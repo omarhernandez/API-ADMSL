@@ -2,7 +2,8 @@
 import os,sys
 
 import dj_database_url
-DATABASES['default'] =  dj_database_url.config()
+
+DATABASES = {'default': dj_database_url.config(default= 'postgres://czdbfbxhdgroah:JvGaRToNvtFGBv6yoIfPAg7_xc@ec2-107-20-191-205.compute-1.amazonaws.com:5432/dc48ggb50iq7u4' )}
 
 
 DEBUG = True
