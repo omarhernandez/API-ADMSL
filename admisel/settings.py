@@ -138,7 +138,6 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'apps.core',
-    'apps.score',
     'tastypie',
     'tastypie_swagger',
     # Uncomment the next line to enable the admin:
