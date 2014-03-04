@@ -3,7 +3,8 @@ import os,sys
 
 import dj_database_url
 
-DATABASES = {'default': dj_database_url.config(default= 'postgres://czdbfbxhdgroah:JvGaRToNvtFGBv6yoIfPAg7_xc@ec2-107-20-191-205.compute-1.amazonaws.com:5432/dc48ggb50iq7u4' )}
+#DATABASES = {'default': dj_database_url.config(default= 'postgres://czdbfbxhdgroah:JvGaRToNvtFGBv6yoIfPAg7_xc@ec2-107-20-191-205.compute-1.amazonaws.com:5432/dc48ggb50iq7u4' )}
+DATABASES = {'default': dj_database_url.config(default= 'mysql://b90765a3f69a4d:fbb51098@us-cdbr-east-05.cleardb.net/heroku_37421aebe3e67f6?reconnect=true' )}
 
 
 DEBUG = True
@@ -137,6 +138,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'apps.core',
+    'apps.score',
     'tastypie',
     'tastypie_swagger',
     # Uncomment the next line to enable the admin:
