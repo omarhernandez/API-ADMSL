@@ -8,10 +8,74 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 
 
+#************************************************************************************************************
+#*********************************************Cliente Facturacion *******************************************
+#************************************************************************************************************
+
+
+class SucursalInventarioResource(ModelResource):
+
+	class Meta:
+		queryset = SucursalInventario.objects.all()
+		resource_name = 'SucursalInventario'
+		authorization= Authorization()
+
+
+
+
+#************************************************************************************************************
+#*********************************************Cliente Facturacion *******************************************
+#************************************************************************************************************
+
+
+class ClienteFacturacionResource(ModelResource):
+
+	class Meta:
+		queryset = ClienteFacturacion.objects.all()
+		resource_name = 'clientefacturacion'
+		authorization= Authorization()
+
+#************************************************************************************************************
+#*********************************************SUCURSAL ******************************************************
+#************************************************************************************************************
+
+class SucursalResource(ModelResource):
+
+	class Meta:
+		queryset = Sucursal.objects.all()
+		resource_name = 'sucursal'
+		authorization= Authorization()
+
+
+#************************************************************************************************************
+#*********************************************   Cliente ****************************************************
+#************************************************************************************************************
+
+
+class ClienteResource(ModelResource):
+
+	cliente_facturacion = fields.ForeignKey(ClienteFacturacionResource , 'cliente_facturacion'    , full = True , null = True )
+	sucursal = fields.ForeignKey(SucursalResource , 'Sucursal'    , full = True , null = True )
+	class Meta:
+		queryset = ClienteDatos.objects.all()
+		resource_name = 'cliente'
+		authorization= Authorization()
+
+
+#************************************************************************************************************
+#*********************************************   Logged ****************************************************
+#************************************************************************************************************
+
+
+
 class LogeedResource(ModelResource):
 
 	class Meta:
 		queryset = Logged.objects.all()
+
+#************************************************************************************************************
+#*********************************************   Login ****************************************************
+#************************************************************************************************************
 
 
 class LoginResource(ModelResource):
@@ -54,6 +118,10 @@ class LoginResource(ModelResource):
 		return data
 	
 
+#************************************************************************************************************
+#*********************************************   Usuario ****************************************************
+#************************************************************************************************************
+
 
 
 class UsuarioResource(ModelResource):
@@ -68,6 +136,7 @@ class UsuarioResource(ModelResource):
 
 	class Meta:
 		allowed_methods = ['get', 'post' , 'delete' , "put"]		
+		excludes = ["password"]
 		queryset = Usuario.objects.all().distinct()
 		resource_name = 'usuario'
 		authorization= Authorization()
@@ -108,4 +177,8 @@ class UsuarioResource(ModelResource):
 
 
 		return bundle
+
+
+
+
 
