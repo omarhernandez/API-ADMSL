@@ -39,6 +39,7 @@ class Sucursal(models.Model):
     num_ext = models.CharField(max_length=45L, blank=True)
     folio_sucursal = models.CharField(max_length=50L, blank=True)
     sucursal_inventario = models.ForeignKey('SucursalInventario')
+    descuento = models.CharField(max_length=50L, blank=True)
     class Meta:
         db_table = 'Sucursal'
 
@@ -50,6 +51,8 @@ class ClienteDatos(models.Model):
     estado = models.CharField(max_length=50L, blank=True)
     cliente_facturacion = models.ForeignKey('ClienteFacturacion')
     sucursal = models.ForeignKey(Sucursal, db_column='Sucursal_id') # Field name made lowercase.
+    descuento = models.CharField(max_length=50L, blank=True)
+
     class Meta:
         db_table = 'cliente_datos'
 
