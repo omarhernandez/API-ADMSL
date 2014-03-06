@@ -5,12 +5,11 @@ class CategoriaProducto(models.Model):
     class Meta:
         db_table = 'Categoria_producto'
 
-class Logged(models.Model):
-    session_key = models.CharField(max_length=100L, blank=True)
-    date = models.DateTimeField(null=True, blank=True)
-    access = models.CharField(max_length=45L, blank=True)
-    class Meta:
-        db_table = 'Logged'
+#class Logged(models.Model):
+#    session_key = models.CharField(max_length=100L, blank=True)
+#    date = models.DateTimeField(null=True, blank=True)
+#    access = models.CharField(max_length=45L, blank=True)
+#    class Meta:#        db_table = 'Logged'
 
 class Producto(models.Model):
     categoria_producto = models.ForeignKey(CategoriaProducto, db_column='Categoria_producto_id') # Field name made lowercase.
@@ -91,7 +90,7 @@ class Usuario(models.Model):
     email = models.CharField(max_length=100L, blank=True)
     password = models.CharField(max_length=300L, blank=True)
     tel_cel = models.CharField(max_length=100L, blank=True)
-    logged = models.ForeignKey(Logged, db_column='Logged_id') # Field name made lowercase.
+    #logged = models.ForeignKey(Logged, db_column='Logged_id') # Field name made lowercase.
     class Meta:
         db_table = 'usuario'
 

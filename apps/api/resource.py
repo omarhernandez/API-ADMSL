@@ -132,7 +132,7 @@ class UsuarioResource(ModelResource):
 
 	nombre = fields.CharField(attribute='nombre')
 	rol = fields.CharField(attribute='rol')
-	logged = fields.ForeignKey(LogeedResource, 'Logged'    , full = True , null = True )
+	#logged = fields.ForeignKey(LogeedResource, 'Logged'    , full = True , null = True )
 
 	class Meta:
 		allowed_methods = ['get', 'post' , 'delete' , "put"]		
