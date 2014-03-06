@@ -16,7 +16,7 @@ ADMINS = (
 )
 
 MANAGERS = ADMINS
-DEPLOY = True
+DEPLOY = False
 
 if DEPLOY:
 	DATABASES = {
