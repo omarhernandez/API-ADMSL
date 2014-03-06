@@ -68,10 +68,10 @@ class ClienteResource(ModelResource):
 
 
 
-class LogeedResource(ModelResource):
+#class LogeedResource(ModelResource):
 
-	class Meta:
-		queryset = Logged.objects.all()
+#	class Meta:
+#		queryset = Logged.objects.all()
 
 #************************************************************************************************************
 #*********************************************   Login ****************************************************
