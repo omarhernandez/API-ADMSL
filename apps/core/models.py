@@ -38,7 +38,7 @@ class Sucursal(models.Model):
     num_ext = models.CharField(max_length=45L, blank=True)
     folio_sucursal = models.CharField(max_length=50L, blank=True)
     sucursal_inventario = models.ForeignKey('SucursalInventario')
-    descuento = models.CharField(max_length=10L, blank=True)
+    descuento = models.CharField(max_length=11L, blank=True)
     class Meta:
         db_table = 'Sucursal'
 

@@ -54,7 +54,7 @@ class SucursalResource(ModelResource):
 
 class ClienteResource(ModelResource):
 
-	cliente_facturacion = fields.ForeignKey(ClienteFacturacionResource , 'cliente_facturacion'    , full = True , null = True )
+	#cliente_facturacion = fields.ForeignKey(ClienteFacturacionResource , 'cliente_facturacion'    , full = True , null = True )
 	sucursal = fields.ForeignKey(SucursalResource , 'Sucursal'    , full = True , null = True )
 	class Meta:
 		queryset = ClienteDatos.objects.all()
