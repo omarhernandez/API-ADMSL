@@ -1,6 +1,6 @@
 from django.db.models import Q
 from tastypie import fields
-from apps.api.models import *
+from apps.core.models import *
 from tastypie.exceptions import BadRequest
 from tastypie.authorization import Authorization
 from tastypie.resources import ModelResource , ALL , ALL_WITH_RELATIONS
