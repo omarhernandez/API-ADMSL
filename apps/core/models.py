@@ -91,6 +91,7 @@ class Usuario(models.Model):
     password = models.CharField(max_length=300L, blank=True)
     tel_cel = models.CharField(max_length=100L, blank=True)
     #logged = models.ForeignKey(Logged, db_column='Logged_id') # Field name made lowercase.
+
     class Meta:
         db_table = 'usuario'
 
