@@ -136,7 +136,7 @@ class UsuarioResource(ModelResource):
 
 	class Meta:
 		allowed_methods = ['get', 'post' , 'delete' , "put"]		
-		excludes = ["password"]
+		#excludes = ["password"]
 		queryset = Usuario.objects.all().distinct()
 		resource_name = 'usuario'
 		authorization= Authorization()
