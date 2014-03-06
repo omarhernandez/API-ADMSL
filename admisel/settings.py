@@ -1,4 +1,5 @@
 # Django settings for admisel project.
+#HEROKU_POSTGRESQL_RED_URL
 import os,sys
 
 import dj_database_url
@@ -132,7 +133,7 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
-    'django.contrib.auth',
+    #'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
