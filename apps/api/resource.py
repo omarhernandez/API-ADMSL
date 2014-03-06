@@ -149,7 +149,7 @@ class UsuarioResource(ModelResource):
 
 		keyword = User.objects.make_random_password()
 		bundle.data["loggin"] = keyword
-		del bundle.data["logged"]
+		#del bundle.data["logged"]
 
 		
 
@@ -160,8 +160,8 @@ class UsuarioResource(ModelResource):
 		print bundle.obj
 
 		keyword = User.objects.make_random_password()
-		last_loggin = Logged.objects.create( session_key = keyword , access = True )
-		bundle.obj.logged  = last_loggin
+		#last_loggin = Logged.objects.create( session_key = keyword , access = True )
+		#bundle.obj.logged  = last_loggin
 
 		print bundle.obj.__dict__
 
