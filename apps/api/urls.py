@@ -9,5 +9,7 @@ v1_api.register(ClienteResource())
 v1_api.register(SucursalResource())
 v1_api.register(ClienteFacturacionResource())
 v1_api.register(SucursalInventarioResource())
+v1_api.register(ProductoResource())
+v1_api.register(CategoriaProductoResource())
 
 

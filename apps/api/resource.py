@@ -6,7 +6,29 @@ from tastypie.authorization import Authorization
 from tastypie.resources import ModelResource , ALL , ALL_WITH_RELATIONS
 from django.contrib.auth.models import User
 from django.db.models import Q
+#************************************************************************************************************
+#********************************************* Categoria Producto *******************************************
+#************************************************************************************************************
 
+
+class CategoriaProductoResource(ModelResource):
+    class Meta:
+	    queryset = CategoriaProducto.objects.all()
+	    resource_name ='categoriaproducto'
+	    authorization= Authorization()
+
+
+#************************************************************************************************************
+#********************************************* Product ******************************************************
+#************************************************************************************************************
+
+class ProductoResource(ModelResource):
+
+	categoria_producto = fields.ForeignKey(CategoriaProductoResource , 'categoria_producto'    , full = True , null = True )
+	class Meta:
+		queryset = Producto.objects.all()
+		resource_name = 'producto'
+		authorization= Authorization()
 
 
 #************************************************************************************************************

@@ -12,7 +12,7 @@ class CategoriaProducto(models.Model):
 #    class Meta:#        db_table = 'Logged'
 
 class Producto(models.Model):
-    categoria_producto = models.ForeignKey(CategoriaProducto, db_column='Categoria_producto_id') # Field name made lowercase.
+    categoria_producto = models.ForeignKey(CategoriaProducto, db_column='categoria_producto') # Field name made lowercase.
     codigo = models.CharField(max_length=45L, blank=True)
     descripcion = models.CharField(max_length=45L, blank=True)
     class Meta:
