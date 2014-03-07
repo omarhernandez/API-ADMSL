@@ -121,3 +121,15 @@ class UsuarioSucursalHasSucursal(models.Model):
     class Meta:
         db_table = 'usuario_sucursal_has_Sucursal'
 
+class Estados(models.Model):
+	estado = models.CharField(max_length=60L)
+	class Meta:
+		db_table = 'estados'
+
+class Municipios(models.Model):
+    	estado = models.ForeignKey(Estados , db_column='estado') # Field name made lowercase.
+	municipio = models.CharField(max_length=49L, blank=True)
+
+	class Meta:
+		db_table = 'municipios'
+

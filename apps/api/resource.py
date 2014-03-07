@@ -6,6 +6,38 @@ from tastypie.authorization import Authorization
 from tastypie.resources import ModelResource , ALL , ALL_WITH_RELATIONS
 from django.contrib.auth.models import User
 from django.db.models import Q
+
+
+#************************************************************************************************************
+#********************************************* Estados  *******************************************
+#************************************************************************************************************
+
+
+class EstadosResource(ModelResource):
+
+	class Meta:
+		queryset = Estados.objects.all()
+		resource_name ='estados'
+
+#************************************************************************************************************
+#********************************************* Municipios ***************************************************
+#************************************************************************************************************
+
+
+class MunicipioResource(ModelResource):
+	estado = fields.ForeignKey(EstadosResource, 'estado'    ,  null = True )
+	class Meta:
+		queryset = Municipios.objects.all()
+		resource_name ='municipios'
+
+		filtering  = {
+
+			"estado"  : ["exact"],
+
+				}
+
+
+
 #************************************************************************************************************
 #********************************************* Categoria Producto *******************************************
 #************************************************************************************************************
