@@ -47,7 +47,7 @@ class ClienteDatos(models.Model):
     correo = models.CharField(max_length=100L, blank=True)
     pais = models.CharField(max_length=50L, blank=True)
     estado = models.CharField(max_length=50L, blank=True)
-    sucursal = models.ForeignKey(Sucursal, db_column='Sucursal_id') # Field name made lowercase.
+    sucursal = models.ForeignKey(Sucursal, db_column='sucursal') # Field name made lowercase.
     descuentos = models.CharField(max_length=45L, blank=True)
     class Meta:
         db_table = 'cliente_datos'

@@ -40,7 +40,7 @@ class SucursalResource(ModelResource):
 
 class SucursalInventarioResource(ModelResource):
 
-	sucursal = fields.ForeignKey(SucursalResource, 'Sucursal_id'    , full = True , null = True )
+	sucursal = fields.ForeignKey(SucursalResource, 'sucursal'    , full = True , null = True )
 	class Meta:
 		queryset = SucursalInventario.objects.all()
 		resource_name = 'SucursalInventario'
@@ -56,7 +56,7 @@ class SucursalInventarioResource(ModelResource):
 class ClienteResource(ModelResource):
 
 	#cliente_facturacion = fields.ForeignKey(ClienteFacturacionResource , 'cliente_facturacion'    , full = True , null = True )
-	sucursal = fields.ForeignKey(SucursalResource , 'Sucursal'    , full = True , null = True )
+	sucursal = fields.ForeignKey(SucursalResource , 'sucursal'    , full = True , null = True )
 	class Meta:
 		queryset = ClienteDatos.objects.all()
 		resource_name = 'cliente'
