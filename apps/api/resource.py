@@ -8,20 +8,6 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 
 
-#************************************************************************************************************
-#*********************************************Sucursal Inventario  ******************************************
-#************************************************************************************************************
-
-
-class SucursalInventarioResource(ModelResource):
-
-	class Meta:
-		queryset = SucursalInventario.objects.all()
-		resource_name = 'SucursalInventario'
-		authorization= Authorization()
-
-
-
 
 #************************************************************************************************************
 #*********************************************Cliente Facturacion *******************************************
@@ -45,6 +31,21 @@ class SucursalResource(ModelResource):
 		queryset = Sucursal.objects.all()
 		resource_name = 'sucursal'
 		authorization= Authorization()
+
+
+#************************************************************************************************************
+#*********************************************Sucursal Inventario  ******************************************
+#************************************************************************************************************
+
+
+class SucursalInventarioResource(ModelResource):
+
+	sucursal = fields.ForeignKey(SucursalResource, 'Sucursal_id'    , full = True , null = True )
+	class Meta:
+		queryset = SucursalInventario.objects.all()
+		resource_name = 'SucursalInventario'
+		authorization= Authorization()
+
 
 
 #************************************************************************************************************
