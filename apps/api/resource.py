@@ -62,6 +62,14 @@ class ClienteResource(ModelResource):
 		resource_name = 'cliente'
 		authorization= Authorization()
 
+		filtering = {
+
+			  "nombre" : ["icontains"],
+
+			}
+
+
+
 
 #************************************************************************************************************
 #*********************************************   Logged ****************************************************
@@ -88,9 +96,6 @@ class LoginResource(ModelResource):
 		allowed_methods = ['get' ]		
 		resource_name = 'login'
 		limit = 1
-
-		filtering = {  }
-
 
 
 	def dehydrate(self , bundle ):
@@ -141,9 +146,6 @@ class UsuarioResource(ModelResource):
 		queryset = Usuario.objects.all().distinct()
 		resource_name = 'usuario'
 		authorization= Authorization()
-
-		filtering = {
-		}
 
 
 	def dehydrate(self , bundle ):
