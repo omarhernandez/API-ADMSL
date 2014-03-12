@@ -51,7 +51,6 @@ class MunicipioResource(ModelResource):
 				}
 
 
-
 #************************************************************************************************************
 #********************************************* Categoria Producto *******************************************
 #************************************************************************************************************
@@ -76,6 +75,7 @@ class ProductoResource(ModelResource):
 		resource_name = 'producto'
 		authorization= Authorization()
 
+
 #************************************************************************************************************
 #*********************************************SUCURSAL ******************************************************
 #************************************************************************************************************
@@ -89,6 +89,19 @@ class SucursalResource(ModelResource):
 
 
 #************************************************************************************************************
+#*********************************************Rango ******************************************************
+#************************************************************************************************************
+
+class RangoResource(ModelResource):
+
+	class Meta:
+		queryset = Rango.objects.all()
+		resource_name = 'rango'
+		authorization= Authorization()
+
+
+
+#************************************************************************************************************
 #*********************************************Sucursal Inventario  ******************************************
 #************************************************************************************************************
 
@@ -96,6 +109,8 @@ class SucursalResource(ModelResource):
 class SucursalInventarioResource(ModelResource):
 
 	sucursal = fields.ForeignKey(SucursalResource, 'sucursal'    , full = True , null = True )
+	producto = fields.ForeignKey(ProductoResource, 'producto'    , full = True , null = True )
+	rango = fields.ForeignKey(RangoResource , 'rango'    , full = True , null = True )
 	class Meta:
 		queryset = SucursalInventario.objects.all()
 		resource_name = 'SucursalInventario'
@@ -115,6 +130,7 @@ class ClienteResource(ModelResource):
 	class Meta:
 		queryset = ClienteDatos.objects.all()
 		resource_name = 'cliente'
+		always_return_data = True
 		authorization= Authorization()
 
 		filtering = {

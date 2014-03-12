@@ -13,5 +13,6 @@ v1_api.register(ProductoResource())
 v1_api.register(CategoriaProductoResource())
 v1_api.register(MunicipioResource())
 v1_api.register(EstadosResource())
+v1_api.register(RangoResource())
 
 
