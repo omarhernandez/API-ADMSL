@@ -4,8 +4,21 @@ from apps.core.models import *
 from tastypie.exceptions import BadRequest
 from tastypie.authorization import Authorization
 from tastypie.resources import ModelResource , ALL , ALL_WITH_RELATIONS
+from tastypie.exceptions import Unauthorized
 from django.contrib.auth.models import User
 from django.db.models import Q
+
+class ISELAuthentication(Authorization):
+
+	def create_list( self , object_list, bundle):
+		print "x"
+		raise Unauthorized("sorry, dont create")
+		 
+
+
+	def is_authenticated( self , request , **kwargs ):
+		print "here" 
+		return False
 
 
 #************************************************************************************************************
@@ -17,6 +30,7 @@ class EstadosResource(ModelResource):
 
 	class Meta:
 		queryset = Estados.objects.all()
+
 		resource_name ='estados'
 
 #************************************************************************************************************
@@ -60,19 +74,6 @@ class ProductoResource(ModelResource):
 	class Meta:
 		queryset = Producto.objects.all()
 		resource_name = 'producto'
-		authorization= Authorization()
-
-
-#************************************************************************************************************
-#*********************************************Cliente Facturacion *******************************************
-#************************************************************************************************************
-
-
-class ClienteFacturacionResource(ModelResource):
-
-	class Meta:
-		queryset = ClienteFacturacion.objects.all()
-		resource_name = 'clientefacturacion'
 		authorization= Authorization()
 
 #************************************************************************************************************
@@ -122,6 +123,20 @@ class ClienteResource(ModelResource):
 
 			}
 
+
+
+#************************************************************************************************************
+#*********************************************Cliente Facturacion *******************************************
+#************************************************************************************************************
+
+
+class ClienteFacturacionResource(ModelResource):
+
+	cliente_datos = fields.ForeignKey(ClienteResource, 'cliente_datos'    , full = True , null = True )
+	class Meta:
+		queryset = ClienteFacturacion.objects.all()
+		resource_name = 'clientefacturacion'
+		authorization= Authorization()
 
 
 
@@ -195,11 +210,11 @@ class UsuarioResource(ModelResource):
 	#logged = fields.ForeignKey(LogeedResource, 'Logged'    , full = True , null = True )
 
 	class Meta:
-		allowed_methods = ['get', 'post' , 'delete' , "put"]		
+		#allowed_methods = ['get', 'post' , 'delete' , "put"]		
 		#excludes = ["password"]
 		queryset = Usuario.objects.all().distinct()
 		resource_name = 'usuario'
-		authorization= Authorization()
+		#authorization= ISELAuthentication()
 
 
 	def dehydrate(self , bundle ):

@@ -21,7 +21,6 @@ class Producto(models.Model):
 class Rango(models.Model):
     min = models.IntegerField(null=True, db_column='Min', blank=True) # Field name made lowercase.
     max = models.IntegerField(null=True, db_column='Max', blank=True) # Field name made lowercase.
-    costo = models.IntegerField(null=True, blank=True)
     class Meta:
         db_table = 'Rango'
 
@@ -47,6 +46,7 @@ class ClienteDatos(models.Model):
     correo = models.CharField(max_length=100L, blank=True)
     pais = models.CharField(max_length=50L, blank=True)
     estado = models.CharField(max_length=50L, blank=True)
+    municipio = models.CharField(max_length=45L, blank=True)
     sucursal = models.ForeignKey(Sucursal, db_column='sucursal') # Field name made lowercase.
     descuentos = models.CharField(max_length=45L, blank=True)
     class Meta:
@@ -54,14 +54,12 @@ class ClienteDatos(models.Model):
 
 class ClienteFacturacion(models.Model):
     rfc = models.CharField(max_length=150L, blank=True)
-    direccion = models.CharField(max_length=150L, blank=True)
     calle = models.CharField(max_length=150L, blank=True)
     colonia = models.CharField(max_length=150L, blank=True)
     num_int = models.CharField(max_length=45L, blank=True)
     num_ext = models.CharField(max_length=45L, blank=True)
     cod_postal = models.CharField(max_length=45L, blank=True)
-    municipio = models.CharField(max_length=45L, blank=True)
-    cliente_datos = models.ForeignKey(ClienteDatos)
+    cliente_datos = models.ForeignKey(ClienteDatos , db_column = "cliente_datos")
     class Meta:
         db_table = 'cliente_facturacion'
 
@@ -82,6 +80,8 @@ class SucursalInventario(models.Model):
     existencia = models.IntegerField(null=True, blank=True)
     rango = models.ForeignKey(Rango, db_column='Rango_id') # Field name made lowercase.
     sucursal = models.ForeignKey(Sucursal, db_column='Sucursal_id') # Field name made lowercase.
+    costo = models.IntegerField(null=True, blank=True , db_column = "costo")
+    stock = models.IntegerField(null=True, blank=True , db_column = "stock")
     class Meta:
         db_table = 'sucursal_inventario'
 
