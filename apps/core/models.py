@@ -77,7 +77,6 @@ class Log(models.Model):
 
 class SucursalInventario(models.Model):
     producto = models.ForeignKey(Producto, db_column='Producto_id') # Field name made lowercase.
-    existencia = models.IntegerField(null=True, blank=True)
     rango = models.ForeignKey(Rango, db_column='rango') # Field name made lowercase.
     sucursal = models.ForeignKey(Sucursal, db_column='Sucursal_id') # Field name made lowercase.
     costo = models.IntegerField(null=True, blank=True , db_column = "costo")

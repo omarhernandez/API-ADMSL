@@ -107,13 +107,15 @@ class RangoResource(ModelResource):
 
 
 class SucursalInventarioResource(ModelResource):
+	""" Administrador de productos - El administrador de admisel puede modificar el rango y el stock de los productos 
+	en las sucursales """
 
 	sucursal = fields.ForeignKey(SucursalResource, 'sucursal'    , full = True , null = True )
 	producto = fields.ForeignKey(ProductoResource, 'producto'    , full = True , null = True )
 	rango = fields.ForeignKey(RangoResource , 'rango'    , full = True , null = True )
 	class Meta:
 		queryset = SucursalInventario.objects.all()
-		resource_name = 'SucursalInventario'
+		resource_name = 'adminproductos'
 		authorization= Authorization()
 
 
