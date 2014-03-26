@@ -1,4 +1,5 @@
 from django.db.models import Q
+import re 
 from tastypie import fields
 from apps.core.models import *
 from tastypie.exceptions import BadRequest
@@ -154,18 +155,56 @@ class VentaResource(ModelResource):
 	""" venta de una sucursal."""
 
 	sucursal = fields.ForeignKey(SucursalResource, 'sucursal'     )
-	producto = fields.ForeignKey(ProductoResource, 'producto'  )
+	producto = fields.ToManyField('apps.api.resource.VentaHasProductoResource',  
+	 	
+			attribute = lambda bundle: venta_has_producto.objects.filter(venta = bundle.obj)
+	  		
+		, null = True , full = True		)    
+
+
 
 	class Meta:
 		queryset = venta.objects.all()
 		resource_name = 'venta'
 		filtering = { "sucursal" : ["exact"] }
 		authorization= Authorization()
+		#always_return_data = True
+	
+	def obj_create(self, bundle, request=None, **kwargs): 
+
+		bundle = self.full_hydrate(bundle)
+		productos = bundle.data["producto"]
+		bundle.obj.save()
+
+		for producto in productos:
+
+			id_producto =   re.search('\/api\/v1\/producto\/(\d+)\/', str(producto["producto"])).group(1)
+			id_producto = Producto.objects.filter(id = id_producto)[0]
+			cantidad = producto["cantidad"]
+
+			venta_has_producto.objects.create( venta = bundle.obj , producto = id_producto , cantidad = cantidad ) 
+
+
+		return bundle
 
 
 
 
-#class SucursalInventarioResource(ModelResource):
+class VentaHasProductoResource(ModelResource):
+
+
+	""" Los productos que se registran dentro de una venta de una sucursal."""
+
+	venta = fields.ForeignKey(VentaResource, 'venta'  )
+	producto = fields.ForeignKey(ProductoResource, 'producto'  )
+
+	class Meta:
+		queryset = venta_has_producto.objects.all()
+		resource_name = 'ventahasproducto'
+		filtering = { "sucursal" : ["exact"] }
+		authorization= Authorization()
+	
+	#class SucursalInventarioResource(ModelResource):
 	#""" Administrador de productos - El administrador de admisel puede modificar el rango y el stock de los productos 
 	#en las sucursales, no corresponde a la seccion de inventarios, esta seccion solo es para dar de alta un producto 
 	#asignarle el rango, y posteriormente asignarselo a una sucursal, para generar existencia, se hace a traves del cargo

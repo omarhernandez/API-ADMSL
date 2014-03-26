@@ -83,13 +83,22 @@ class inventario(models.Model):
         db_table = 'inventario'
 
 class venta(models.Model):
-    producto = models.ForeignKey(Producto, db_column='Producto_id') # Field name made lowercase.
     sucursal = models.ForeignKey(Sucursal, db_column='Sucursal_id') # Field name made lowercase.
-    cantidad = models.IntegerField(null=True, blank=True , db_column = "cantidad")
     fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
 
     class Meta:
         db_table = 'venta'
+
+class venta_has_producto(models.Model):
+
+    venta = models.ForeignKey(venta, db_column='Venta_id') # Field name made lowercase.
+    producto = models.ForeignKey(Producto, db_column='Producto_id') # Field name made lowercase.
+    cantidad = models.IntegerField(null=True, blank=True , db_column = "cantidad")
+
+    class Meta:
+        db_table = 'venta_has_producto'
+
+
 
 
 class producto_has_rango(models.Model):
