@@ -35,7 +35,6 @@ class Sucursal(models.Model):
     num_int = models.CharField(max_length=50L, blank=True)
     num_ext = models.CharField(max_length=45L, blank=True)
     folio_sucursal = models.CharField(max_length=50L, blank=True)
-    #sucursal_inventario = models.ForeignKey('SucursalInventario')
     descuento = models.CharField(max_length=10L, blank=True)
     class Meta:
         db_table = 'Sucursal'
@@ -75,14 +74,32 @@ class Log(models.Model):
     class Meta:
         db_table = 'log'
 
-class SucursalInventario(models.Model):
+class inventario(models.Model):
+    producto = models.ForeignKey(Producto, db_column='Producto_id') # Field name made lowercase.
+    sucursal = models.ForeignKey(Sucursal, db_column='Sucursal_id') # Field name made lowercase.
+    existencia = models.IntegerField(null=True, blank=True , db_column = "existencia")
+    stock = models.IntegerField(null=True, blank=True , db_column = "stock")
+    class Meta:
+        db_table = 'inventario'
+
+class venta(models.Model):
+    producto = models.ForeignKey(Producto, db_column='Producto_id') # Field name made lowercase.
+    sucursal = models.ForeignKey(Sucursal, db_column='Sucursal_id') # Field name made lowercase.
+    cantidad = models.IntegerField(null=True, blank=True , db_column = "cantidad")
+    fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
+
+    class Meta:
+        db_table = 'venta'
+
+
+class producto_has_rango(models.Model):
     producto = models.ForeignKey(Producto, db_column='Producto_id') # Field name made lowercase.
     rango = models.ForeignKey(Rango, db_column='rango') # Field name made lowercase.
     sucursal = models.ForeignKey(Sucursal, db_column='Sucursal_id') # Field name made lowercase.
     costo = models.IntegerField(null=True, blank=True , db_column = "costo")
-    stock = models.IntegerField(null=True, blank=True , db_column = "stock")
     class Meta:
-        db_table = 'sucursal_inventario'
+        db_table = 'producto_has_rango'
+
 
 class Usuario(models.Model):
     nombre = models.CharField(max_length=500L, blank=True)

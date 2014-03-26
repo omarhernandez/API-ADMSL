@@ -11,13 +11,11 @@ from django.db.models import Q
 class ISELAuthentication(Authorization):
 
 	def create_list( self , object_list, bundle):
-		print "x"
 		raise Unauthorized("sorry, dont create")
 		 
 
 
 	def is_authenticated( self , request , **kwargs ):
-		print "here" 
 		return False
 
 
@@ -81,6 +79,12 @@ class ProductoResource(ModelResource):
 #************************************************************************************************************
 
 class SucursalResource(ModelResource):
+	
+	inventario = fields.ToManyField('apps.api.resource.InventarioResource',  
+	 	
+			attribute = lambda bundle:      inventario.objects.filter(sucursal = bundle.obj)
+	  		
+		, null = True , full = True		)    
 
 	class Meta:
 		queryset = Sucursal.objects.all()
@@ -100,23 +104,81 @@ class RangoResource(ModelResource):
 		authorization= Authorization()
 
 
+#************************************************************************************************************
+#*********************************************producto has rango  *******************************************
+#************************************************************************************************************
+
+class ProductoHasRangoesource(ModelResource):
+
+	sucursal = fields.ForeignKey(SucursalResource, 'sucursal'     )
+	producto = fields.ForeignKey(ProductoResource, 'producto'     )
+	rango = fields.ForeignKey(RangoResource , 'rango'    , full = True , null = True )
+
+	class Meta:
+		queryset = producto_has_rango.objects.all()
+		resource_name = 'producto_has_rango'
+		authorization= Authorization()
+
+
+
 
 #************************************************************************************************************
 #*********************************************Sucursal Inventario  ******************************************
 #************************************************************************************************************
 
 
-class SucursalInventarioResource(ModelResource):
-	""" Administrador de productos - El administrador de admisel puede modificar el rango y el stock de los productos 
-	en las sucursales """
+class InventarioResource(ModelResource):
+	""" Inventario de una sucursal."""
 
-	sucursal = fields.ForeignKey(SucursalResource, 'sucursal'    , full = True , null = True )
-	producto = fields.ForeignKey(ProductoResource, 'producto'    , full = True , null = True )
-	rango = fields.ForeignKey(RangoResource , 'rango'    , full = True , null = True )
+	sucursal = fields.ForeignKey(SucursalResource, 'sucursal'     )
+	producto = fields.ForeignKey(ProductoResource, 'producto' , full = True     )
+
+	producto_has_rango  = fields.ToManyField('apps.api.resource.ProductoHasRangoesource',  
+	 	
+			attribute = lambda bundle: producto_has_rango.objects.filter(Q(sucursal = bundle.obj.sucursal) , Q( producto = bundle.obj.producto) )
+	  		
+		, null = True , full = True		)    
+
+
+
 	class Meta:
-		queryset = SucursalInventario.objects.all()
-		resource_name = 'adminproductos'
+		queryset = inventario.objects.all()
+		resource_name = 'inventario'
+		filtering = {
+			  	"sucursal" : ["exact"]
+			  }
 		authorization= Authorization()
+
+
+class VentaResource(ModelResource):
+	""" venta de una sucursal."""
+
+	sucursal = fields.ForeignKey(SucursalResource, 'sucursal'     )
+	producto = fields.ForeignKey(ProductoResource, 'producto'  )
+
+	class Meta:
+		queryset = venta.objects.all()
+		resource_name = 'venta'
+		filtering = { "sucursal" : ["exact"] }
+		authorization= Authorization()
+
+
+
+
+#class SucursalInventarioResource(ModelResource):
+	#""" Administrador de productos - El administrador de admisel puede modificar el rango y el stock de los productos 
+	#en las sucursales, no corresponde a la seccion de inventarios, esta seccion solo es para dar de alta un producto 
+	#asignarle el rango, y posteriormente asignarselo a una sucursal, para generar existencia, se hace a traves del cargo
+	#de factura."""
+
+	#sucursal = fields.ForeignKey(SucursalResource, 'sucursal'    , full = True , null = True )
+	#producto = fields.ForeignKey(ProductoResource, 'producto'    , full = True , null = True )
+	#rango = fields.ForeignKey(RangoResource , 'rango'    , full = True , null = True )
+	#class Meta:
+		#queryset = SucursalInventario.objects.all()
+		#resource_name = 'adminproductos'
+		#authorization= Authorization()
+
 
 
 
@@ -133,7 +195,7 @@ class ClienteResource(ModelResource):
 		queryset = ClienteDatos.objects.all()
 		resource_name = 'cliente'
 		always_return_data = True
-		authorization= Authorization()
+		authorization = Authorization()
 
 		filtering = {
 
