@@ -1,4 +1,4 @@
-from django.db.models import Q
+from django.db.models import Q , F
 import re 
 from tastypie import fields
 from apps.core.models import *
@@ -176,12 +176,20 @@ class VentaResource(ModelResource):
 		productos = bundle.data["producto"]
 		bundle.obj.save()
 
+		sucursal =   re.search('\/api\/v1\/sucursal\/(\d+)\/', str(bundle.data["sucursal"])).group(1)
+		sucursal = Sucursal.objects.filter(id = sucursal)
 		for producto in productos:
 
 			id_producto =   re.search('\/api\/v1\/producto\/(\d+)\/', str(producto["producto"])).group(1)
 			id_producto = Producto.objects.filter(id = id_producto)[0]
+
 			cantidad = producto["cantidad"]
 
+			
+			#decuenta el producto en venta al inventario de la sucursal actual
+			inventario.objects.filter ( producto = id_producto , sucursal = sucursal ).update(existencia = F("existencia") - cantidad )
+
+			#guarda los productos dentro de la venta
 			venta_has_producto.objects.create( venta = bundle.obj , producto = id_producto , cantidad = cantidad ) 
 
 
