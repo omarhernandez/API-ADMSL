@@ -204,7 +204,7 @@ class VentaHasProductoResource(ModelResource):
 	""" Los productos que se registran dentro de una venta de una sucursal."""
 
 	venta = fields.ForeignKey(VentaResource, 'venta'  )
-	producto = fields.ForeignKey(ProductoResource, 'producto'  )
+	producto = fields.ForeignKey(ProductoResource, 'producto' , full = True  )
 
 	class Meta:
 		queryset = venta_has_producto.objects.all()
