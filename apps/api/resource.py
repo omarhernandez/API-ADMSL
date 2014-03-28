@@ -169,6 +169,12 @@ class VentaResource(ModelResource):
 		filtering = { "sucursal" : ["exact"] }
 		authorization= Authorization()
 		always_return_data = True
+
+	def dehydrate(self , bundle):
+		bundle.data["folio"] = bundle.obj.id
+
+		return bundle
+
 	
 	def obj_create(self, bundle, request=None, **kwargs): 
 
