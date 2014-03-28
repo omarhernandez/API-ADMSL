@@ -168,7 +168,7 @@ class VentaResource(ModelResource):
 		resource_name = 'venta'
 		filtering = { "sucursal" : ["exact"] }
 		authorization= Authorization()
-		#always_return_data = True
+		always_return_data = True
 	
 	def obj_create(self, bundle, request=None, **kwargs): 
 
