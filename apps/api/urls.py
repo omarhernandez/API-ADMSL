@@ -17,6 +17,8 @@ v1_api.register(RangoResource())
 v1_api.register(InventarioResource())
 v1_api.register(ProductoHasRangoesource())
 v1_api.register(VentaResource())
+v1_api.register(UsuarioSucursalResource())
+v1_api.register(UsuarioHasSucursalResource())
 #v1_api.register(VentaHasProductoResource())
 
 
