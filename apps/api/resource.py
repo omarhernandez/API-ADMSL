@@ -492,4 +492,15 @@ class AsignacionSupervisorPlazaResource(ModelResource):
 				}
 
 
+#************************************************************************************************************
+#********************************************* Venta Publico ***********************************************
+#************************************************************************************************************
 
+
+class VentaPublicoResource(ModelResource):
+
+	venta = fields.ForeignKey(VentaResource, 'venta' , full = True  )
+	class Meta:
+		queryset = VentaPublico.objects.all()
+		resource_name ='ventapublico'
+		authorization= Authorization()

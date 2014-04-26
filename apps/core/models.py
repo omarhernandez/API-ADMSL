@@ -173,4 +173,9 @@ class AsignacionSupervisorPlaza(models.Model):
 		db_table = 'asignacion_supervisor_plaza'
 
 
+class VentaPublico(models.Model):
+	venta = models.ForeignKey(venta, db_column = "venta")
+	class Meta:
+		db_table = 'venta_publico'
+
 
