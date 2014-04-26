@@ -213,7 +213,7 @@ class VentaResource(ModelResource):
 		always_return_data = True
 
 	def dehydrate(self , bundle):
-		bundle.data["folio"] = bundle.obj.id
+		#bundle.data["folio"] = bundle.obj.id
 		print bundle.data["producto"]
 
 		return bundle
@@ -507,6 +507,18 @@ class VentaPublicoResource(ModelResource):
 		resource_name ='ventapublico'
 		authorization= Authorization()
 
+#************************************************************************************************************
+#*********************************************SUCURSAL SIN RELACIONEs  **************************************
+#************************************************************************************************************
+#Se creo este recurso porque el recurso principa de sucursal al incluirse SucursalResource regresa todo el inventario,
+#en esta seccion no se requiere
+
+class SucursalSinInventarioResource(ModelResource):
+
+	class Meta:
+		queryset = Sucursal.objects.all()
+
+
 
 #************************************************************************************************************
 #********************************************* Historial Venta ***********************************************
@@ -518,7 +530,7 @@ class VentaPublicoResource(ModelResource):
 class HistorialVentaResource(ModelResource):
 	""" Historial de las ventas , se puede filtrar por sucursal."""
 
-	sucursal = fields.ForeignKey(SucursalResource, 'sucursal'     )
+	sucursal = fields.ForeignKey(SucursalSinInventarioResource , 'sucursal' , full = True     )
 
 	class Meta:
 		allowed_methods = ['get' ]		
@@ -527,7 +539,7 @@ class HistorialVentaResource(ModelResource):
 		filtering = { "sucursal" : ["exact"] }
 
 	def dehydrate(self , bundle):
-		bundle.data["folio"] = bundle.obj.id
+		#bundle.data["folio"] = bundle.obj.id
 
 		try:
 			ClienteVentaQuerySet = VentaCliente.objects.select_related().filter( venta__id  = bundle.obj.id )[0]

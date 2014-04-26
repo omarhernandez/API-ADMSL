@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Max 
 
 class CategoriaProducto(models.Model):
     categoria = models.CharField(max_length=45L, db_column='Categoria', blank=True) # Field name made lowercase.
@@ -96,10 +97,10 @@ class venta(models.Model):
 
     def save(self):
     	
-	venta = venta.objects.all().aggregate(Max('folio'))
+	venta_qs = venta.objects.all().aggregate(Max('folio'))
 
-	if venta["folio__max"]:
-		last = unicode(venta["folio__max"])
+	if venta_qs["folio__max"]:
+		last = unicode(venta_qs ["folio__max"])
 		self.folio = int(last)+1
 	else:
 		self.folio = 1
