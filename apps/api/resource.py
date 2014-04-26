@@ -156,6 +156,7 @@ class ProductoHasRangoesource(ModelResource):
 	rango = fields.ForeignKey(RangoResource , 'rango'    , full = True , null = True )
 
 	class Meta:
+		always_return_data = True
 		queryset = producto_has_rango.objects.all()
 		resource_name = 'producto_has_rango'
 		authorization= Authorization()
@@ -504,3 +505,36 @@ class VentaPublicoResource(ModelResource):
 		queryset = VentaPublico.objects.all()
 		resource_name ='ventapublico'
 		authorization= Authorization()
+
+
+#************************************************************************************************************
+#********************************************* Historial Venta ***********************************************
+#************************************************************************************************************
+
+
+
+
+class HistorialVentaResource(ModelResource):
+	""" Historial de las ventas , se puede filtrar por sucursal."""
+
+	sucursal = fields.ForeignKey(SucursalResource, 'sucursal'     )
+
+	class Meta:
+		allowed_methods = ['get' ]		
+		queryset = venta.objects.all()
+		resource_name = 'historialventa'
+		filtering = { "sucursal" : ["exact"] }
+
+	def dehydrate(self , bundle):
+		bundle.data["folio"] = bundle.obj.id
+
+		try:
+			ClienteVentaQuerySet = VentaCliente.objects.select_related().filter( venta__id  = bundle.obj.id )[0]
+			nombre_cliente = ClienteVentaQuerySet.cliente_datos.nombre
+			bundle.data["nombre_comprador"] =  ( nombre_cliente , "publico")[ not nombre_cliente]
+		except :
+			bundle.data["nombre_comprador"] =  "publico"
+
+		return bundle
+
+
