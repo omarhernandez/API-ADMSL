@@ -101,7 +101,7 @@ class venta(models.Model):
 	if venta["folio__max"]:
 		last = unicode(venta["folio__max"])
 		self.folio = int(last)+1
-	else
+	else:
 		self.folio = 1
 	
 
