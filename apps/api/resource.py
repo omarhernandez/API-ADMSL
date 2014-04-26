@@ -19,7 +19,6 @@ class ISELAuthentication(Authorization):
 	def is_authenticated( self , request , **kwargs ):
 		return False
 
-
 #************************************************************************************************************
 #********************************************* Estados  *******************************************
 #************************************************************************************************************
@@ -383,6 +382,22 @@ class UsuarioResource(ModelResource):
 
 		return bundle
 
+
+
+#************************************************************************************************************
+#********************************************* Venta Cliente *******************************************
+#************************************************************************************************************
+
+
+class VentaClienteResource(ModelResource):
+
+	venta = fields.ForeignKey( VentaResource , 'venta'     )
+	cliente_datos = fields.ForeignKey(ClienteResource , 'cliente_datos'     )
+
+	class Meta:
+		queryset = VentaCliente.objects.all()
+		resource_name ='ventacliente'
+		authorization= Authorization()
 
 
 
