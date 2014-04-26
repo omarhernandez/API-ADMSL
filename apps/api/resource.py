@@ -109,6 +109,11 @@ class ProductoResource(ModelResource):
 		queryset = Producto.objects.all()
 		resource_name = 'producto'
 		authorization= Authorization()
+		filtering = {
+
+			"categoria" : ["exact"],
+
+		}
 
 
 #************************************************************************************************************
@@ -375,12 +380,6 @@ class LoginResource(ModelResource):
 				bundle.data["sucursal"]["resource_uri"] =   "api/v1/sucursal/{0}/".format(UsuarioSucursalResponse[0].id )
 			
 	 	
-
-
-
-
-				print "sucursal"
-
 		else:
 
 			bundle.data["loggin"] = False
