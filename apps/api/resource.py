@@ -55,7 +55,6 @@ class UsuarioSucursalResource(ModelResource):
 		authorization= Authorization()
 
 
-
 #************************************************************************************************************
 #********************************************* Estados  *******************************************
 #************************************************************************************************************
@@ -185,6 +184,7 @@ class InventarioResource(ModelResource):
 
 	class Meta:
 		queryset = inventario.objects.all()
+		always_return_data = True
 		resource_name = 'inventario'
 		filtering = {
 			  	"sucursal" : ["exact"]
@@ -285,7 +285,7 @@ class VentaHasProductoResource(ModelResource):
 class ClienteResource(ModelResource):
 
 	#cliente_facturacion = fields.ForeignKey(ClienteFacturacionResource , 'cliente_facturacion'    , full = True , null = True )
-	sucursal = fields.ForeignKey(SucursalResource , 'sucursal'    , full = True , null = True )
+	sucursal = fields.ForeignKey(SucursalResource , 'sucursal'    , full = False , null = True )
 	class Meta:
 		queryset = ClienteDatos.objects.all()
 		resource_name = 'cliente'
@@ -295,6 +295,7 @@ class ClienteResource(ModelResource):
 		filtering = {
 
 			  "nombre" : ["icontains"],
+			  "sucursal" : ["exact"],
 
 			}
 
@@ -411,11 +412,11 @@ class UsuarioResource(ModelResource):
 	#logged = fields.ForeignKey(LogeedResource, 'Logged'    , full = True , null = True )
 
 	class Meta:
-		#allowed_methods = ['get', 'post' , 'delete' , "put"]		
-		#excludes = ["password"]
+		allowed_methods = ['get', 'post' , 'delete' , "put"]		
+		excludes = ["password"]
 		queryset = Usuario.objects.all().distinct()
 		resource_name = 'usuario'
-		#authorization= ISELAuthentication()
+		authorization= ISELAuthentication()
 
 
 	def dehydrate(self , bundle ):
@@ -452,6 +453,43 @@ class UsuarioResource(ModelResource):
 		return bundle
 
 
+
+#************************************************************************************************************
+#********************************************* Venta Cliente *******************************************
+#************************************************************************************************************
+
+
+class VentaClienteResource(ModelResource):
+
+	venta = fields.ForeignKey( VentaResource , 'venta'     )
+	cliente_datos = fields.ForeignKey(ClienteResource , 'cliente_datos'     )
+
+	class Meta:
+		queryset = VentaCliente.objects.all()
+		resource_name ='ventacliente'
+		authorization= Authorization()
+
+
+
+#************************************************************************************************************
+#********************************************* Asignacion supervisor plaza *********************************
+#************************************************************************************************************
+
+
+class AsignacionSupervisorPlazaResource(ModelResource):
+
+	usuario = fields.ForeignKey("apps.api.resource.UsuarioResource", 'usuario'    ,  null = True )
+	sucursal  = fields.ForeignKey("apps.api.resource.SucursalResource", 'sucursal'    ,  null = True )
+	class Meta:
+		queryset = AsignacionSupervisorPlaza.objects.all()
+		resource_name ='asignacionsupervisorplaza'
+		authorization= Authorization()
+
+		filtering  = {
+
+			"sucursal"  : ["exact"],
+
+				}
 
 
 

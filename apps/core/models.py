@@ -158,3 +158,19 @@ class Municipios(models.Model):
 	class Meta:
 		db_table = 'municipios'
 
+class VentaCliente(models.Model):
+	cliente_datos = models.ForeignKey(ClienteDatos , db_column ="cliente_datos")
+	venta = models.ForeignKey(venta, db_column = "venta")
+
+	class Meta:
+		db_table = 'venta_cliente'
+
+class AsignacionSupervisorPlaza(models.Model):
+    	usuario = models.ForeignKey('usuario' , db_column = "usuario")
+	sucursal = models.ForeignKey(Sucursal, db_column='sucursal') 
+
+	class Meta:
+		db_table = 'asignacion_supervisor_plaza'
+
+
+
