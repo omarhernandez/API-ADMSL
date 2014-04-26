@@ -123,7 +123,7 @@ class Usuario(models.Model):
 
 class UsuarioHasSucursal(models.Model):
     usuario = models.ForeignKey(Usuario)
-    sucursal = models.ForeignKey(Sucursal, db_column='Sucursal_id') # Field name made lowercase.
+    Sucursal_id  = models.ForeignKey(Sucursal, db_column='Sucursal_id') # Field name made lowercase.
     class Meta:
         db_table = 'usuario_has_Sucursal'
 

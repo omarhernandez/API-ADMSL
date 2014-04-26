@@ -1,4 +1,5 @@
 from django.db.models import Q , F
+from django.core import serializers
 import re 
 from tastypie import fields
 from apps.core.models import *
@@ -18,6 +19,41 @@ class ISELAuthentication(Authorization):
 
 	def is_authenticated( self , request , **kwargs ):
 		return False
+
+#************************************************************************************************************
+#********************************************* Usuario Sucursal *******************************************
+#************************************************************************************************************
+
+
+class UsuarioHasSucursalResource(ModelResource):
+
+	usuario = fields.ForeignKey("apps.api.resource.UsuarioResource", 'usuario'    ,  null = True )
+	Sucursal_id  = fields.ForeignKey("apps.api.resource.SucursalResource", 'Sucursal_id'    ,  null = True )
+
+	class Meta:
+		queryset = UsuarioHasSucursal.objects.all()
+		resource_name ='usuariohassucursal'
+		authorization= Authorization()
+
+
+
+
+
+
+
+#************************************************************************************************************
+#********************************************* Usuario Sucursal *******************************************
+#************************************************************************************************************
+
+
+class UsuarioSucursalResource(ModelResource):
+
+	usuario = fields.ForeignKey("apps.api.resource.UsuarioResource", 'usuario'    ,  null = True )
+	class Meta:
+		queryset = UsuarioSucursal.objects.all()
+		resource_name ='usuariosucursal'
+		authorization= Authorization()
+
 
 #************************************************************************************************************
 #********************************************* Estados  *******************************************
@@ -171,6 +207,7 @@ class VentaResource(ModelResource):
 
 	def dehydrate(self , bundle):
 		bundle.data["folio"] = bundle.obj.id
+		print bundle.data["producto"]
 
 		return bundle
 
@@ -307,10 +344,42 @@ class LoginResource(ModelResource):
 
 		user_exist = Usuario.objects.filter( Q(email = get_email ) , Q(password = get_password))
 
+
+
+
+
 		if user_exist:
 			
 			bundle.data["loggin"] = True
 			bundle.data["message"] = "201"
+			bundle.data["nombre"] = user_exist[0].nombre
+			if user_exist[0].rol == "sucursal":
+				#bundle.data["info"] = UsuarioSucursal.objects.filter ( usuario = user_exist ) 
+				UsuarioSucursalResponse = UsuarioSucursal.objects.filter ( usuario = user_exist )
+    
+				bundle.data["usuario_informacion"] =  {
+					"salario_real":  UsuarioSucursalResponse[0].salario_real,
+					"num_seguro_social": UsuarioSucursalResponse[0].num_seguro_social,
+					"tel_aval": UsuarioSucursalResponse[0].tel_aval,
+					"porciento_comision": UsuarioSucursalResponse[0].porciento_comision,
+					"direccion": UsuarioSucursalResponse[0].direccion,
+					"tel_residencia": UsuarioSucursalResponse[0].tel_residencia,
+					"bono":UsuarioSucursalResponse[0].bono,
+					"nombre_aval": UsuarioSucursalResponse[0].nombre_aval,
+
+				}
+
+				bundle.data["sucursal"] =  UsuarioHasSucursal.objects.select_related().filter( usuario = user_exist )[0].Sucursal_id.__dict__
+				bundle.data["sucursal"].pop("_state")
+				bundle.data["sucursal"]["resource_uri"] =   "api/v1/sucursal/{0}/".format(UsuarioSucursalResponse[0].id )
+			
+	 	
+
+
+
+
+				print "sucursal"
+
 		else:
 
 			bundle.data["loggin"] = False
