@@ -413,6 +413,7 @@ class UsuarioResource(ModelResource):
 	#logged = fields.ForeignKey(LogeedResource, 'Logged'    , full = True , null = True )
 
 	class Meta:
+		always_return_data = True
 		allowed_methods = ['get', 'post' , 'delete' , "put"]		
 		excludes = ["password"]
 		queryset = Usuario.objects.all().distinct()
