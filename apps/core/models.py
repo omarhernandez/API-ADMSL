@@ -212,3 +212,12 @@ class VentaPublico(models.Model):
 		db_table = 'venta_publico'
 
 
+class VentaUsuarioSucursal(models.Model):
+    	usuario_sucursal = models.ForeignKey(UsuarioSucursal , db_column = "usuario_sucursal")
+	venta = models.ForeignKey(venta, db_column = "venta")
+	nombre_usuario = models.CharField(max_length=400L)
+
+	class Meta:
+		db_table = 'venta_usuario_sucursal'
+
+

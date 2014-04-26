@@ -423,8 +423,38 @@ class UsuarioResource(ModelResource):
 
 	def dehydrate(self , bundle ):
 
+		current_obj = bundle.obj
+
+		datos = []
+		if bundle.obj.rol == "sucursal":
+
+			try:
+				datos = UsuarioSucursal.objects.filter(id = current_obj.id ) [0]
+
+				UsuarioSucursalResponse = datos
+
+
+				datos = {
+						"salario_real":  UsuarioSucursalResponse.salario_real,
+						"num_seguro_social": UsuarioSucursalResponse.num_seguro_social,
+						"resource_uri": "/api/v1/usuariosucursal/{0}/".format(UsuarioSucursalResponse.id),
+						"tel_aval": UsuarioSucursalResponse.tel_aval,
+						"porciento_comision": UsuarioSucursalResponse.porciento_comision,
+						"direccion": UsuarioSucursalResponse.direccion,
+						"tel_residencia": UsuarioSucursalResponse.tel_residencia,
+						"bono":UsuarioSucursalResponse.bono,
+						"nombre_aval": UsuarioSucursalResponse.nombre_aval,
+
+					}
+
+			except:
+				datos = []
+
+
+
 		keyword = User.objects.make_random_password()
 		bundle.data["loggin"] = keyword
+		bundle.data["datos"] = datos
 		#del bundle.data["logged"]
 
 		
@@ -495,6 +525,23 @@ class AsignacionSupervisorPlazaResource(ModelResource):
 
 
 #************************************************************************************************************
+#********************************************* Venta Usuario Sucursal ***************************************
+#************************************************************************************************************
+
+
+class VentaUsuarioSucursalResource(ModelResource):
+
+	venta = fields.ForeignKey(VentaResource, 'venta' , full = True  )
+	usuario_sucursal = fields.ForeignKey(UsuarioSucursalResource , 'usuario_sucursal' )
+
+	class Meta:
+
+		queryset = VentaUsuarioSucursal.objects.all()
+		resource_name ='ventausuariosucursal'
+		authorization= Authorization()
+
+
+#************************************************************************************************************
 #********************************************* Venta Publico ***********************************************
 #************************************************************************************************************
 
@@ -534,15 +581,23 @@ class HistorialVentaResource(ModelResource):
 
 	class Meta:
 		allowed_methods = ['get' ]		
-		queryset = venta.objects.all()
+		queryset = venta.objects.all().order_by('-fecha') 
 		resource_name = 'historialventa'
 		filtering = { "sucursal" : ["exact"] }
 
 	def dehydrate(self , bundle):
-		#bundle.data["folio"] = bundle.obj.id
+
+		id_current_obj = bundle.obj.id
+		try:
+			VentaUsuarioSucursalQS = VentaUsuarioSucursal.objects.filter( venta__id = id_current_obj)[0]
+			bundle.data["vendedor_sucursal"] = VentaUsuarioSucursalQS.nombre_usuario
+
+		except:
+			bundle.data["vendedor_sucursal"] = "sin asignar"
+
 
 		try:
-			ClienteVentaQuerySet = VentaCliente.objects.select_related().filter( venta__id  = bundle.obj.id )[0]
+			ClienteVentaQuerySet = VentaCliente.objects.select_related().filter( venta__id  = id_current_obj )[0]
 			nombre_cliente = ClienteVentaQuerySet.cliente_datos.nombre
 			bundle.data["nombre_comprador"] =  ( nombre_cliente , "publico")[ not nombre_cliente]
 		except :
