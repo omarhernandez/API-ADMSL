@@ -86,8 +86,28 @@ class venta(models.Model):
     sucursal = models.ForeignKey(Sucursal, db_column='Sucursal_id') # Field name made lowercase.
     fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
 
+
+    folio = models.IntegerField( db_column = "folio")
+    total = models.IntegerField( db_column = "total")
+    total_productos = models.IntegerField( db_column = "total_productos")
+
     class Meta:
         db_table = 'venta'
+
+    def save(self):
+    	
+	venta = venta.objects.all().aggregate(Max('folio'))
+
+	if venta["folio__max"]:
+		last = unicode(venta["folio__max"])
+		self.folio = int(last)+1
+	else
+		self.folio = 1
+	
+
+	super(venta , self).save()
+
+
 
 class venta_has_producto(models.Model):
 
@@ -96,7 +116,19 @@ class venta_has_producto(models.Model):
     cantidad = models.IntegerField(null=True, blank=True , db_column = "cantidad")
 
     class Meta:
-        db_table = 'venta_has_producto'
+        db_table = 'venta_has_producto' 
+	
+	
+
+
+
+
+
+
+
+
+
+
 
 
 
