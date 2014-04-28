@@ -96,8 +96,9 @@ class venta(models.Model):
         db_table = 'venta'
 
     def save(self):
+    
     	
-	venta_qs = venta.objects.all().aggregate(Max('folio'))
+	venta_qs = venta.objects.all().filter(sucursal=self.sucursal).aggregate(Max('folio'))
 
 	if venta_qs["folio__max"]:
 		last = unicode(venta_qs ["folio__max"])

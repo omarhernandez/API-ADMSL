@@ -214,7 +214,6 @@ class VentaResource(ModelResource):
 
 	def dehydrate(self , bundle):
 		#bundle.data["folio"] = bundle.obj.id
-		print bundle.data["producto"]
 
 		return bundle
 
@@ -469,19 +468,16 @@ class UsuarioResource(ModelResource):
 
 
 	def obj_create(self , bundle , request = None , ):
-		print bundle.obj
 
 		keyword = User.objects.make_random_password()
 		#last_loggin = Logged.objects.create( session_key = keyword , access = True )
 		#bundle.obj.logged  = last_loggin
 
-		print bundle.obj.__dict__
 
 		bundle = self.full_hydrate(bundle)
 		bundle.obj.save()
 
 
-		print bundle.obj.__dict__
 
 
 
