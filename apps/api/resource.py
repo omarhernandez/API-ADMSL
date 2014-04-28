@@ -419,6 +419,12 @@ class UsuarioResource(ModelResource):
 		queryset = Usuario.objects.all().distinct()
 		resource_name = 'usuario'
 		authorization= ISELAuthentication()
+		filtering  = {
+
+			"nombre"  : ["icontains"],
+
+				}
+
 
 
 	def dehydrate(self , bundle ):
