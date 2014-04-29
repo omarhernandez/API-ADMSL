@@ -20,6 +20,10 @@ v1_api.register(VentaResource())
 v1_api.register(VentaClienteResource())
 v1_api.register(UsuarioSucursalResource())
 v1_api.register(UsuarioHasSucursalResource())
+v1_api.register(AsignacionSupervisorPlazaResource())
+v1_api.register(VentaPublicoResource())
+v1_api.register(HistorialVentaResource())
+v1_api.register(VentaUsuarioSucursalResource())
 #v1_api.register(VentaHasProductoResource())
 
 

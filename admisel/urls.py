@@ -5,6 +5,7 @@ from apps.api.urls import v1_api
 urlpatterns = patterns('',
 
      (r'^api/' , include(v1_api.urls)),
+      url(r'^' , include('apps.notificacion.urls')) ,
      (r'api/doc/', include('tastypie_swagger.urls', namespace='tastypie_swagger')),
 )
 

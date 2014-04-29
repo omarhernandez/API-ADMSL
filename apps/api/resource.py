@@ -108,6 +108,11 @@ class ProductoResource(ModelResource):
 		queryset = Producto.objects.all()
 		resource_name = 'producto'
 		authorization= Authorization()
+		filtering = {
+
+			"categoria" : ["exact"],
+
+		}
 
 
 #************************************************************************************************************
@@ -151,6 +156,7 @@ class ProductoHasRangoesource(ModelResource):
 	rango = fields.ForeignKey(RangoResource , 'rango'    , full = True , null = True )
 
 	class Meta:
+		always_return_data = True
 		queryset = producto_has_rango.objects.all()
 		resource_name = 'producto_has_rango'
 		authorization= Authorization()
@@ -179,6 +185,7 @@ class InventarioResource(ModelResource):
 
 	class Meta:
 		queryset = inventario.objects.all()
+		always_return_data = True
 		resource_name = 'inventario'
 		filtering = {
 			  	"sucursal" : ["exact"]
@@ -206,8 +213,7 @@ class VentaResource(ModelResource):
 		always_return_data = True
 
 	def dehydrate(self , bundle):
-		bundle.data["folio"] = bundle.obj.id
-		print bundle.data["producto"]
+		#bundle.data["folio"] = bundle.obj.id
 
 		return bundle
 
@@ -279,7 +285,7 @@ class VentaHasProductoResource(ModelResource):
 class ClienteResource(ModelResource):
 
 	#cliente_facturacion = fields.ForeignKey(ClienteFacturacionResource , 'cliente_facturacion'    , full = True , null = True )
-	sucursal = fields.ForeignKey(SucursalResource , 'sucursal'    , full = True , null = True )
+	sucursal = fields.ForeignKey(SucursalResource , 'sucursal'    , full = False , null = True )
 	class Meta:
 		queryset = ClienteDatos.objects.all()
 		resource_name = 'cliente'
@@ -289,6 +295,7 @@ class ClienteResource(ModelResource):
 		filtering = {
 
 			  "nombre" : ["icontains"],
+			  "sucursal" : ["exact"],
 
 			}
 
@@ -374,12 +381,6 @@ class LoginResource(ModelResource):
 				bundle.data["sucursal"]["resource_uri"] =   "api/v1/sucursal/{0}/".format(UsuarioSucursalResponse[0].id )
 			
 	 	
-
-
-
-
-				print "sucursal"
-
 		else:
 
 			bundle.data["loggin"] = False
@@ -411,17 +412,54 @@ class UsuarioResource(ModelResource):
 	#logged = fields.ForeignKey(LogeedResource, 'Logged'    , full = True , null = True )
 
 	class Meta:
-		#allowed_methods = ['get', 'post' , 'delete' , "put"]		
+		always_return_data = True
+		allowed_methods = ['get', 'post' , 'delete' , "put"]		
 		#excludes = ["password"]
 		queryset = Usuario.objects.all().distinct()
 		resource_name = 'usuario'
-		#authorization= ISELAuthentication()
+		authorization= ISELAuthentication()
+		filtering  = {
+
+			"nombre"  : ["icontains"],
+
+				}
+
 
 
 	def dehydrate(self , bundle ):
 
+		current_obj = bundle.obj
+
+		datos = []
+		if bundle.obj.rol == "sucursal":
+
+			try:
+				datos = UsuarioSucursal.objects.filter(id = current_obj.id ) [0]
+
+				UsuarioSucursalResponse = datos
+
+
+				datos = {
+						"salario_real":  UsuarioSucursalResponse.salario_real,
+						"num_seguro_social": UsuarioSucursalResponse.num_seguro_social,
+						"resource_uri": "/api/v1/usuariosucursal/{0}/".format(UsuarioSucursalResponse.id),
+						"tel_aval": UsuarioSucursalResponse.tel_aval,
+						"porciento_comision": UsuarioSucursalResponse.porciento_comision,
+						"direccion": UsuarioSucursalResponse.direccion,
+						"tel_residencia": UsuarioSucursalResponse.tel_residencia,
+						"bono":UsuarioSucursalResponse.bono,
+						"nombre_aval": UsuarioSucursalResponse.nombre_aval,
+
+					}
+
+			except:
+				datos = []
+
+
+
 		keyword = User.objects.make_random_password()
 		bundle.data["loggin"] = keyword
+		bundle.data["datos"] = datos
 		#del bundle.data["logged"]
 
 		
@@ -430,19 +468,16 @@ class UsuarioResource(ModelResource):
 
 
 	def obj_create(self , bundle , request = None , ):
-		print bundle.obj
 
 		keyword = User.objects.make_random_password()
 		#last_loggin = Logged.objects.create( session_key = keyword , access = True )
 		#bundle.obj.logged  = last_loggin
 
-		print bundle.obj.__dict__
 
 		bundle = self.full_hydrate(bundle)
 		bundle.obj.save()
 
 
-		print bundle.obj.__dict__
 
 
 
@@ -469,5 +504,107 @@ class VentaClienteResource(ModelResource):
 		authorization= Authorization()
 
 
+
+#************************************************************************************************************
+#********************************************* Asignacion supervisor plaza *********************************
+#************************************************************************************************************
+
+
+class AsignacionSupervisorPlazaResource(ModelResource):
+
+	usuario = fields.ForeignKey("apps.api.resource.UsuarioResource", 'usuario'    ,  null = True )
+	sucursal  = fields.ForeignKey("apps.api.resource.SucursalResource", 'sucursal'    ,  null = True )
+	class Meta:
+		queryset = AsignacionSupervisorPlaza.objects.all()
+		resource_name ='asignacionsupervisorplaza'
+		authorization= Authorization()
+
+		filtering  = {
+
+			"sucursal"  : ["exact"],
+
+				}
+
+
+#************************************************************************************************************
+#********************************************* Venta Usuario Sucursal ***************************************
+#************************************************************************************************************
+
+
+class VentaUsuarioSucursalResource(ModelResource):
+
+	venta = fields.ForeignKey(VentaResource, 'venta' , full = True  )
+	usuario_sucursal = fields.ForeignKey(UsuarioSucursalResource , 'usuario_sucursal' )
+
+	class Meta:
+
+		queryset = VentaUsuarioSucursal.objects.all()
+		resource_name ='ventausuariosucursal'
+		authorization= Authorization()
+
+
+#************************************************************************************************************
+#********************************************* Venta Publico ***********************************************
+#************************************************************************************************************
+
+
+class VentaPublicoResource(ModelResource):
+
+	venta = fields.ForeignKey(VentaResource, 'venta' , full = True  )
+	class Meta:
+		queryset = VentaPublico.objects.all()
+		resource_name ='ventapublico'
+		authorization= Authorization()
+
+#************************************************************************************************************
+#*********************************************SUCURSAL SIN RELACIONEs  **************************************
+#************************************************************************************************************
+#Se creo este recurso porque el recurso principa de sucursal al incluirse SucursalResource regresa todo el inventario,
+#en esta seccion no se requiere
+
+class SucursalSinInventarioResource(ModelResource):
+
+	class Meta:
+		queryset = Sucursal.objects.all()
+
+
+
+#************************************************************************************************************
+#********************************************* Historial Venta ***********************************************
+#************************************************************************************************************
+
+
+
+
+class HistorialVentaResource(ModelResource):
+	""" Historial de las ventas , se puede filtrar por sucursal."""
+
+	sucursal = fields.ForeignKey(SucursalSinInventarioResource , 'sucursal' , full = True     )
+
+	class Meta:
+		allowed_methods = ['get' ]		
+		queryset = venta.objects.all().order_by('-fecha') 
+		resource_name = 'historialventa'
+		filtering = { "sucursal" : ["exact"] }
+
+	def dehydrate(self , bundle):
+
+		id_current_obj = bundle.obj.id
+		try:
+			VentaUsuarioSucursalQS = VentaUsuarioSucursal.objects.filter( venta__id = id_current_obj)[0]
+			bundle.data["vendedor_sucursal"] = VentaUsuarioSucursalQS.nombre_usuario
+
+		except:
+			bundle.data["vendedor_sucursal"] = "sin asignar"
+
+
+		try:
+			ClienteVentaQuerySet = VentaCliente.objects.select_related().filter( venta__id  = id_current_obj )[0]
+			nombre_cliente = ClienteVentaQuerySet.cliente_datos.nombre
+			bundle.data["nombre_comprador"] =  ( nombre_cliente , "publico")[ not nombre_cliente]
+		except :
+			bundle.data["nombre_comprador"] =  "publico"
+
+		return bundle
 
 

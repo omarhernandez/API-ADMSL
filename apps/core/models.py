@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Max 
 
 class CategoriaProducto(models.Model):
     categoria = models.CharField(max_length=45L, db_column='Categoria', blank=True) # Field name made lowercase.
@@ -86,8 +87,29 @@ class venta(models.Model):
     sucursal = models.ForeignKey(Sucursal, db_column='Sucursal_id') # Field name made lowercase.
     fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
 
+
+    folio = models.IntegerField( db_column = "folio")
+    total = models.IntegerField( db_column = "total")
+    total_productos = models.IntegerField( db_column = "total_productos")
+
     class Meta:
         db_table = 'venta'
+
+    def save(self):
+    
+    	
+	venta_qs = venta.objects.all().filter(sucursal=self.sucursal).aggregate(Max('folio'))
+
+	if venta_qs["folio__max"]:
+		last = unicode(venta_qs ["folio__max"])
+		self.folio = int(last)+1
+	else:
+		self.folio = 1
+	
+
+	super(venta , self).save()
+
+
 
 class venta_has_producto(models.Model):
 
@@ -96,7 +118,19 @@ class venta_has_producto(models.Model):
     cantidad = models.IntegerField(null=True, blank=True , db_column = "cantidad")
 
     class Meta:
-        db_table = 'venta_has_producto'
+        db_table = 'venta_has_producto' 
+	
+	
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -164,3 +198,27 @@ class VentaCliente(models.Model):
 
 	class Meta:
 		db_table = 'venta_cliente'
+
+class AsignacionSupervisorPlaza(models.Model):
+    	usuario = models.ForeignKey('usuario' , db_column = "usuario")
+	sucursal = models.ForeignKey(Sucursal, db_column='sucursal') 
+
+	class Meta:
+		db_table = 'asignacion_supervisor_plaza'
+
+
+class VentaPublico(models.Model):
+	venta = models.ForeignKey(venta, db_column = "venta")
+	class Meta:
+		db_table = 'venta_publico'
+
+
+class VentaUsuarioSucursal(models.Model):
+    	usuario_sucursal = models.ForeignKey(UsuarioSucursal , db_column = "usuario_sucursal")
+	venta = models.ForeignKey(venta, db_column = "venta")
+	nombre_usuario = models.CharField(max_length=400L)
+
+	class Meta:
+		db_table = 'venta_usuario_sucursal'
+
+
