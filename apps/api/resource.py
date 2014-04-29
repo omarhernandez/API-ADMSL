@@ -27,8 +27,8 @@ class ISELAuthentication(Authorization):
 
 class UsuarioHasSucursalResource(ModelResource):
 
-	usuario = fields.ForeignKey("apps.api.resource.UsuarioResource", 'usuario'    ,  null = True )
-	Sucursal_id  = fields.ForeignKey("apps.api.resource.SucursalResource", 'Sucursal_id'    ,  null = True )
+	usuario = fields.ForeignKey("apps.api.resource.UsuarioResource", 'usuario'    ,  null = True , full = True )
+	Sucursal_id  = fields.ForeignKey("apps.api.resource.SucursalResource", 'Sucursal_id'    ,  null = True ,full = True )
 
 	class Meta:
 		queryset = UsuarioHasSucursal.objects.all()
