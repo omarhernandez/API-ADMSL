@@ -203,6 +203,7 @@ class VentaResource(ModelResource):
 
 	
 	def obj_create(self, bundle, request=None, **kwargs): 
+		""" se crea una venta """
 
 		bundle = self.full_hydrate(bundle)
 		productos = bundle.data["producto"]
@@ -418,7 +419,7 @@ class UsuarioResource(ModelResource):
 		if bundle.obj.rol == "sucursal":
 
 			try:
-				datos = UsuarioSucursal.objects.filter(id = current_obj.id ) [0]
+				datos = UsuarioSucursal.objects.filter(usuario = current_obj.id ) [0]
 
 				UsuarioSucursalResponse = datos
 
