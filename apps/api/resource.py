@@ -443,6 +443,7 @@ class UsuarioResource(ModelResource):
 						"salario_real":  UsuarioSucursalResponse.salario_real,
 						"num_seguro_social": UsuarioSucursalResponse.num_seguro_social,
 						"resource_uri": "/api/v1/usuariosucursal/{0}/".format(UsuarioSucursalResponse.id),
+						"id": "{0}".format(UsuarioSucursalResponse.id),
 						"tel_aval": UsuarioSucursalResponse.tel_aval,
 						"porciento_comision": UsuarioSucursalResponse.porciento_comision,
 						"direccion": UsuarioSucursalResponse.direccion,
