@@ -519,7 +519,7 @@ class AsignacionSupervisorPlazaResource(ModelResource):
 class VentaUsuarioSucursalResource(ModelResource):
 
 	venta = fields.ForeignKey(VentaResource, 'venta' , full = True  )
-	usuario_sucursal = fields.ForeignKey(UsuarioSucursalResource , 'usuario_sucursal' )
+	usuario_sucursal = fields.ForeignKey("apps.api.resource.UsuarioSucursalResource" , 'usuario_sucursal' )
 
 	class Meta:
 
