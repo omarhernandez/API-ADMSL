@@ -28,7 +28,7 @@ class ISELAuthentication(Authorization):
 class UsuarioHasSucursalResource(ModelResource):
 
 	usuario = fields.ForeignKey("apps.api.resource.UsuarioResource", 'usuario'    ,  null = True , full = True )
-	Sucursal_id  = fields.ForeignKey("apps.api.resource.SucursalResource", 'Sucursal_id'    ,  null = True ,full = True )
+	Sucursal_id  = fields.ForeignKey("apps.api.resource.SucursalSinInventarioResource", 'Sucursal_id'    ,  null = True ,full = True )
 
 	class Meta:
 		queryset = UsuarioHasSucursal.objects.all()
@@ -37,22 +37,6 @@ class UsuarioHasSucursalResource(ModelResource):
 
 
 
-
-
-
-
-#************************************************************************************************************
-#********************************************* Usuario Sucursal *******************************************
-#************************************************************************************************************
-
-
-class UsuarioSucursalResource(ModelResource):
-
-	usuario = fields.ForeignKey("apps.api.resource.UsuarioResource", 'usuario'    ,  null = True )
-	class Meta:
-		queryset = UsuarioSucursal.objects.all()
-		resource_name ='usuariosucursal'
-		authorization= Authorization()
 
 
 #************************************************************************************************************
@@ -607,5 +591,21 @@ class HistorialVentaResource(ModelResource):
 			bundle.data["nombre_comprador"] =  "publico"
 
 		return bundle
+
+
+
+
+#************************************************************************************************************
+#********************************************* Usuario Sucursal *******************************************
+#************************************************************************************************************
+
+
+class UsuarioSucursalResource(ModelResource):
+
+	usuario = fields.ForeignKey("apps.api.resource.UsuarioResource", 'usuario'    ,  null = True )
+	class Meta:
+		queryset = UsuarioSucursal.objects.all()
+		resource_name ='usuariosucursal'
+		authorization= Authorization()
 
 
