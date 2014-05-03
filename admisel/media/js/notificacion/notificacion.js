@@ -33,7 +33,7 @@ $(document).ready(function(){
 		var self = this;
 
 		var $node_activity = $(".str-activity");
-		$node_activity.html("");
+		$(".loader").hide();
 
 		$.each( data.objects , function(index , activity){
 
