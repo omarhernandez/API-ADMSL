@@ -91,6 +91,7 @@ class venta(models.Model):
     folio = models.IntegerField( db_column = "folio")
     total = models.IntegerField( db_column = "total")
     total_productos = models.IntegerField( db_column = "total_productos")
+    url_reporte =   models.CharField(max_length=500L, blank=True , db_column = "url_reporte")
 
     class Meta:
         db_table = 'venta'
