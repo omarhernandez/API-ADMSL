@@ -59,3 +59,10 @@ div.container_notify .child{
     padding: 44px 0;
         text-align: center;
 	}
+
+.timeago {
+float: right;
+font-weight: normal;
+font-size: 12px;
+color: #999;
+}

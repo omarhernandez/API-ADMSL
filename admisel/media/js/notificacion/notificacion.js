@@ -38,7 +38,7 @@ $(document).ready(function(){
 		$.each( data.objects , function(index , activity){
 
 				var current_el = '<div class="child">'+
-					'<div class="sucursal_name"> '+ activity.sucursal.nombre+'</div>'+
+					'<div class="sucursal_name"> '+ activity.sucursal.nombre+' <abbr class="timeago" title="'+activity.fecha+'"></abbr> </div>'+
 					'<div class="activity"> Ha finalizado la venta con el folio : <strong>'+activity.folio+'</strong> </div>'+
 					'<div class="activity_report"> Total productos vendidos : <strong> '+activity.total_productos+'</strong> </div>'+
 					'<div class="activity_report"> Total : <strong> $'+activity.total+'</strong> </div>'+
@@ -48,10 +48,11 @@ $(document).ready(function(){
 					'</div>';
 
 
-			console.log(activity);
 			$node_activity.append(current_el);
 
 		});
+
+		$("abbr.timeago").timeago();
 
 	}
 
