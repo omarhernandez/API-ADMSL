@@ -26,19 +26,15 @@ $(document).ready(function(){
 		success : function(data){
 
 
-			var last_el  = data.objects[0];
 
-			if ( !STACK_NOTIFY.last_folio_updated ){
+			var last_folio = $(".str-activity").children().first().find(".folio_el").html() || "";
 
-				STACK_NOTIFY.last_folio_updated = last_el.folio ;
-			}
-
-			var last_folio = $(".str-activity").children().first().find(".folio_el").html()
-
-			if (last_folio != STACK_NOTIFY.last_folio_updated){
+			if (last_folio != data.objects[0] || last_folio == "" ){
 
 				activity_admisel.render(data);
 			}
+
+
 				setTimeout( GET_LAST_NOTIFY , 2000)
 
 
