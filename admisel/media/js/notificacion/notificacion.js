@@ -29,10 +29,11 @@ $(document).ready(function(){
 
 			var last_folio = $(".str-activity").children().first().find(".folio_el").html() || "";
 
-			if (last_folio != data.objects[0] || last_folio == "" ){
+			//
+			//if (last_folio != data.objects[0] || last_folio == "" ){
 
 				activity_admisel.render(data);
-			}
+			//}
 
 
 				setTimeout( GET_LAST_NOTIFY , 2000)
