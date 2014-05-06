@@ -1,17 +1,8 @@
 $(document).ready(function(){
 
 	//MUTEX
-	var synchronized = false;
 
-	var STACK_NOTIFY = {
-
-		old_data : [],
-		new_data : [],
-		last_folio_updated : "",
-		last_id_updated : "",
-	};
-
-	GET_LAST_NOTIFY = function(){
+		GET_LAST_NOTIFY = function(){
 
 
 		var STATIC_DOMAIN_ = "",
@@ -24,7 +15,6 @@ $(document).ready(function(){
 
 		//beforeSend : function(){ synchronized = true; },
 		success : function(data){
-
 
 
 			var last_folio = $(".str-activity").children().first().find(".folio_el").html() || "";
