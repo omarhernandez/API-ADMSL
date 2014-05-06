@@ -29,12 +29,8 @@ $(document).ready(function(){
 
 			var last_folio = $(".str-activity").children().first().find(".folio_el").html() || "";
 
-			//
-			//if (last_folio != data.objects[0] || last_folio == "" ){
 
 				activity_admisel.render(data);
-			//}
-
 
 				setTimeout( GET_LAST_NOTIFY , 2000)
 
@@ -66,6 +62,7 @@ $(document).ready(function(){
 		var self = this;
 
 		var $node_activity = $(".str-activity");
+		$node_activity.html("");
 		$(".loader").hide();
 
 		$.each( data.objects , function(index , activity){
