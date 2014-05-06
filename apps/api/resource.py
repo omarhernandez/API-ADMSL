@@ -569,11 +569,27 @@ class HistorialVentaResource(ModelResource):
 
 	sucursal = fields.ForeignKey(SucursalSinInventarioResource , 'sucursal' , full = True     )
 
+	
+	usuario = fields.ToManyField('apps.api.resource.UsuarioHasSucursalResource',  
+	 	
+			attribute = lambda bundle:      inventario.objects.filter(sucursal = bundle.obj)
+	  		
+		, null = True , full = True		)    
+
+
+
+
+
 	class Meta:
 		allowed_methods = ['get' ]		
 		queryset = venta.objects.all().order_by('-fecha') 
 		resource_name = 'historialventa'
-		filtering = { "sucursal" : ["exact"] }
+		filtering = { 
+		
+		"sucursal" : ["exact"],
+		"usuario" : ["exact"],
+		"fecha" : ["lte","gte", "lt","gt"],
+		}
 
 	def dehydrate(self , bundle):
 

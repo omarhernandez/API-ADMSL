@@ -1,21 +1,57 @@
 $(document).ready(function(){
 
-	var STATIC_DOMAIN_ = "",
-	    URL_HISTORY_ = STATIC_DOMAIN_+"/api/v1/historialventa/?api_key=special-key";
-	
-	$.ajax({
+	//MUTEX
+	var synchronized = false;
 
-	url : URL_HISTORY_,
-	type : "GET",
+	var STACK_NOTIFY = {
 
-	success : function(data){
+		old_data : [],
+		new_data : [],
+		last_folio_updated : "",
+		last_id_updated : "",
+	};
 
-		activity_admisel.render(data);
+	GET_LAST_NOTIFY = function(){
 
-	},
-	dataType : "json"
 
-	});
+		var STATIC_DOMAIN_ = "",
+		    URL_HISTORY_ = STATIC_DOMAIN_+"/api/v1/historialventa/?api_key=special-key";
+		
+		$.ajax({
+
+		url : URL_HISTORY_,
+		type : "GET",
+
+		//beforeSend : function(){ synchronized = true; },
+		success : function(data){
+
+
+			var last_el  = data.objects[0];
+
+			if ( !STACK_NOTIFY.last_folio_updated ){
+
+				STACK_NOTIFY.last_folio_updated = last_el.folio ;
+			}
+
+			var last_folio = $(".str-activity").children().first().find(".folio_el").html()
+
+			if (last_folio != STACK_NOTIFY.last_folio_updated){
+
+				activity_admisel.render(data);
+			}
+				setTimeout( GET_LAST_NOTIFY , 2000)
+
+
+		},
+		dataType : "json"
+
+		});
+
+	};
+
+
+	GET_LAST_NOTIFY();
+
 
 /*
 
@@ -39,7 +75,7 @@ $(document).ready(function(){
 
 				var current_el = '<div class="child">'+
 					'<div class="sucursal_name"> '+ activity.sucursal.nombre+' <abbr class="timeago" title="'+activity.fecha+'"></abbr> </div>'+
-					'<div class="activity"> Ha finalizado la venta con el folio : <strong>'+activity.folio+'</strong> </div>'+
+					'<div class="activity"> Ha finalizado la venta con el folio : <strong class="folio_el">'+activity.folio+'</strong> </div>'+
 					'<div class="activity_report"> Total productos vendidos : <strong> '+activity.total_productos+'</strong> </div>'+
 					'<div class="activity_report"> Total : <strong> $'+activity.total+'</strong> </div>'+
 					'<div class="activity_report"> venta realizada a: <strong> '+activity.nombre_comprador+'</strong> </div>'+

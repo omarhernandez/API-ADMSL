@@ -16,36 +16,39 @@ body,html{
 
 
 div.container_notify{
- background: none repeat scroll 0 0 #FFFFFF;
-     border: 1px solid #DDDDDD;
-         border-radius: 6px 6px 6px 6px;
-	     margin: 17px;
-	         padding: 21px;
-		     width: 310px;
+   width: 320px;
 }
 
 
 div.container_notify .header{
- font-size: 19px;
-    font-weight: bold;
+   font-size: 19px;
+       font-weight: bold;
+           padding: 14px;
+	       text-shadow: 1px 1px #FFFFFF;
 }
 
 
 
 .child .sucursal_name {
-    font-size: 13px;
-        font-weight: bold;
-	    padding-bottom: 10px;
+     background: none repeat scroll 0 0 #FAFBFC;
+         border-bottom: 1px solid #EEEEEE;
+	     font-size: 13px;
+	         font-weight: bold;
+		     margin: -14px -14px 19px -15px;
+		         padding: 10px 15px;
 	    }
 
 
 
 div.container_notify .child{
-     border-bottom: 1px solid #DDDDDD;
-         box-shadow: 0 -1px #FFFFFF inset;
-	     overflow-y: auto;
-	         padding: 40px 0;
-		     width: 100%;
+         background: none repeat scroll 0 0 #FFFFFF;
+	     border: 1px solid #DDDDDD;
+	         border-radius: 6px 6px 6px 6px;
+		     box-shadow: 0 -1px #FFFFFF inset;
+		         margin: 8px;
+			     overflow-y: auto;
+			         padding: 14px;
+				     width: 100%;
 }
 
 
@@ -56,8 +59,12 @@ div.container_notify .child{
 	}
 
 .loader {
-    padding: 44px 0;
-        text-align: center;
+      background: none repeat scroll 0 0 #FFFFFF;
+          border: 1px solid #CCCCCC;
+	      border-radius: 6px 6px 6px 6px;
+	          margin: 4px;
+		      padding: 14px 28px;
+		          text-align: center;
 	}
 
 .timeago {
