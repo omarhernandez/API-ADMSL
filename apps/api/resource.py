@@ -361,9 +361,11 @@ class LoginResource(ModelResource):
 
 				}
 
-				bundle.data["sucursal"] =  UsuarioHasSucursal.objects.select_related().filter( usuario = user_exist )[0].Sucursal_id.__dict__
+				current_obj_sucursal_ = UsuarioHasSucursal.objects.select_related().filter( usuario = user_exist )[0].Sucursal_id
+				bundle.data["sucursal"] =  current_obj_sucursal_.__dict__
+				print UsuarioHasSucursal.objects.select_related().filter( usuario = user_exist )[0].Sucursal_id.__dict__
 				bundle.data["sucursal"].pop("_state")
-				bundle.data["sucursal"]["resource_uri"] =   "api/v1/sucursal/{0}/".format(UsuarioSucursalResponse[0].id )
+				bundle.data["sucursal"]["resource_uri"] =   "api/v1/sucursal/{0}/".format( current_obj_sucursal_.id )
 			
 	 	
 		else:
