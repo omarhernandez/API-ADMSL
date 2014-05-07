@@ -25,7 +25,7 @@ $(document).ready(function(){
 			//si es la primera vez que se carga el sitio etnonces se insertan todas las notificaciones
 				activity_admisel.render(data);
 				LOAD_FIRST_TIME = false;
-				setTimeout( GET_LAST_NOTIFY , 2000)
+				setTimeout( GET_LAST_NOTIFY , 1000)
 				return true;
 
 			}
@@ -38,7 +38,7 @@ $(document).ready(function(){
 			}
 
 
-				setTimeout( GET_LAST_NOTIFY , 2000)
+				setTimeout( GET_LAST_NOTIFY , 1000)
 
 
 		},
