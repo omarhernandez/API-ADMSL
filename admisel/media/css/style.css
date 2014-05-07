@@ -68,8 +68,9 @@ div.container_notify .child{
 	}
 
 .timeago {
-float: right;
-font-weight: normal;
-font-size: 12px;
-color: #999;
+   color: #AAAAAA;
+       display: inline-block;
+           font-size: 12px;
+	       font-weight: normal;
+	           padding-left: 5px;
 }
