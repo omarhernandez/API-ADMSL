@@ -528,7 +528,7 @@ class AsignacionSupervisorPlazaResource(ModelResource):
 class VentaUsuarioSucursalResource(ModelResource):
 
 	venta = fields.ForeignKey(VentaResource, 'venta' , full = True  )
-	usuario_sucursal = fields.ForeignKey("apps.api.resource.UsuarioSucursalResource" , 'usuario_sucursal' )
+	usuario_sucursal = fields.ForeignKey("apps.api.resource.UsuarioSucursalResource" , 'usuario_sucursal' , null = True )
 
 	class Meta:
 
@@ -576,16 +576,6 @@ class HistorialVentaResource(ModelResource):
 	sucursal = fields.ForeignKey(SucursalSinInventarioResource , 'sucursal' , full = True     )
 
 	
-	usuario = fields.ToManyField('apps.api.resource.UsuarioHasSucursalResource',  
-	 	
-			attribute = lambda bundle:      inventario.objects.filter(sucursal = bundle.obj)
-	  		
-		, null = True , full = True		)    
-
-
-
-
-
 	class Meta:
 		allowed_methods = ['get' ]		
 		queryset = venta.objects.all().order_by('-fecha') 
@@ -593,7 +583,7 @@ class HistorialVentaResource(ModelResource):
 		filtering = { 
 		
 		"sucursal" : ALL_WITH_RELATIONS,
-		"usuario" : ALL_WITH_RELATIONS ,
+		#"usuario" : ["iexact"],
 		"fecha" : ["lte","gte", "lt","gt"],
 		}
 
@@ -616,6 +606,19 @@ class HistorialVentaResource(ModelResource):
 			bundle.data["nombre_comprador"] =  "publico"
 
 		return bundle
+	
+	def get_object_list(self , request):    
+
+		try:
+			user_id =  int(request.GET.get('usuario'))  
+			venta_usuario_sucursal = VentaUsuarioSucursal.objects.filter( usuario_sucursal = user_id)
+			print venta_usuario_sucursal
+
+			usuario_venta = super(HistorialVentaResource , self).get_object_list(request).filter(id__in = venta_usuario_sucursal)  
+			return usuario_venta
+
+		except:
+			return  venta.objects.all().order_by('-fecha') 
 
 
 
