@@ -589,10 +589,10 @@ class HistorialVentaResource(ModelResource):
 
 	def dehydrate(self , bundle):
 
+		print bundle
 		id_current_obj = bundle.obj.id
 		try:
 			VentaUsuarioSucursalQS = VentaUsuarioSucursal.objects.filter( venta__id = id_current_obj)[0]
-			print  VentaUsuarioSucursalQS.usuario_sucursal.usuario.nombre
 			bundle.data["vendedor_sucursal"] =  VentaUsuarioSucursalQS.usuario_sucursal.usuario.nombre 
 
 		except:
@@ -606,22 +606,28 @@ class HistorialVentaResource(ModelResource):
 		except :
 			bundle.data["nombre_comprador"] =  "publico"
 
+		print bundle
+
+
 		return bundle
-	
-	def get_object_list(self , request):    
+
+	def obj_get_list(self , bundle , **kwargs):
+
+		request = bundle.request
+
+		ventas = venta.objects.all().order_by('-fecha')
+
 
 		try:
-			user_id =  int(request.GET.get('usuario'))  
+			user_id =  int(request.GET.get('usuario')) 
 			venta_usuario_sucursal = VentaUsuarioSucursal.objects.filter( usuario_sucursal__usuario  = user_id)
 			print venta_usuario_sucursal
-
-			usuario_venta = super(HistorialVentaResource , self).get_object_list(request).filter(id__in = venta_usuario_sucursal)  
-			return usuario_venta
+			return venta.objects.all().order_by('-fecha').filter( id__in  =  venta_usuario_sucursal)
 
 		except:
-			return  venta.objects.all().order_by('-fecha') 
 
-
+			return ventas 
+	
 
 
 #************************************************************************************************************
