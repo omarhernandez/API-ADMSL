@@ -210,11 +210,10 @@ class VentaResource(ModelResource):
 		productos = bundle.data["producto"]
 
 
+		t = datetime.datetime.utcnow().strftime('%m_%d_%Y')
+		bundle.obj.url_reporte = "{0}_{1}_.pdf".format( bundle.obj.sucursal.nombre.lower().replace(" ","_") , datetime.datetime.utcnow().strftime('%m_%d_%Y_%s') )
 		bundle.obj.save()
 
-		print bundle.obj.folio
-		print bundle.obj.sucursal.nombre
-		bundle.obj.url_reporte = "{0}_{1}_{2}.pdf".format( bundle.obj.sucursal.nombre.lower().replace(" ","_") , datetime.datetime.utcnow().strftime('%m_%d_%Y') , bundle.obj.folio )
 
 
 		sucursal =   re.search('\/api\/v1\/sucursal\/(\d+)\/', str(bundle.data["sucursal"])).group(1)
@@ -371,7 +370,6 @@ class LoginResource(ModelResource):
 
 				current_obj_sucursal_ = UsuarioHasSucursal.objects.select_related().filter( usuario = user_exist )[0].Sucursal_id
 				bundle.data["sucursal"] =  current_obj_sucursal_.__dict__
-				print UsuarioHasSucursal.objects.select_related().filter( usuario = user_exist )[0].Sucursal_id.__dict__
 				bundle.data["sucursal"].pop("_state")
 				bundle.data["sucursal"]["resource_uri"] =   "api/v1/sucursal/{0}/".format( current_obj_sucursal_.id )
 			
