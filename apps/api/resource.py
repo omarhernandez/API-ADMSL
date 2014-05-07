@@ -592,7 +592,8 @@ class HistorialVentaResource(ModelResource):
 		id_current_obj = bundle.obj.id
 		try:
 			VentaUsuarioSucursalQS = VentaUsuarioSucursal.objects.filter( venta__id = id_current_obj)[0]
-			bundle.data["vendedor_sucursal"] = VentaUsuarioSucursalQS.nombre_usuario
+			print  VentaUsuarioSucursalQS.usuario_sucursal.usuario.nombre
+			bundle.data["vendedor_sucursal"] =  VentaUsuarioSucursalQS.usuario_sucursal.usuario.nombre 
 
 		except:
 			bundle.data["vendedor_sucursal"] = "sin asignar"
@@ -611,7 +612,7 @@ class HistorialVentaResource(ModelResource):
 
 		try:
 			user_id =  int(request.GET.get('usuario'))  
-			venta_usuario_sucursal = VentaUsuarioSucursal.objects.filter( usuario_sucursal = user_id)
+			venta_usuario_sucursal = VentaUsuarioSucursal.objects.filter( usuario_sucursal__usuario  = user_id)
 			print venta_usuario_sucursal
 
 			usuario_venta = super(HistorialVentaResource , self).get_object_list(request).filter(id__in = venta_usuario_sucursal)  
