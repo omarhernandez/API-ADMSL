@@ -592,8 +592,8 @@ class HistorialVentaResource(ModelResource):
 		resource_name = 'historialventa'
 		filtering = { 
 		
-		"sucursal" : ["exact"],
-		"usuario" : ["exact"],
+		"sucursal" : ALL_WITH_RELATIONS,
+		"usuario" : ALL_WITH_RELATIONS ,
 		"fecha" : ["lte","gte", "lt","gt"],
 		}
 
