@@ -621,8 +621,13 @@ class HistorialVentaResource(ModelResource):
 		try:
 			user_id =  int(request.GET.get('usuario')) 
 			venta_usuario_sucursal = VentaUsuarioSucursal.objects.filter( usuario_sucursal__usuario  = user_id)
-			print venta_usuario_sucursal
-			return venta.objects.all().order_by('-fecha').filter( id__in  =  venta_usuario_sucursal)
+			id_ventas = []
+
+
+			for ventas in venta_usuario_sucursal:
+				id_ventas.append( ventas.venta_id)
+				
+			return venta.objects.all().order_by('-fecha').filter( id__in  =  id_ventas)
 
 		except:
 
