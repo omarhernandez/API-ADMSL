@@ -1,4 +1,5 @@
 from django.db.models import Q , F
+import datetime
 from django.core import serializers
 import re 
 from tastypie import fields
@@ -207,7 +208,14 @@ class VentaResource(ModelResource):
 
 		bundle = self.full_hydrate(bundle)
 		productos = bundle.data["producto"]
+
+
 		bundle.obj.save()
+
+		print bundle.obj.folio
+		print bundle.obj.sucursal.nombre
+		bundle.obj.url_reporte = "{0}_{1}_{2}.pdf".format( bundle.obj.sucursal.nombre.lower().replace(" ","_") , datetime.datetime.utcnow().strftime('%m_%d_%Y') , bundle.obj.folio )
+
 
 		sucursal =   re.search('\/api\/v1\/sucursal\/(\d+)\/', str(bundle.data["sucursal"])).group(1)
 		sucursal = Sucursal.objects.filter(id = sucursal)
