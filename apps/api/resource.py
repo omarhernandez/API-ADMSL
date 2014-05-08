@@ -240,7 +240,7 @@ class VentaResource(ModelResource):
 		if id_cliente:
 
 			#objeto del cliente
-			obj_cliente  = ClienteDatos.objects.filter( id = id_cliente)
+			obj_cliente  = ClienteDatos.objects.filter( id = id_cliente)[0]
 			#se guarda la venta al cliente
 			VentaCliente.objects.create( cliente_datos = obj_cliente , venta = bundle.obj )
 
