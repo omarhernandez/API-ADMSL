@@ -640,12 +640,21 @@ class HistorialVentaResource(ModelResource):
 
 	def obj_get_list(self , bundle , **kwargs):
 
-		print bundle
 
 		request = bundle.request
-		print bundle
+		querystring_get = dict(bundle.request.GET.iterlists())
+
+
+
+
 		ventas = venta.objects.all().order_by('-fecha')
-		print request.GET.get("sucursal__in")
+
+		id_sucursal  = querystring_get["sucursal__in"] or False
+
+		if id_sucursal:
+
+			ventas = ventas.filter(sucursal__in = id_sucursal )
+
 
 		try:
 			user_id =  int(request.GET.get('usuario')) 
@@ -653,10 +662,10 @@ class HistorialVentaResource(ModelResource):
 			id_ventas = []
 
 
-			for ventas in venta_usuario_sucursal:
-				id_ventas.append( ventas.venta_id)
+			for ventas_el  in venta_usuario_sucursal:
+				id_ventas.append( ventas_el.venta_id)
 				
-			return venta.objects.all().order_by('-fecha').filter( id__in  =  id_ventas)
+			return ventas.filter( id__in  =  id_ventas)
 
 		except:
 
