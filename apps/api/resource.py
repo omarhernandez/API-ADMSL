@@ -226,9 +226,23 @@ class VentaResource(ModelResource):
 
 
 
-		#registro del usuario_sucursal que hizo la venta
+		#guarda el usuario_sucursal que hizo la venta
 		VentaUsuarioSucursal.objects.create( usuario_sucursal = current_user , venta = bundle.obj , nombre_usuario =  current_user.usuario.nombre  )
 
+		#se busca si la venta sera asignada aun cliente
+
+
+
+		#id del cliente obtenido por parametro en body JSON
+		id_cliente  = bundle.data["cliente"] or False
+
+		#si existe un id guardamos la venta al cliente
+		if id_cliente:
+
+			#objeto del cliente
+			obj_cliente  = ClienteDatos.objects.filter( id = id_cliente)
+			#se guarda la venta al cliente
+			VentaCliente.objects.create( cliente_datos = obj_cliente , venta = bundle.obj )
 
 
 		sucursal =   re.search('\/api\/v1\/sucursal\/(\d+)\/', str(bundle.data["sucursal"])).group(1)
