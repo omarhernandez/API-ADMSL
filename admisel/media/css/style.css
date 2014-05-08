@@ -73,4 +73,16 @@ div.container_notify .child{
            font-size: 12px;
 	       font-weight: normal;
 	           padding-left: 5px;
+
+
 }
+
+
+.verb {
+    color: #444444;
+        font-weight: normal;
+	    padding-left: 1px;
+	    }
+.actor {
+    color: #4183C4;
+    }

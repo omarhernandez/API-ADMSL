@@ -133,7 +133,7 @@ $(document).ready(function(){
 		activity = notify;
 
 		return  '<div class="child">'+
-			'<div class="sucursal_name"> '+ activity.sucursal.nombre+' <abbr class="timeago" title="'+activity.fecha+'"></abbr> </div>'+
+			'<div class="sucursal_name"> <span class="actor">'+ activity.sucursal.nombre+'</span><span class="verb"> hizo una venta </span> <abbr class="timeago" title="'+activity.fecha+'"></abbr> </div>'+
 			'<div class="activity"> Ha finalizado la venta con el folio : <strong class="folio_el">'+activity.folio+'</strong> </div>'+
 			'<div class="activity_report"> Total productos vendidos : <strong> '+activity.total_productos+'</strong> </div>'+
 			'<div class="activity_report"> Total : <strong> $'+activity.total+'</strong> </div>'+
