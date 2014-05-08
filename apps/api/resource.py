@@ -649,7 +649,10 @@ class HistorialVentaResource(ModelResource):
 
 		ventas = venta.objects.all().order_by('-fecha')
 
-		id_sucursal  = querystring_get["sucursal__in"] or False
+		try:
+			id_sucursal  = querystring_get["sucursal__in"] or False
+		except:
+			id_sucursal = False
 
 		if id_sucursal:
 
