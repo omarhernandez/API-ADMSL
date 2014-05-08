@@ -215,6 +215,21 @@ class VentaResource(ModelResource):
 		bundle.obj.save()
 
 
+		sucursal = bundle.obj.sucursal
+		qs_usuariosucursal_has_sucursal = UsuarioHasSucursal.objects.filter( Sucursal_id  = sucursal)[0]
+
+		#instancia de usuario
+		current_user = qs_usuariosucursal_has_sucursal 
+
+		#instancia de usuario has sucursal
+		current_user = UsuarioSucursal.objects.filter( usuario =  current_user )[0]
+
+
+
+		#registro del usuario_sucursal que hizo la venta
+		VentaUsuarioSucursal.objects.create( usuario_sucursal = current_user , venta = bundle.obj , nombre_usuario =  current_user.usuario.nombre  )
+
+
 
 		sucursal =   re.search('\/api\/v1\/sucursal\/(\d+)\/', str(bundle.data["sucursal"])).group(1)
 		sucursal = Sucursal.objects.filter(id = sucursal)
@@ -589,7 +604,6 @@ class HistorialVentaResource(ModelResource):
 
 	def dehydrate(self , bundle):
 
-		print bundle
 		id_current_obj = bundle.obj.id
 		try:
 			VentaUsuarioSucursalQS = VentaUsuarioSucursal.objects.filter( venta__id = id_current_obj)[0]
@@ -606,17 +620,18 @@ class HistorialVentaResource(ModelResource):
 		except :
 			bundle.data["nombre_comprador"] =  "publico"
 
-		print bundle
 
 
 		return bundle
 
 	def obj_get_list(self , bundle , **kwargs):
 
+		print bundle
+
 		request = bundle.request
-
+		print bundle
 		ventas = venta.objects.all().order_by('-fecha')
-
+		print request.GET.get("sucursal__in")
 
 		try:
 			user_id =  int(request.GET.get('usuario')) 
@@ -631,7 +646,7 @@ class HistorialVentaResource(ModelResource):
 
 		except:
 
-			return ventas 
+			return ventas
 	
 
 
