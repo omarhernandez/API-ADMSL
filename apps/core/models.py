@@ -140,7 +140,7 @@ class producto_has_rango(models.Model):
     producto = models.ForeignKey(Producto, db_column='Producto_id') # Field name made lowercase.
     rango = models.ForeignKey(Rango, db_column='rango') # Field name made lowercase.
     sucursal = models.ForeignKey(Sucursal, db_column='Sucursal_id') # Field name made lowercase.
-    costo = models.IntegerField(null=True, blank=True , db_column = "costo")
+    costo = models.FloatField(null=True, blank=True , db_column = "costo")
     class Meta:
         db_table = 'producto_has_rango'
 
