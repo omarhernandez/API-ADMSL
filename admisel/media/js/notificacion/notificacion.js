@@ -18,21 +18,32 @@ $(document).ready(function(){
 		success : function(data){
 
 
-			var last_folio = $(".str-activity").children().first().find(".folio_el").html() || "";
+			if ( data.length > 0 ){
+
+				var last_folio = $(".str-activity").children().first().find(".folio_el").html() || "";
 
 
-			if( LOAD_FIRST_TIME ){
-			//si es la primera vez que se carga el sitio etnonces se insertan todas las notificaciones
-				activity_admisel.render(data);
-				LOAD_FIRST_TIME = false;
-				setTimeout( GET_LAST_NOTIFY , 1000)
-				return true;
+				if( LOAD_FIRST_TIME ){
+				//si es la primera vez que se carga el sitio etnonces se insertan todas las notificaciones
+					activity_admisel.render(data);
+					LOAD_FIRST_TIME = false;
+					setTimeout( GET_LAST_NOTIFY , 1000)
+					return true;
 
-			}
+				}
 
-			if( last_folio != data.objects[0].folio && $(".str-activity").html() != "" ){
-			//si las nuevas ventas regresadas por AJAX tiene alguna venta no ingresada en el timeline entonces Agrega nueva venta al timeline...
-				activity_admisel.append_new_notify_one_by_one ( data.objects) ;
+				if( last_folio != data.objects[0].folio && $(".str-activity").html() != "" ){
+				//si las nuevas ventas regresadas por AJAX tiene alguna venta no ingresada en el timeline entonces Agrega nueva venta al timeline...
+					activity_admisel.append_new_notify_one_by_one ( data.objects) ;
+
+
+				}
+
+			}else{
+
+
+				var $node_activity = $(".loader");
+				$node_activity.html("<strong>No hay ventas en Admisel  <br> </br> <h1> :( </h1> </strong>"); //.slideUp('slow');
 
 
 			}
