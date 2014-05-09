@@ -140,7 +140,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'south',
+#    'south',
     'apps.core',
     'tastypie',
     'tastypie_swagger',
