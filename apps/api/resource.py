@@ -96,6 +96,7 @@ class ProductoResource(ModelResource):
 		filtering = {
 
 			"categoria" : ["exact"],
+			"codigo" : ["icontains", "iexact"],
 
 		}
 
