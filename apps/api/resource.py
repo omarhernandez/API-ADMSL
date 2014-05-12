@@ -535,8 +535,8 @@ class VentaClienteResource(ModelResource):
 
 class AsignacionSupervisorPlazaResource(ModelResource):
 
-	usuario = fields.ForeignKey("apps.api.resource.UsuarioResource", 'usuario'    ,  null = True )
-	sucursal  = fields.ForeignKey("apps.api.resource.SucursalResource", 'sucursal'    ,  null = True )
+	usuario = fields.ForeignKey("apps.api.resource.UsuarioResource", 'usuario'    ,  null = True, full = True )
+	sucursal  = fields.ForeignKey("apps.api.resource.SucursalSinInventarioResource", 'sucursal'    ,  null = True, full = True )
 	class Meta:
 		queryset = AsignacionSupervisorPlaza.objects.all()
 		resource_name ='asignacionsupervisorplaza'
