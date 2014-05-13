@@ -174,18 +174,21 @@ class InventarioResource(ModelResource):
 		always_return_data = True
 		resource_name = 'inventario'
 		filtering = {
-			  	"sucursal" : ["exact"],
-			  	"codigo" : ["iexact"]
+			  	"sucursal" : ["exact"]
 			  }
 		authorization= Authorization()
 
 	def obj_get_list(self , bundle , **kwargs):
 
-
 		request = bundle.request
+
 		querystring_get = dict(bundle.request.GET.iterlists())
 
 		inventario_g = inventario.objects.all()
+
+		if request.method == 'POST':
+			return inventario_g
+
 
 		try:
 			codigo = querystring_get["codigo"] or False
