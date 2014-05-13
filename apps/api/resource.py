@@ -178,39 +178,6 @@ class InventarioResource(ModelResource):
 			  }
 		authorization= Authorization()
 
-	def obj_get_list(self , bundle , **kwargs):
-
-		request = bundle.request
-
-		querystring_get = dict(bundle.request.GET.iterlists())
-
-		inventario_g = inventario.objects.all()
-
-		if request.method == 'POST':
-			return inventario_g
-
-
-		try:
-			codigo = querystring_get["codigo"] or False
-		except:
-			codigo = False
-
-		if codigo :
-
-			inventario_g = inventario_g.filter(producto__codigo__iexact  = codigo[0] )
-
-		try:
-			id_sucursal =  int(request.GET.get('sucursal')) 
-			return  inventario_g.filter( sucursal = id_sucursal)
-			
-			#return inventario_g.filter( id__in  =  id_inventario_g_sucursal)
-
-		except:
-
-			return inventario_g 
-	
-
-
 
 class VentaResource(ModelResource):
 	""" venta de una sucursal."""
