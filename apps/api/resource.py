@@ -1,3 +1,4 @@
+#encoding:utf-8
 from django.db.models import Q , F
 import unicodedata
 import datetime
@@ -185,7 +186,6 @@ class InventarioResource(ModelResource):
 
 	def dehydrate(self , bundle ): 
 
-		print bundle
 
 		obj_producto = producto_has_rango.objects.filter( Q( sucursal = bundle.obj.sucursal ) , Q( producto = bundle.obj.producto) )
 		producto_rango = []
@@ -277,7 +277,17 @@ class VentaResource(ModelResource):
 
 		t = datetime.datetime.utcnow().strftime('%m_%d_%Y')
 
-		name_utf8_decoded = unicodedata.normalize('NFKD', unicode(bundle.obj.sucursal.nombre.lower().decode('utf-8') ) ).encode('ascii', 'ignore')
+		#print unicode(bundle.obj.sucursal.nombre.lower().decode('utf-8') )
+
+
+		name_sucursal = unicode(bundle.obj.sucursal.nombre.lower() )
+		name_sucursal = unicodedata.normalize('NFKD', unicode(name_sucursal) ).encode('ascii', 'ignore').replace(" ","_").lower()
+		
+
+
+
+		name_utf8_decoded = name_sucursal #unicodedata.normalize('NFKD', unicode(bundle.obj.sucursal.nombre.lower().decode('utf-8') ) ).encode('ascii', 'ignore')
+
 
 
 		bundle.obj.url_reporte = "{0}_{1}_.pdf".format( name_utf8_decoded , datetime.datetime.utcnow().strftime('%m_%d_%Y_%s') )
@@ -757,5 +767,6 @@ class UsuarioSucursalResource(ModelResource):
 		queryset = UsuarioSucursal.objects.all()
 		resource_name ='usuariosucursal'
 		authorization= Authorization()
+
 
 
