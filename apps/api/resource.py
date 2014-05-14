@@ -451,6 +451,13 @@ class ClienteReporteResource(ModelResource):
 		resource_name = 'reportecliente'
 		authorization= Authorization()
 
+		filtering  = {
+
+			"nombre"  : ["icontains"],
+
+				}
+
+
 
 
 
