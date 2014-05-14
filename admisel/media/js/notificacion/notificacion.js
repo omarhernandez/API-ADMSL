@@ -17,8 +17,6 @@ $(document).ready(function(){
 		//beforeSend : function(){ synchronized = true; },
 		success : function(data){
 
-			console.log(data)
-
 
 			if ( data.objects.length > 0 ){
 
