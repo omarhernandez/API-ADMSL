@@ -412,6 +412,48 @@ class ClienteFacturacionResource(ModelResource):
 		resource_name = 'clientefacturacion'
 		authorization= Authorization()
 
+#************************************************************************************************************
+#*********************************************Cliente Facturacion sin relacion ******************************
+#************************************************************************************************************
+
+
+class ClienteFacturacionSinRelacionResource(ModelResource):
+
+	cliente_datos = fields.ForeignKey(ClienteResource, 'cliente_datos'    , full = False , null = True )
+	class Meta:
+		queryset = ClienteFacturacion.objects.all()
+		resource_name = 'clientefacturacion'
+		authorization= Authorization()
+
+
+
+#************************************************************************************************************
+#*********************************************Cliente Reporte  **********************************
+#************************************************************************************************************
+
+
+class ClienteReporteResource(ModelResource):
+
+	sucursal = fields.ForeignKey(SucursalResource , 'sucursal'    , full = False , null = True )
+	usuario_creador = fields.ForeignKey("api.resource.UsuarioResource", 'Usuario'    , full = False , null = True )
+
+	
+	cliente_datos_facturacion= fields.ToManyField('apps.api.resource.ClienteFacturacionSinRelacionResource',  
+	 	
+			attribute = lambda bundle:      ClienteFacturacion.objects.filter(cliente_datos = bundle.obj)
+	  		
+		, null = True , full = True		)    
+
+
+
+	class Meta:
+		queryset = ClienteDatos.objects.all().order_by("-fecha")
+		resource_name = 'reportecliente'
+		authorization= Authorization()
+
+
+
+
 
 
 #************************************************************************************************************

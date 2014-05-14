@@ -24,6 +24,7 @@ v1_api.register(AsignacionSupervisorPlazaResource())
 v1_api.register(VentaPublicoResource())
 v1_api.register(HistorialVentaResource())
 v1_api.register(VentaUsuarioSucursalResource())
+v1_api.register(ClienteReporteResource())
 #v1_api.register(VentaHasProductoResource())
 
 
