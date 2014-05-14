@@ -161,11 +161,11 @@ class InventarioResource(ModelResource):
 	sucursal = fields.ForeignKey(SucursalResource, 'sucursal'     )
 	producto = fields.ForeignKey(ProductoResource, 'producto' , full = True     )
 
-	producto_has_rango  = fields.ToManyField('apps.api.resource.ProductoHasRangoesource',  
-	 	
-			attribute = lambda bundle: producto_has_rango.objects.filter(Q(sucursal = bundle.obj.sucursal) , Q( producto = bundle.obj.producto) )
-	  		
-		, null = True , full = True		)    
+
+#	producto_has_rango  = fields.ToManyField('apps.api.resource.ProductoHasRangoesource',  
+#			attribute = lambda bundle: producto_has_rango.objects.filter(Q(sucursal = bundle.obj.sucursal) , Q( producto = bundle.obj.producto) )
+#		, null = True , full = True		)    
+
 
 
 
@@ -177,6 +177,65 @@ class InventarioResource(ModelResource):
 			  	"sucursal" : ["exact"]
 			  }
 		authorization= Authorization()
+
+	def dehydrate(self , bundle ): 
+
+		print bundle
+
+		obj_producto = producto_has_rango.objects.filter( Q( sucursal = bundle.obj.sucursal ) , Q( producto = bundle.obj.producto) )
+		producto_rango = []
+
+		for rango_producto in obj_producto:
+			producto_rango.append({ "id":  rango_producto.id  , "costo" : rango_producto.costo  ,  "producto" : "/api/v1/producto/{0}/".format( rango_producto.producto.id ) ,
+						"rango" : { 
+
+							"id" : rango_producto.rango.id,
+							"resource_uri" : "/api/v1/rango/{0}/".format(rango_producto.rango.id),
+							"max" :  rango_producto.rango.max,
+							"min" :  rango_producto.rango.min,
+							 
+							} , 
+						        "resource_uri" : "/api/v1/producto_has_rango/{0}/".format(rango_producto.id),
+						        "sucursal": "/api/v1/sucursal/{0}/".format(rango_producto.sucursal.id)
+						})
+
+		bundle.data["producto_has_rango"] = producto_rango
+
+
+		return bundle
+
+	def obj_get_list(self , bundle , **kwargs):
+
+		request = bundle.request
+
+		querystring_get = dict(bundle.request.GET.iterlists())
+
+		inventario_g = inventario.objects.all()
+
+		if request.method == 'POST':
+			return inventario_g
+
+
+		try:
+			codigo = querystring_get["codigo"] or False
+		except:
+			codigo = False
+
+		if codigo :
+
+			inventario_g = inventario_g.filter(producto__codigo__iexact  = codigo[0] )
+
+		try:
+			id_sucursal =  int(request.GET.get('sucursal')) 
+			return  inventario_g.filter( sucursal = id_sucursal)
+			
+			#return inventario_g.filter( id__in  =  id_inventario_g_sucursal)
+
+		except:
+
+			return inventario_g 
+	
+
 
 
 class VentaResource(ModelResource):
