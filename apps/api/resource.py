@@ -118,6 +118,10 @@ class SucursalResource(ModelResource):
 		resource_name = 'sucursal'
 		authorization= Authorization()
 
+		filtering = {
+				"nombre" : ["icontains"]
+			    }
+
 
 #************************************************************************************************************
 #*********************************************Rango ******************************************************
