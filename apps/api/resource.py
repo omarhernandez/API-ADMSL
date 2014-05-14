@@ -1,4 +1,5 @@
 from django.db.models import Q , F
+import unicodedata
 import datetime
 from django.core import serializers
 import re 
@@ -275,7 +276,11 @@ class VentaResource(ModelResource):
 
 
 		t = datetime.datetime.utcnow().strftime('%m_%d_%Y')
-		bundle.obj.url_reporte = "{0}_{1}_.pdf".format( bundle.obj.sucursal.nombre.lower().replace(" ","_") , datetime.datetime.utcnow().strftime('%m_%d_%Y_%s') )
+
+		name_utf8_decoded = unicodedata.normalize('NFKD', unicode(bundle.obj.sucursal.nombre.lower().decode('utf-8') ) ).encode('ascii', 'ignore')
+
+
+		bundle.obj.url_reporte = "{0}_{1}_.pdf".format( name_utf8_decoded , datetime.datetime.utcnow().strftime('%m_%d_%Y_%s') )
 		bundle.obj.save()
 
 
