@@ -49,6 +49,8 @@ class ClienteDatos(models.Model):
     municipio = models.CharField(max_length=45L, blank=True)
     sucursal = models.ForeignKey(Sucursal, db_column='sucursal') # Field name made lowercase.
     descuentos = models.CharField(max_length=45L, blank=True)
+    fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
+    usuario_creador = models.ForeignKey('Usuario' , db_column = "usuario_creador")
     class Meta:
         db_table = 'cliente_datos'
 

@@ -383,6 +383,7 @@ class ClienteResource(ModelResource):
 
 	#cliente_facturacion = fields.ForeignKey(ClienteFacturacionResource , 'cliente_facturacion'    , full = True , null = True )
 	sucursal = fields.ForeignKey(SucursalResource , 'sucursal'    , full = False , null = True )
+	usuario_creador = fields.ForeignKey("api.resource.UsuarioResource", 'Usuario'    , full = False , null = True )
 	class Meta:
 		queryset = ClienteDatos.objects.all()
 		resource_name = 'cliente'
