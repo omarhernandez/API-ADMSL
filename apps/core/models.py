@@ -224,3 +224,15 @@ class VentaUsuarioSucursal(models.Model):
 		db_table = 'venta_usuario_sucursal'
 
 
+class Cambio(models.Model):
+
+    	sucursal = models.ForeignKey(Sucursal, db_column='sucursal') # Field name made lowercase.
+	folio_ticket = models.CharField(max_length=145L)
+    	fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
+	modelo_entrada = models.CharField(max_length=45L)
+	modelo_salida = models.CharField(max_length=45L)
+	diferencia_precio = models.FloatField()
+	motivo_cambio = models.TextField()
+	
+	class Meta:
+		db_table = 'cambio'

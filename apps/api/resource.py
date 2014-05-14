@@ -819,3 +819,31 @@ class UsuarioSucursalResource(ModelResource):
 
 
 
+
+#************************************************************************************************************
+#********************************************* reporte cambio  ***********************************************
+#************************************************************************************************************
+
+
+
+
+class CambioResource(ModelResource):
+	""" Reporte de los cambios realizados en la sucursales """
+
+	sucursal = fields.ForeignKey(SucursalSinInventarioResource , 'sucursal' , full = True     )
+
+	
+	class Meta:
+		allowed_methods = ['get' , 'post' ]		
+		queryset = Cambio.objects.all().order_by('-fecha') 
+		resource_name = 'productocambio'
+		filtering = { 
+		
+		"sucursal" : ALL_WITH_RELATIONS,
+		"fecha" : ["lte","gte", "lt","gt"],
+
+		}
+
+		authorization= Authorization()
+
+
