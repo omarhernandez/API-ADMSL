@@ -277,9 +277,6 @@ class VentaResource(ModelResource):
 
 		t = datetime.datetime.utcnow().strftime('%m_%d_%Y')
 
-		#print unicode(bundle.obj.sucursal.nombre.lower().decode('utf-8') )
-
-
 		name_sucursal = unicode(bundle.obj.sucursal.nombre.lower() )
 		name_sucursal = unicodedata.normalize('NFKD', unicode(name_sucursal) ).encode('ascii', 'ignore').replace(" ","_").lower()
 		
@@ -451,11 +448,8 @@ class LoginResource(ModelResource):
 
 		user_exist = Usuario.objects.filter( Q(email = get_email ) , Q(password = get_password))
 
-
-
-
-
 		if user_exist:
+
 			
 			bundle.data["loggin"] = True
 			bundle.data["message"] = "201"
@@ -482,6 +476,8 @@ class LoginResource(ModelResource):
 				bundle.data["sucursal"]["resource_uri"] =   "api/v1/sucursal/{0}/".format( current_obj_sucursal_.id )
 			
 	 	
+			if user_exist[0].rol == "supervisor":
+				bundle.data["rol"] = "supervisor"
 		else:
 
 			bundle.data["loggin"] = False
