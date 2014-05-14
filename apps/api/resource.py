@@ -455,6 +455,9 @@ class ClienteReporteResource(ModelResource):
 
 			"nombre"  : ["icontains"],
 
+			 "fecha" : ["lte","gte", "lt","gt"],
+
+
 				}
 
 
