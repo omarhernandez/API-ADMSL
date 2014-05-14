@@ -17,8 +17,10 @@ $(document).ready(function(){
 		//beforeSend : function(){ synchronized = true; },
 		success : function(data){
 
+			console.log(data)
 
-			if ( data.length > 0 ){
+
+			if ( data.objects.length > 0 ){
 
 				var last_folio = $(".str-activity").children().first().find(".folio_el").html() || "";
 
