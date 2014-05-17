@@ -12,6 +12,9 @@ class CategoriaProducto(models.Model):
 #    access = models.CharField(max_length=45L, blank=True)
 #    class Meta:#        db_table = 'Logged'
 
+
+
+
 class Producto(models.Model):
     categoria_producto = models.ForeignKey(CategoriaProducto, db_column='categoria_producto') # Field name made lowercase.
     codigo = models.CharField(max_length=45L, blank=True)
@@ -236,3 +239,20 @@ class Cambio(models.Model):
 	
 	class Meta:
 		db_table = 'cambio'
+
+
+class AjusteInventario(models.Model):
+    codigo = models.CharField(max_length=45L)
+    sucursal = models.ForeignKey(Sucursal ,db_column = "sucursal") # Field name made lowercase.
+    costo_publico = models.FloatField()
+    faltante = models.IntegerField()
+    sobrante = models.IntegerField()
+    sistema = models.IntegerField()
+    fisico = models.IntegerField()
+    usuario = models.ForeignKey(Usuario , db_column = "usuario")
+    fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
+    class Meta:
+        db_table = 'ajuste_inventario'
+
+
+

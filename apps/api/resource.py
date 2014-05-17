@@ -1,5 +1,6 @@
 #encoding:utf-8
 from django.db.models import Q , F
+from tastypie.exceptions import * 
 import unicodedata
 import datetime
 from django.core import serializers
@@ -845,5 +846,91 @@ class CambioResource(ModelResource):
 		}
 
 		authorization= Authorization()
+
+
+#************************************************************************************************************
+#********************************************* Ajuste Inventario ***********************************************
+#************************************************************************************************************
+
+
+
+
+class AjusteInventarioResource(ModelResource):
+	"""Ajuste de un inventario en una sucursal realizado por un supervisor"""
+
+	sucursal = fields.ForeignKey(SucursalSinInventarioResource , 'sucursal' , full = True, null = False )
+	usuario = fields.ForeignKey(UsuarioResource, 'usuario' , full = False)
+
+	
+	class Meta:
+		always_return_data = True
+		allowed_methods = ['get' , 'post' ]		
+		#excludes = ["sobrante", "faltante" , "fecha" ,  "sistema" , "costo_publico"]
+		queryset = AjusteInventario.objects.all().order_by('-fecha') 
+		resource_name = 'ajusteinventario'
+		filtering = { 
+		
+		"sucursal" : ALL_WITH_RELATIONS,
+		"fecha" : ["lte","gte", "lt","gt"],
+
+		}
+
+		authorization= Authorization()
+	
+
+	def obj_create(self, bundle, request=None, **kwargs): 
+		""" Se hace un ajuste de inventario """
+
+		try:
+			bundle = self.full_hydrate(bundle)
+			codigo = bundle.data["codigo"]
+			fisico = int(bundle.data["fisico"] )
+
+			sucursal_ =   re.search('\/api\/v1\/sucursal\/(\d+)\/', str(bundle.data["sucursal"])).group(1)
+			usuario = re.search('\/api\/v1\/usuario\/(\d+)\/', str(bundle.data["usuario"])).group(1)
+
+			#obtenemos el producto filtrado por la sucursal y el codigo exacto ignoring case 
+
+			current_product = inventario.objects.filter( Q(producto__codigo__iexact = codigo ) , Q(sucursal__id   = sucursal_ ) )[0]
+
+			#cantidad en el sistema
+			existencia_current_product_in_system = int(current_product.existencia)
+			bundle.obj.sistema = existencia_current_product_in_system
+
+			#productos faltantes
+			faltante = ( existencia_current_product_in_system - fisico ) 
+			bundle.obj.faltante = faltante 
+
+
+			sobrante = ( fisico - existencia_current_product_in_system)
+			# si hay productos sobrantes
+			if  sobrante > 0:
+
+				bundle.obj.sobrante = sobrante 
+			else:
+
+				bundle.obj.sobrante = 0
+
+			if faltante > 0 :
+
+				current_rango = producto_has_rango.objects.filter( producto =   current_product , rango__min = 1, rango__max = 1 , sucursal  = bundle.obj.sucursal )[0]
+				deuda = current_rango.costo * faltante
+
+				bundle.obj.costo_publico = deuda
+			else:
+				bundle.obj.costo_publico = 0L
+
+			bundle.obj.save()
+
+			return bundle
+
+		except:
+			raise NotFound("Error al intentar hacer el ajuste, verifica el codigo del producto, id sucursal , id_usuario")
+			return bundle
+
+
+
+		
+
 
 
