@@ -258,7 +258,7 @@ class VentaResource(ModelResource):
 	class Meta:
 		queryset = venta.objects.all()
 		resource_name = 'venta'
-		filtering = { "sucursal" : ["exact"] }
+		filtering = { "sucursal" : ["exact"] , "folio" : ["exact"] }
 		authorization= Authorization()
 		always_return_data = True
 
