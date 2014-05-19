@@ -121,6 +121,7 @@ class venta_has_producto(models.Model):
     venta = models.ForeignKey(venta, db_column='Venta_id') # Field name made lowercase.
     producto = models.ForeignKey(Producto, db_column='Producto_id') # Field name made lowercase.
     cantidad = models.IntegerField(null=True, blank=True , db_column = "cantidad")
+    costo_por_producto = models.FloatField(null=True, blank=True , db_column = "costo_por_producto")
 
     class Meta:
         db_table = 'venta_has_producto' 

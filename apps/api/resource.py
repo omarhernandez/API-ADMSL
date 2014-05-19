@@ -324,19 +324,33 @@ class VentaResource(ModelResource):
 
 		sucursal =   re.search('\/api\/v1\/sucursal\/(\d+)\/', str(bundle.data["sucursal"])).group(1)
 		sucursal = Sucursal.objects.filter(id = sucursal)
+
+		range_products_by_sucursal = producto_has_rango.objects.filter(sucursal =  sucursal )
+
+
+		
 		for producto in productos:
 
 			id_producto =   re.search('\/api\/v1\/producto\/(\d+)\/', str(producto["producto"])).group(1)
 			id_producto = Producto.objects.filter(id = id_producto)[0]
-
 			cantidad = producto["cantidad"]
 
 			
 			#decuenta el producto en venta al inventario de la sucursal actual
 			inventario.objects.filter ( producto = id_producto , sucursal = sucursal ).update(existencia = F("existencia") - cantidad )
 
+			#se busca el precio del control conforme al rango en el que se encuentre, este valor de guarda en venta_has_producto, que es a que precio se adquirio el producto
+			for product_range in range_products_by_sucursal:
+
+
+				if  product_range.rango.min <= cantidad  and cantidad <= product_range.rango.max and product_range.producto.id == id_producto.id :
+
+					cantidad_en_rango  = product_range.costo
+					break
+
+
 			#guarda los productos dentro de la venta
-			venta_has_producto.objects.create( venta = bundle.obj , producto = id_producto , cantidad = cantidad ) 
+			venta_has_producto.objects.create( venta = bundle.obj , producto = id_producto , cantidad = cantidad , costo_por_producto = cantidad_en_rango ) 
 
 
 		return bundle
