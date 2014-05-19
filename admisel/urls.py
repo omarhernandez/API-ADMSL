@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, include, url
 from django.conf import settings
-from apps.api.urls import v1_api
+from apps.api.urls import * 
 
 urlpatterns = patterns('',
 

@@ -944,7 +944,38 @@ class AjusteInventarioResource(ModelResource):
 
 
 
+#************************************************************************************************************
+#********************************************* reporte Inventario Existencias  ***********************************************
+#************************************************************************************************************
+
+
 		
 
+class ReporteInventarioResource(ModelResource):
+	""" Inventario de una sucursal."""
 
+	sucursal = fields.ForeignKey(SucursalResource, 'sucursal'  )
+	producto = fields.ForeignKey(ProductoResource, 'producto' , null = True )
+
+
+
+	class Meta:
+		queryset =  inventario.objects.all()
+		allowed_methods = ['get' ]		
+		resource_name = 'reporteinventario'
+		filtering = {
+			  	"sucursal" : ["exact"],
+			  	"producto" : ["exact"],
+			  }
+		authorization= Authorization()
+	
+	def dehydrate(self , bundle):
+		bundle.data["sucursal_codigo"] = bundle.obj.sucursal.almacen_admipaq
+		return bundle
+
+
+
+	#def alter_list_data_to_serialize(self, request, data):
+	#	inv = inventario.objects.all().values("sucursal","existencia","sucursal__almacen_admipaq").distinct()
+	#	return data
 
