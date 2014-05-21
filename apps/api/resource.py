@@ -952,7 +952,7 @@ class AjusteInventarioResource(ModelResource):
 		
 
 class ReporteInventarioResource(ModelResource):
-	""" Inventario de una sucursal."""
+	""" Existencia de productos en Inventario de una sucursal."""
 
 	sucursal = fields.ForeignKey(SucursalResource, 'sucursal'  )
 	producto = fields.ForeignKey(ProductoResource, 'producto' , null = True )
@@ -962,7 +962,7 @@ class ReporteInventarioResource(ModelResource):
 	class Meta:
 		queryset =  inventario.objects.all()
 		allowed_methods = ['get' ]		
-		resource_name = 'reporteinventario'
+		resource_name = 'reporteexistencia'
 		filtering = {
 			  	"sucursal" : ["exact"],
 			  	"producto" : ["exact"],
