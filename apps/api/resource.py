@@ -955,7 +955,7 @@ class ReporteInventarioResource(ModelResource):
 	""" Existencia de productos en Inventario de una sucursal."""
 
 	sucursal = fields.ForeignKey(SucursalResource, 'sucursal'  )
-	producto = fields.ForeignKey(ProductoResource, 'producto' , null = True )
+	producto = fields.ForeignKey(ProductoResource, 'producto' , null = True, full = True )
 
 
 
@@ -971,6 +971,7 @@ class ReporteInventarioResource(ModelResource):
 	
 	def dehydrate(self , bundle):
 		bundle.data["sucursal_codigo"] = bundle.obj.sucursal.almacen_admipaq
+		bundle.data["sucursal_nombre"] = bundle.obj.sucursal.nombre
 		return bundle
 
 
