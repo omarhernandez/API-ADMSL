@@ -1,4 +1,5 @@
 #encoding:utf-8
+from tastypie.authentication import BasicAuthentication
 from django.db.models import Q , F
 from tastypie.exceptions import * 
 import unicodedata
@@ -856,6 +857,7 @@ class CambioResource(ModelResource):
 		
 		"sucursal" : ALL_WITH_RELATIONS,
 		"fecha" : ["lte","gte", "lt","gt"],
+		"modelo_entrada" : ["icontains","iexact"],
 
 		}
 
@@ -967,7 +969,8 @@ class ReporteInventarioResource(ModelResource):
 			  	"sucursal" : ["exact"],
 			  	"producto" : ["exact"],
 			  }
-		authorization= Authorization()
+		#authorization= Authorization()
+		authorization= BasicAuthentication()
 	
 	def dehydrate(self , bundle):
 		bundle.data["sucursal_codigo"] = bundle.obj.sucursal.almacen_admipaq
