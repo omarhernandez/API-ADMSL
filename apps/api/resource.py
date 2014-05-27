@@ -969,8 +969,8 @@ class ReporteInventarioResource(ModelResource):
 			  	"sucursal" : ["exact"],
 			  	"producto" : ["exact"],
 			  }
-		#authorization= Authorization()
-		authorization= BasicAuthentication()
+		authorization= Authorization()
+		#authorization= BasicAuthentication()
 	
 	def dehydrate(self , bundle):
 		bundle.data["sucursal_codigo"] = bundle.obj.sucursal.almacen_admipaq
