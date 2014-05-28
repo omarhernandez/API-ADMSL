@@ -334,7 +334,7 @@ class VentaResource(ModelResource):
 
 			id_producto =   re.search('\/api\/v1\/producto\/(\d+)\/', str(producto["producto"])).group(1)
 			id_producto = Producto.objects.filter(id = id_producto)[0]
-			cantidad = producto["cantidad"]
+			cantidad = int(producto["cantidad"])
 
 			
 			#decuenta el producto en venta al inventario de la sucursal actual
