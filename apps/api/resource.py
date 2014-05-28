@@ -344,10 +344,13 @@ class VentaResource(ModelResource):
 			for product_range in range_products_by_sucursal:
 
 
-				if  product_range.rango.min <= cantidad  and cantidad <= product_range.rango.max and product_range.producto.id == id_producto.id :
+				try:
+					if  product_range.rango.min <= cantidad  and cantidad <= product_range.rango.max and product_range.producto.id == id_producto.id :
 
-					cantidad_en_rango  = product_range.costo
-					break
+						cantidad_en_rango  = product_range.costo
+						break
+				except:
+					raise NotFound("Error en rango, verifica que el producto tenga asignados todos los rangos")
 
 
 			#guarda los productos dentro de la venta
