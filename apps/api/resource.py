@@ -341,6 +341,7 @@ class VentaResource(ModelResource):
 			inventario.objects.filter ( producto = id_producto , sucursal = sucursal ).update(existencia = F("existencia") - cantidad )
 
 			#se busca el precio del control conforme al rango en el que se encuentre, este valor de guarda en venta_has_producto, que es a que precio se adquirio el producto
+			cantidad_en_rango = 0L
 			for product_range in range_products_by_sucursal:
 
 
@@ -354,7 +355,10 @@ class VentaResource(ModelResource):
 
 
 			#guarda los productos dentro de la venta
-			venta_has_producto.objects.create( venta = bundle.obj , producto = id_producto , cantidad = cantidad , costo_por_producto = cantidad_en_rango ) 
+			try:
+				venta_has_producto.objects.create( venta = bundle.obj , producto = id_producto , cantidad = cantidad , costo_por_producto = cantidad_en_rango ) 
+			except:
+				raise NotFound("Error en rango, verifica que el producto tenga asignados todos los rangos")
 
 
 		return bundle
