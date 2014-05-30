@@ -519,6 +519,7 @@ class LoginResource(ModelResource):
 	def dehydrate(self , bundle ):
 
 		del bundle.data["resource_uri"]
+		print bundle
 		get_email= bundle.request.GET.get("email") or False
 		get_password = unicode(bundle.request.GET.get("password"))
 
@@ -527,9 +528,11 @@ class LoginResource(ModelResource):
 		if user_exist:
 
 			
+			bundle.data["usuario_resource_uri"] = "api/v1/usuario/{0}/".format( user_exist[0].id )
 			bundle.data["loggin"] = True
 			bundle.data["message"] = "201"
 			bundle.data["nombre"] = user_exist[0].nombre
+
 			if user_exist[0].rol == "sucursal":
 				#bundle.data["info"] = UsuarioSucursal.objects.filter ( usuario = user_exist ) 
 				UsuarioSucursalResponse = UsuarioSucursal.objects.filter ( usuario = user_exist )
