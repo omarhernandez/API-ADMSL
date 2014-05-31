@@ -166,7 +166,7 @@ class ProductoHasRangoesource(ModelResource):
 class InventarioResource(ModelResource):
 	""" Inventario de una sucursal."""
 
-	sucursal = fields.ForeignKey(SucursalResource, 'sucursal'     )
+	sucursal = fields.ForeignKey("apps.api.resource.SucursalSinInventarioResource" , 'sucursal' , full = True     )
 	producto = fields.ForeignKey(ProductoResource, 'producto' , full = True     )
 
 
@@ -393,7 +393,6 @@ class VentaHasProductoResource(ModelResource):
 		#queryset = SucursalInventario.objects.all()
 		#resource_name = 'adminproductos'
 		#authorization= Authorization()
-
 
 
 
