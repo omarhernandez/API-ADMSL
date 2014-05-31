@@ -294,10 +294,12 @@ class VentaResource(ModelResource):
 
 
 		sucursal = bundle.obj.sucursal
+
 		qs_usuariosucursal_has_sucursal = UsuarioHasSucursal.objects.filter( Sucursal_id  = sucursal)[0]
+		current_user = qs_usuariosucursal_has_sucursal.usuario
 
 		#instancia de usuario
-		current_user = qs_usuariosucursal_has_sucursal 
+		#current_user = qs_usuariosucursal_has_sucursal 
 
 		#instancia de usuario has sucursal
 		current_user = UsuarioSucursal.objects.filter( usuario =  current_user )[0]
