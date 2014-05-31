@@ -409,7 +409,7 @@ class ClienteResource(ModelResource):
 	usuario_creador = fields.ForeignKey("apps.api.resource.UsuarioResource", 'usuario_creador'    , full = False , null = True )
 	class Meta:
 
-		allowed_methods = ['get',"post" ]		
+		allowed_methods = ['get',"post" ,"put" ]		
 		queryset = ClienteDatos.objects.all()
 		resource_name = 'cliente'
 		always_return_data = True
