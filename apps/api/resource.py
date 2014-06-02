@@ -338,9 +338,19 @@ class VentaResource(ModelResource):
 			id_producto = Producto.objects.filter(id = id_producto)[0]
 			cantidad = int(producto["cantidad"])
 
-			
 			#decuenta el producto en venta al inventario de la sucursal actual
-			inventario.objects.filter ( producto = id_producto , sucursal = sucursal ).update(existencia = F("existencia") - cantidad )
+
+			existencia_producto_inventario = inventario.objects.filter ( producto = id_producto , sucursal = sucursal ).values("existencia")[0]["existencia"]
+
+			nueva_existencia = (existencia_producto_inventario  - cantidad)
+
+			inventario.objects.filter ( producto = id_producto , sucursal = sucursal ).update(existencia =   nueva_existencia  )
+	
+			#guardamos la venta en el kardex
+			Kardex.objects.create( folio = bundle.obj.folio , sucursal = sucursal[0] , tipo_registro = "TICKET" , inventario_inicial = 0L , 
+						entradas = 0L , salidas = cantidad, existencia = existencia_producto_inventario , descripcion = "venta en sucursal" , producto = id_producto )
+
+					
 
 			#se busca el precio del control conforme al rango en el que se encuentre, este valor de guarda en venta_has_producto, que es a que precio se adquirio el producto
 			cantidad_en_rango = 0L
@@ -537,7 +547,6 @@ class LoginResource(ModelResource):
 	def dehydrate(self , bundle ):
 
 		del bundle.data["resource_uri"]
-		print bundle
 		get_email= bundle.request.GET.get("email") or False
 		get_password = unicode(bundle.request.GET.get("password"))
 
@@ -899,8 +908,11 @@ class CambioResource(ModelResource):
 
 
 
-class AjusteInventarioResource(ModelResource):
-	"""Ajuste de un inventario en una sucursal realizado por un supervisor"""
+class ReporteAjusteInventarioResource(ModelResource):
+	"""Reporte en Administrador/supervisor : Consume la informacion del inventario que las sucursales hacen semanalmente
+	  Sucursales : Ingresan el inventario semanalmente por producto
+	
+	"""
 
 	sucursal = fields.ForeignKey(SucursalSinInventarioResource , 'sucursal' , full = True, null = False )
 	usuario = fields.ForeignKey(UsuarioResource, 'usuario' , full = False)
@@ -911,7 +923,7 @@ class AjusteInventarioResource(ModelResource):
 		allowed_methods = ['get' , 'post' ]		
 		#excludes = ["sobrante", "faltante" , "fecha" ,  "sistema" , "costo_publico"]
 		queryset = AjusteInventario.objects.all().order_by('-fecha') 
-		resource_name = 'ajusteinventario'
+		resource_name = 'reporteinventario'
 		filtering = { 
 		
 		"sucursal" : ALL_WITH_RELATIONS,
@@ -1010,4 +1022,38 @@ class ReporteInventarioResource(ModelResource):
 	#def alter_list_data_to_serialize(self, request, data):
 	#	inv = inventario.objects.all().values("sucursal","existencia","sucursal__almacen_admipaq").distinct()
 	#	return data
+
+
+
+
+
+
+
+#************************************************************************************************************
+#*********************************************Reporte Inventario General  **********************************
+#************************************************************************************************************
+
+
+class KardexResource(ModelResource):
+	""" Kardex : este se puede usar en la seccion de inventario general ."""
+
+	sucursal = fields.ForeignKey("apps.api.resource.SucursalSinInventarioResource" , 'sucursal' , full = True     )
+	producto = fields.ForeignKey(ProductoResource, 'producto' , full = True     )
+
+
+	class Meta:
+		allowed_methods = ["get"]
+		queryset = Kardex.objects.all()
+		always_return_data = True
+		resource_name = 'kardex'
+		filtering = {
+			  	"sucursal" : ["exact"],
+			  	"producto" : ["exact"],
+			  }
+		authorization= Authorization()
+
+	def dehydrate(self , bundle ): 
+
+
+		return bundle
 

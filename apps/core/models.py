@@ -257,3 +257,20 @@ class AjusteInventario(models.Model):
 
 
 
+
+
+class Kardex(models.Model):
+
+    	fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
+	folio = models.IntegerField()
+    	sucursal = models.ForeignKey(Sucursal, db_column='sucursal') # Field name made lowercase.
+	tipo_registro = models.CharField(max_length=45L)
+	inventario_inicial = models.IntegerField()
+	entradas = models.IntegerField()
+	salidas = models.IntegerField()
+	existencia = models.IntegerField()
+	descripcion = models.TextField()
+    	producto = models.ForeignKey(Producto, db_column='producto') # Field name made lowercase.
+
+	class Meta:
+		db_table = 'kardex'

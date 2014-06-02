@@ -26,8 +26,9 @@ v1_api.register(HistorialVentaResource())
 v1_api.register(VentaUsuarioSucursalResource())
 v1_api.register(ClienteReporteResource())
 v1_api.register(CambioResource())
-v1_api.register(AjusteInventarioResource())
+v1_api.register(ReporteAjusteInventarioResource())
 v1_api.register(ReporteInventarioResource())
+v1_api.register(KardexResource())
 #v1_api.register(VentaHasProductoResource())
 
 
