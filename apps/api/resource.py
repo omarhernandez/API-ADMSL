@@ -923,7 +923,7 @@ class ReporteAjusteInventarioResource(ModelResource):
 		allowed_methods = ['get' , 'post' ]		
 		#excludes = ["sobrante", "faltante" , "fecha" ,  "sistema" , "costo_publico"]
 		queryset = AjusteInventario.objects.all().order_by('-fecha') 
-		resource_name = 'reporteinventario'
+		resource_name = 'kardex'
 		filtering = { 
 		
 		"sucursal" : ALL_WITH_RELATIONS,
@@ -935,7 +935,7 @@ class ReporteAjusteInventarioResource(ModelResource):
 	
 
 	def obj_create(self, bundle, request=None, **kwargs): 
-		""" Se hace un ajuste de inventario """
+		""" Se hace un ajuste de inventario por una sucursal semanalmente """
 
 		try:
 			bundle = self.full_hydrate(bundle)
