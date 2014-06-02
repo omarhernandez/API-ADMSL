@@ -424,6 +424,21 @@ class ClienteResource(ModelResource):
 			}
 
 
+	def dehydrate(self , bundle ): 
+
+		cliente_datos = {}
+		try:
+			cliente_datos = ClienteFacturacion.objects.filter ( cliente_datos = bundle.obj )[0]
+			bundle.data["datos_facturacion"] = cliente_datos.__dict__
+			del bundle.data["datos_facturacion"]["_state"]
+		except:
+			bundle.data["datos_facturacion"] = {}
+
+
+
+		return bundle
+
+
 
 #************************************************************************************************************
 #*********************************************Cliente Facturacion *******************************************
