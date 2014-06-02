@@ -277,9 +277,10 @@ class Kardex(models.Model):
 
 
 class CorteDia(models.Model):
+
     	sucursal = models.ForeignKey(Sucursal, db_column='sucursal') # Field name made lowercase.
+    	usuario = models.ForeignKey(Usuario , db_column = "usuario")
     	fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
-    	sucursal = models.ForeignKey(Sucursal, db_column='sucursal') # Field name made lowercase.
 	deposito_1 = models.FloatField()
 	deposito_2 = models.FloatField()
 	deposito_3 = models.FloatField()

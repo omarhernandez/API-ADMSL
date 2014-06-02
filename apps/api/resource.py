@@ -1,4 +1,5 @@
 #encoding:utf-8
+from datetime import date
 from tastypie.authentication import BasicAuthentication
 from django.db.models import Q , F
 from tastypie.exceptions import * 
@@ -927,7 +928,6 @@ class ReporteAjusteInventarioResource(ModelResource):
 		filtering = { 
 
 				"sucursal" : ["exact"],
-
 				"fecha" : ["lte","gte", "lt","gt"],
 
 		}
@@ -1067,7 +1067,7 @@ class KardexResource(ModelResource):
 
 class CorteDiaResource(ModelResource):
 
-	""" Gastos sucursal: Ingresar o ver los gastos de una sucursal """
+	""" Corte del dia de una sucursal """
 
 	sucursal = fields.ForeignKey("apps.api.resource.SucursalSinInventarioResource" , 'sucursal' , full = True     )
 	usuario = fields.ForeignKey("apps.api.resource.UsuarioResource", 'usuario'    ,  null = True , full = True )
@@ -1088,15 +1088,51 @@ class CorteDiaResource(ModelResource):
 
 	def obj_create(self, bundle, request=None, **kwargs): 
 
-		bundle.data["deposito_1"]
-		bundle.data["deposito_2"]
-		bundle.data["deposito_3"]
-		bundle.data["venta_mayoreo"]
-		bundle.data["venta_publico"]
-		bundle.data["total"]
+		bundle = self.full_hydrate(bundle)
+
+		MAYOREO_INT = 2
 
 
-		venta.objects.filter( fecha__year = year , fecha__month = month , fecha__day = day )
+		sucursal =   re.search('\/api\/v1\/sucursal\/(\d+)\/', str(bundle.data["sucursal"])).group(1)
+
+
+
+		year = date.today().year
+		month = date.today().month
+		day = date.today().day
+
+		#ventas totales diarias  por sucursal objectos
+		ventas_hoy = venta.objects.filter( fecha__year = year , fecha__month = month , fecha__day = day , sucursal = sucursal )
+
+		ventas_hoy_total = 0
+
+		#ventas totales a publico por sucursal
+		ventas_hoy_publico =0  #VentaPublico.objects.filter( venta__fecha__year = year , venta__fecha__month = month , venta__fecha__day = day , venta__sucursal = sucursal )
+
+		#ventas totales a mayoreo por sucursal
+		ventas_hoy_mayoreo = 0
+		for venta_ in ventas_hoy:
+
+			ventas_hoy_total+= venta_.total
+
+			if venta_.total_productos >= MAYOREO_INT:
+				ventas_hoy_mayoreo+= venta_.total
+			else:
+				ventas_hoy_publico+=venta_.total
+
+
+
+
+
+		bundle.obj.deposito_1 =  ventas_hoy_total * .60
+		bundle.obj.deposito_2 = ( ventas_hoy_total * .40)
+		bundle.obj.deposito_3 = 0L
+		bundle.obj.venta_mayoreo = ventas_hoy_mayoreo
+		bundle.obj.venta_publico = ventas_hoy_publico
+		bundle.obj.total =  ventas_hoy_total
+
+
+
 
 
 		bundle.obj.save()
