@@ -293,7 +293,7 @@ class CorteDia(models.Model):
 
 class GastosSucursal(models.Model):
     	corte_dia = models.ForeignKey(CorteDia, db_column='corte_dia') # Field name made lowercase.
-    	fecha = models.DateTimeField()
+    	fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
 	gastos = models.FloatField()
 	concepto = models.TextField()
 

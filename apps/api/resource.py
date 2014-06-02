@@ -1157,7 +1157,7 @@ class CorteDiaResource(ModelResource):
 
 class SucursalGastosResource(ModelResource):
 	""" Gastos sucursal: Ingresar o ver los gastos de una sucursal """
-	corte_dia = fields.ForeignKey(ProductoResource, 'producto' , full = True     )
+	corte_dia = fields.ForeignKey(CorteDiaResource, 'corte_dia' , full = False)
 
 	class Meta:
 		allowed_methods = ["get", "post"]
