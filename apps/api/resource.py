@@ -923,11 +923,12 @@ class ReporteAjusteInventarioResource(ModelResource):
 		allowed_methods = ['get' , 'post' ]		
 		#excludes = ["sobrante", "faltante" , "fecha" ,  "sistema" , "costo_publico"]
 		queryset = AjusteInventario.objects.all().order_by('-fecha') 
-		resource_name = 'kardex'
+		resource_name = 'ajusteinventario'
 		filtering = { 
-		
-		"sucursal" : ALL_WITH_RELATIONS,
-		"fecha" : ["lte","gte", "lt","gt"],
+
+				"sucursal" : ["exact"],
+
+				"fecha" : ["lte","gte", "lt","gt"],
 
 		}
 
@@ -1056,4 +1057,87 @@ class KardexResource(ModelResource):
 
 
 		return bundle
+
+
+
+#************************************************************************************************************
+#********************************************* Corte dia ************************************************
+#************************************************************************************************************
+
+
+class CorteDiaResource(ModelResource):
+
+	""" Gastos sucursal: Ingresar o ver los gastos de una sucursal """
+
+	sucursal = fields.ForeignKey("apps.api.resource.SucursalSinInventarioResource" , 'sucursal' , full = True     )
+	usuario = fields.ForeignKey("apps.api.resource.UsuarioResource", 'usuario'    ,  null = True , full = True )
+
+
+	class Meta:
+		allowed_methods = ["get", "post"]
+		queryset = CorteDia.objects.all()
+		always_return_data = True
+		resource_name = 'cortedia'
+		filtering = {
+			  	"sucursal" : ["exact"],
+			  	"usuario" : ["exact"],
+			 	"fecha" : ["lte","gte", "lt","gt"],
+			  }
+		authorization= Authorization()
+
+
+	def obj_create(self, bundle, request=None, **kwargs): 
+
+		bundle.data["deposito_1"]
+		bundle.data["deposito_2"]
+		bundle.data["deposito_3"]
+		bundle.data["venta_mayoreo"]
+		bundle.data["venta_publico"]
+		bundle.data["total"]
+
+
+		venta.objects.filter( fecha__year = year , fecha__month = month , fecha__day = day )
+
+
+		bundle.obj.save()
+
+
+		return bundle
+
+
+	def dehydrate(self , bundle ): 
+
+		return bundle
+
+
+
+
+
+
+#************************************************************************************************************
+#********************************************* gastos sucursal************************************************
+#************************************************************************************************************
+
+
+class SucursalGastosResource(ModelResource):
+	""" Gastos sucursal: Ingresar o ver los gastos de una sucursal """
+	corte_dia = fields.ForeignKey(ProductoResource, 'producto' , full = True     )
+
+	class Meta:
+		allowed_methods = ["get", "post"]
+		queryset = GastosSucursal.objects.all()
+		always_return_data = True
+		resource_name = 'sucursalgastos'
+		filtering = {
+			  	"corte_dia" : ["exact"],
+			  }
+		authorization= Authorization()
+
+	def dehydrate(self , bundle ): 
+
+		return bundle
+
+
+
+
 

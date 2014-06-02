@@ -274,3 +274,31 @@ class Kardex(models.Model):
 
 	class Meta:
 		db_table = 'kardex'
+
+
+class CorteDia(models.Model):
+    	sucursal = models.ForeignKey(Sucursal, db_column='sucursal') # Field name made lowercase.
+    	fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
+    	sucursal = models.ForeignKey(Sucursal, db_column='sucursal') # Field name made lowercase.
+	deposito_1 = models.FloatField()
+	deposito_2 = models.FloatField()
+	deposito_3 = models.FloatField()
+	venta_mayoreo = models.FloatField()
+    	venta_publico = models.FloatField()
+	total = models.FloatField()
+
+    	class Meta:
+	    db_table = 'corte_dia'
+
+class GastosSucursal(models.Model):
+    	corte_dia = models.ForeignKey(CorteDia, db_column='corte_dia') # Field name made lowercase.
+    	fecha = models.DateTimeField()
+	gastos = models.FloatField()
+	concepto = models.TextField()
+
+	class Meta:
+		db_table = 'gastos_sucursal'
+
+
+
+
