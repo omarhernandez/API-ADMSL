@@ -1092,10 +1092,7 @@ class CorteDiaResource(ModelResource):
 
 		MAYOREO_INT = 2
 
-
 		sucursal =   re.search('\/api\/v1\/sucursal\/(\d+)\/', str(bundle.data["sucursal"])).group(1)
-
-
 
 		year = date.today().year
 		month = date.today().month
@@ -1165,7 +1162,7 @@ class SucursalGastosResource(ModelResource):
 		always_return_data = True
 		resource_name = 'sucursalgastos'
 		filtering = {
-			  	"corte_dia" : ["exact"],
+			  	"corte_dia" : ALL_WITH_RELATIONS,
 			  }
 		authorization= Authorization()
 
@@ -1175,5 +1172,24 @@ class SucursalGastosResource(ModelResource):
 
 
 
+
+#************************************************************************************************************
+#********************************************* Deposito sucursal************************************************
+#************************************************************************************************************
+
+
+class DepositoSucursalResource(ModelResource):
+	""" Deposito reportado por sucursal: """
+	corte_dia = fields.ForeignKey(CorteDiaResource, 'corte_dia' , full = False)
+
+	class Meta:
+		allowed_methods = ["get", "post"]
+		queryset = DepositosSucursal.objects.all()
+		always_return_data = True
+		resource_name = 'depositosucursal'
+		filtering = {
+			  	"corte_dia" : ALL_WITH_RELATIONS,
+			  }
+		authorization= Authorization()
 
 

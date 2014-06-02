@@ -31,6 +31,7 @@ v1_api.register(ReporteInventarioResource())
 v1_api.register(KardexResource())
 v1_api.register(SucursalGastosResource())
 v1_api.register(CorteDiaResource())
+v1_api.register(DepositoSucursalResource())
 #v1_api.register(VentaHasProductoResource())
 
 

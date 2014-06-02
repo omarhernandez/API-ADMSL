@@ -301,5 +301,17 @@ class GastosSucursal(models.Model):
 		db_table = 'gastos_sucursal'
 
 
+class DepositosSucursal(models.Model):
 
+    	corte_dia = models.ForeignKey(CorteDia, db_column='corte_dia') # Field name made lowercase.
+	deposito = models.FloatField()
+        numero_cuenta = models.CharField(max_length=200L)
+    	referencia = models.CharField(max_length=150L)
+        fecha = models.DateTimeField()
+    	cantidad = models.FloatField()
+        comentario = models.TextField()
+        deposito_real = models.FloatField()
+    	numero_deposito = models.IntegerField()
 
+        class Meta:
+	        db_table = 'depositos_sucursal'
