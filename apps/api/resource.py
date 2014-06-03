@@ -896,6 +896,7 @@ class CambioResource(ModelResource):
 		"sucursal" : ALL_WITH_RELATIONS,
 		"fecha" : ["lte","gte", "lt","gt"],
 		"modelo_entrada" : ["icontains","iexact"],
+		"folio_ticket" : ["iexact"],
 
 		}
 
