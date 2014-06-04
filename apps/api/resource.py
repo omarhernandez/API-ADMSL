@@ -458,7 +458,7 @@ class ClienteResource(ModelResource):
 
 class ClienteFacturacionResource(ModelResource):
 
-	cliente_datos = fields.ForeignKey(ClienteResource, 'cliente_datos'    , full = True , null = True )
+	cliente_datos = fields.ForeignKey(ClienteResource, 'cliente_datos'    , full = False , null = True )
 	class Meta:
 		queryset = ClienteFacturacion.objects.all()
 		resource_name = 'clientefacturacion'
