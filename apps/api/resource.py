@@ -418,7 +418,7 @@ class ClienteResource(ModelResource):
 
 	#cliente_facturacion = fields.ForeignKey(ClienteFacturacionResource , 'cliente_facturacion'    , full = True , null = True )
 	sucursal = fields.ForeignKey(SucursalResource , 'sucursal'    , full = False , null = True )
-	usuario_creador = fields.ForeignKey("apps.api.resource.UsuarioResource", 'usuario_creador'    , full = True :, null = True )
+	usuario_creador = fields.ForeignKey("apps.api.resource.UsuarioResource", 'usuario_creador'    , full = True , null = True )
 	class Meta:
 
 		allowed_methods = ['get',"post" ,"put" ]		
