@@ -430,6 +430,11 @@ class ClienteResource(ModelResource):
 		filtering = {
 
 			  "nombre" : ["icontains"],
+
+
+			  "fecha" : ["lte","gte", "lt","gt"],
+
+
 			  "sucursal" : ["exact"],
 
 			}
