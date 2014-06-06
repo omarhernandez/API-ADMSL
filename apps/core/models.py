@@ -88,6 +88,8 @@ class inventario(models.Model):
     class Meta:
         db_table = 'inventario'
 
+
+
 class venta(models.Model):
     sucursal = models.ForeignKey(Sucursal, db_column='Sucursal_id') # Field name made lowercase.
     fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
@@ -96,6 +98,8 @@ class venta(models.Model):
     total = models.FloatField( db_column = "total")
     total_productos = models.IntegerField( db_column = "total_productos")
     url_reporte =   models.CharField(max_length=500L, blank=True , db_column = "url_reporte")
+    descuento_cliente =   models.CharField(max_length=500L, blank=True , db_column = "descuento_cliente")
+
 
     class Meta:
         db_table = 'venta'
