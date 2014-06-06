@@ -1124,7 +1124,7 @@ class CorteDiaResource(ModelResource):
 				ventas_hoy_publico+=venta_.total
 
 
-		FacturarVenta = 
+		#FacturarVenta = 
 
 
 		ventas_facturas = 0L
