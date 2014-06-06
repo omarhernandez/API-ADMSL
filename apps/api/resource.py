@@ -1124,12 +1124,14 @@ class CorteDiaResource(ModelResource):
 				ventas_hoy_publico+=venta_.total
 
 
+		FacturarVenta = 
 
 
+		ventas_facturas = 0L
 
 		bundle.obj.deposito_1 =  ventas_hoy_total * .60
-		bundle.obj.deposito_2 = ( ventas_hoy_total * .40)
-		bundle.obj.deposito_3 = 0L
+		bundle.obj.deposito_2 =  ventas_hoy_total * .40
+		bundle.obj.deposito_3 =  ventas_facturas
 		bundle.obj.venta_mayoreo = ventas_hoy_mayoreo
 		bundle.obj.venta_publico = ventas_hoy_publico
 		bundle.obj.total =  ventas_hoy_total
@@ -1210,7 +1212,7 @@ class FacturarVentaResource(ModelResource):
 
 	sucursal = fields.ForeignKey(SucursalResource, 'sucursal' , full = True     )
 	cliente = fields.ForeignKey(ClienteResource, 'cliente'    , full = True , null = True )
-	venta = fields.ForeignKey(VentaResource, 'venta'  )
+	venta = fields.ForeignKey(VentaResource, 'venta' , full = True  )
 
 
 	class Meta:
@@ -1224,7 +1226,6 @@ class FacturarVentaResource(ModelResource):
 			  	"sucursal" : ALL_WITH_RELATIONS,
 			  }
 		authorization= Authorization()
-
 
 
 
