@@ -1104,8 +1104,13 @@ class CorteDiaResource(ModelResource):
 		month = date.today().month
 		day = date.today().day
 
+
+		#calcular el total a facturar de ventas
+		FacturarVenta_qs =    FacturarVenta.objects.filter ( fecha__year = year , fecha__month = month , fecha__day = day ,  sucursal = sucursal)
+		id_venta_facturacion = FacturarVenta_qs.values("id")
+
 		#ventas totales diarias  por sucursal objectos
-		ventas_hoy = venta.objects.filter( fecha__year = year , fecha__month = month , fecha__day = day , sucursal = sucursal )
+		ventas_hoy = venta.objects.filter( fecha__year = year , fecha__month = month , fecha__day = day , sucursal = sucursal ).exclude( id__in = id_venta_facturacion )
 
 		ventas_hoy_total = 0
 
@@ -1124,17 +1129,24 @@ class CorteDiaResource(ModelResource):
 				ventas_hoy_publico+=venta_.total
 
 
-		#FacturarVenta = 
+		ventas_facturas = 0
 
 
-		ventas_facturas = 0L
+		for venta_a_facturar in FacturarVenta_qs:
+			ventas_facturas	 +=  venta_a_facturar.venta.total
+
+		ventas_hoy_total_con_factura = ventas_hoy_total
+		#total de la venta incluyendo facturas
+		ventas_hoy_total_con_factura += ventas_facturas
+
+
 
 		bundle.obj.deposito_1 =  ventas_hoy_total * .60
 		bundle.obj.deposito_2 =  ventas_hoy_total * .40
 		bundle.obj.deposito_3 =  ventas_facturas
 		bundle.obj.venta_mayoreo = ventas_hoy_mayoreo
 		bundle.obj.venta_publico = ventas_hoy_publico
-		bundle.obj.total =  ventas_hoy_total
+		bundle.obj.total =  ventas_hoy_total_con_factura
 
 
 
@@ -1210,7 +1222,7 @@ class DepositoSucursalResource(ModelResource):
 class FacturarVentaResource(ModelResource):
 	""" supervisor - Reporte para facturar una venta ,  sucursal - enviar que venta se requiere facturar"""
 
-	sucursal = fields.ForeignKey(SucursalResource, 'sucursal' , full = True     )
+	sucursal = fields.ForeignKey(SucursalSinInventarioResource, 'sucursal' , full = True     )
 	cliente = fields.ForeignKey(ClienteResource, 'cliente'    , full = True , null = True )
 	venta = fields.ForeignKey(VentaResource, 'venta' , full = True  )
 
