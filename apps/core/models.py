@@ -311,7 +311,7 @@ class DepositosSucursal(models.Model):
 	deposito = models.FloatField()
         numero_cuenta = models.CharField(max_length=200L)
     	referencia = models.CharField(max_length=150L)
-        fecha = models.DateTimeField()
+    	fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
     	cantidad = models.FloatField()
         comentario = models.TextField()
         deposito_real = models.FloatField()
@@ -319,3 +319,15 @@ class DepositosSucursal(models.Model):
 
         class Meta:
 	        db_table = 'depositos_sucursal'
+	
+
+class FacturarVenta(models.Model):
+
+    	sucursal = models.ForeignKey(Sucursal, db_column='sucursal') # Field name made lowercase.
+    	venta = models.ForeignKey(venta, db_column='venta') # Field name made lowercase.
+    	cliente = models.ForeignKey(ClienteDatos , db_column = "cliente")
+    	fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
+
+	class Meta:
+		db_table = 'facturar_venta'
+

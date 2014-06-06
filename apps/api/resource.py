@@ -1199,3 +1199,32 @@ class DepositoSucursalResource(ModelResource):
 		authorization= Authorization()
 
 
+
+#************************************************************************************************************
+#********************************************* Facturar venta sucursal***********************************
+#************************************************************************************************************
+
+
+class FacturarVentaResource(ModelResource):
+	""" supervisor - Reporte para facturar una venta ,  sucursal - enviar que venta se requiere facturar"""
+
+	sucursal = fields.ForeignKey(SucursalResource, 'sucursal' , full = True     )
+	cliente = fields.ForeignKey(ClienteResource, 'cliente'    , full = True , null = True )
+	venta = fields.ForeignKey(VentaResource, 'venta'  )
+
+
+	class Meta:
+		allowed_methods = ["get", "post"]
+		queryset = FacturarVenta.objects.all()
+		always_return_data = True
+		resource_name = 'facturarventa'
+		filtering = {
+			  	"venta" : ALL_WITH_RELATIONS,
+			  	"cliente" : ALL_WITH_RELATIONS,
+			  	"sucursal" : ALL_WITH_RELATIONS,
+			  }
+		authorization= Authorization()
+
+
+
+
