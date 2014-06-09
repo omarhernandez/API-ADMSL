@@ -1080,7 +1080,7 @@ class CorteDiaResource(ModelResource):
 
 
 	class Meta:
-		allowed_methods = ["get", "post"]
+		allowed_methods = ["get", "post" , "put"]
 		queryset = CorteDia.objects.all()
 		always_return_data = True
 		resource_name = 'cortedia'
