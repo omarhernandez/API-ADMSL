@@ -1080,7 +1080,7 @@ class CorteDiaResource(ModelResource):
 
 
 	class Meta:
-		allowed_methods = ["get", "post" , "put"]
+		allowed_methods = ["get", "post" , "put" , "delete"]
 		queryset = CorteDia.objects.all()
 		always_return_data = True
 		resource_name = 'cortedia'
@@ -1177,7 +1177,7 @@ class SucursalGastosResource(ModelResource):
 	corte_dia = fields.ForeignKey(CorteDiaResource, 'corte_dia' , full = False)
 
 	class Meta:
-		allowed_methods = ["get", "post"]
+		allowed_methods = ["get", "post" , "put" , "delete" ]
 		queryset = GastosSucursal.objects.all()
 		always_return_data = True
 		resource_name = 'sucursalgastos'
