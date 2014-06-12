@@ -1241,3 +1241,33 @@ class FacturarVentaResource(ModelResource):
 
 
 
+
+
+
+#************************************************************************************************************
+#*********************************************  ConfiguracionComision    ***********************************
+#************************************************************************************************************
+
+
+class ConfiguracionComisionResource(ModelResource):
+	"""Configuracion de comision para usuarios en sucursales"""
+
+	sucursal = fields.ForeignKey(SucursalSinInventarioResource, 'sucursal' , full = True     )
+	sucursal_comision = fields.ForeignKey(SucursalSinInventarioResource, 'sucursal_comision' , full = True     )
+
+	usuario = fields.ForeignKey("apps.api.resource.UsuarioResource", 'usuario'    ,  null = True , full = True )
+
+	class Meta:
+		allowed_methods = ["get", "post"]
+		queryset = ConfiguracionComision.objects.all()
+		always_return_data = True
+		resource_name = 'configuracioncomision'
+		filtering = {
+			  	"sucursal" : ALL_WITH_RELATIONS,
+			  	"usuario" : ALL_WITH_RELATIONS,
+			  	"sucursal_comision" : ALL_WITH_RELATIONS,
+			  }
+		authorization= Authorization()
+
+
+
