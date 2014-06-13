@@ -928,7 +928,7 @@ class ReporteAjusteInventarioResource(ModelResource):
 	"""
 
 	sucursal = fields.ForeignKey(SucursalSinInventarioResource , 'sucursal' , full = True, null = False )
-	usuario = fields.ForeignKey(UsuarioResource, 'usuario' , full = False)
+	usuario = fields.ForeignKey(UsuarioResource, 'usuario' , full = True)
 
 	
 	class Meta:
