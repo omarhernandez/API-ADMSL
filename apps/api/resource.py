@@ -940,6 +940,7 @@ class ReporteAjusteInventarioResource(ModelResource):
 		filtering = { 
 
 				"sucursal" : ["exact"],
+				"usuario" : ["exact"],
 				"fecha" : ["lte","gte", "lt","gt"],
 
 		}
