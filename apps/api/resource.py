@@ -586,6 +586,16 @@ class LoginResource(ModelResource):
 	 	
 			if user_exist[0].rol == "supervisor":
 				bundle.data["rol"] = "supervisor"
+
+	
+			if user_exist[0].rol == "foraneo":
+				bundle.data["rol"] = "foraneo"
+
+	
+			if user_exist[0].rol == "administrador":
+				bundle.data["rol"] = "administrador"
+
+
 		else:
 
 			bundle.data["loggin"] = False
