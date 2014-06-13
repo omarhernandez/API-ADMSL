@@ -331,3 +331,19 @@ class FacturarVenta(models.Model):
 	class Meta:
 		db_table = 'facturar_venta'
 
+
+
+
+
+class ConfiguracionComision(models.Model):
+
+    	sucursal = models.ForeignKey(Sucursal, db_column='sucursal' , related_name="sucursal" ) # Field name made lowercase.
+    	sucursal_comision = models.ForeignKey(Sucursal, db_column='sucursal_comision' , related_name = "sucursal_comision") # Field name made lowercase.
+	usuario = models.ForeignKey(Usuario , db_column = "usuario" )
+	porcentaje_comision_total = models.FloatField(null=True, blank=True)
+	porcentaje_comision = models.FloatField(null=True, blank=True)
+
+	class Meta:
+		db_table = 'configuracion_comision'
+
+
