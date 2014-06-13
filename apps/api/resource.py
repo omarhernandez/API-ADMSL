@@ -171,10 +171,6 @@ class InventarioResource(ModelResource):
 	producto = fields.ForeignKey(ProductoResource, 'producto' , full = True     )
 
 
-#	producto_has_rango  = fields.ToManyField('apps.api.resource.ProductoHasRangoesource',  
-#			attribute = lambda bundle: producto_has_rango.objects.filter(Q(sucursal = bundle.obj.sucursal) , Q( producto = bundle.obj.producto) )
-#		, null = True , full = True		)    
-
 
 
 
@@ -1058,11 +1054,6 @@ class KardexResource(ModelResource):
 			  	"producto" : ["exact"],
 			  }
 		authorization= Authorization()
-
-	def dehydrate(self , bundle ): 
-
-
-		return bundle
 
 
 
