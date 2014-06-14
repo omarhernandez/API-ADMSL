@@ -42,6 +42,13 @@ class UsuarioHasSucursalResource(ModelResource):
 		authorization= Authorization()
 
 
+		filtering  = {
+
+			"usuario"  : ["exact"],
+
+				}
+
+
 
 
 
