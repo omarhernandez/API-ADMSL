@@ -163,7 +163,7 @@ class ProductoHasRangoesource(ModelResource):
 		resource_name = 'producto_has_rango'
 		authorization= Authorization()
 	
-	filtering = { 
+		filtering = { 
 
 			"producto" : ALL_WITH_RELATIONS
 
