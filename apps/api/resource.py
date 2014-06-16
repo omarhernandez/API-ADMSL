@@ -162,6 +162,14 @@ class ProductoHasRangoesource(ModelResource):
 		queryset = producto_has_rango.objects.all()
 		resource_name = 'producto_has_rango'
 		authorization= Authorization()
+	
+	filtering = { 
+
+			"producto" : ALL_WITH_RELATIONS
+
+
+
+			}
 
 
 
