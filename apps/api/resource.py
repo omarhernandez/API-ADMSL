@@ -186,7 +186,8 @@ class InventarioResource(ModelResource):
 		always_return_data = True
 		resource_name = 'inventario'
 		filtering = {
-			  	"sucursal" : ["exact"]
+			  	"sucursal" : ["exact"],
+			  	"producto" : ALL_WITH_RELATIONS 
 			  }
 		authorization= Authorization()
 
