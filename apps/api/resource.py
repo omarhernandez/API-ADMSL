@@ -179,8 +179,6 @@ class InventarioResource(ModelResource):
 
 
 
-
-
 	class Meta:
 		queryset = inventario.objects.all()
 		always_return_data = True
