@@ -165,7 +165,9 @@ class ProductoHasRangoesource(ModelResource):
 	
 		filtering = { 
 
-			"producto" : ALL_WITH_RELATIONS
+			"producto" : ALL_WITH_RELATIONS,
+			"sucursal" : ALL_WITH_RELATIONS,
+			"rango" : ALL_WITH_RELATIONS
 
 
 
