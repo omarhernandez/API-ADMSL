@@ -154,7 +154,7 @@ class RangoResource(ModelResource):
 class ProductoHasRangoesource(ModelResource):
 
 	sucursal = fields.ForeignKey(SucursalResource, 'sucursal'     )
-	producto = fields.ForeignKey(ProductoResource, 'producto'     )
+	producto = fields.ForeignKey(ProductoResource, 'producto' , full = True     )
 	rango = fields.ForeignKey(RangoResource , 'rango'    , full = True , null = True )
 
 	class Meta:
