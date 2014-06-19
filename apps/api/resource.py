@@ -598,6 +598,7 @@ class LoginResource(ModelResource):
 				bundle.data["sucursal"] =  current_obj_sucursal_.__dict__
 				bundle.data["sucursal"].pop("_state")
 				bundle.data["sucursal"]["resource_uri"] =   "api/v1/sucursal/{0}/".format( current_obj_sucursal_.id )
+				bundle.data["rol"] = "sucursal"
 			
 	 	
 			if user_exist[0].rol == "supervisor":
