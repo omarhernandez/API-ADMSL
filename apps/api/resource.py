@@ -1315,7 +1315,7 @@ class PaquetesResource(ModelResource):
 		allowed_methods = ["get", "post"]
 		queryset = Paquetes.objects.all()
 		always_return_data = True
-		resource_name = 'paquetes'
+		resource_name = 'paquete'
 		filtering = {
 			  	"producto" : ALL_WITH_RELATIONS,
 			  }
@@ -1325,7 +1325,7 @@ class PaquetesResource(ModelResource):
 
 
 #************************************************************************************************************
-#*********************************************  Paquetes ***********************************
+#*********************************************  Paquetes has productos  ***********************************
 #************************************************************************************************************
 
 

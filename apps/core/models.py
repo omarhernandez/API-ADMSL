@@ -350,10 +350,19 @@ class ConfiguracionComision(models.Model):
 
 
 class Paquetes(models.Model):
-    producto = models.ForeignKey(Producto, db_column='producto') # Field name made lowercase.
+    	producto = models.ForeignKey(Producto, db_column='producto') # Field name made lowercase.
+
+	class Meta:
+		db_table = 'paquetes'
+
 
 class PaquetesHasProducto(models.Model):
-    producto = models.ForeignKey(Producto, db_column='producto') # Field name made lowercase.
-    paquetes = models.ForeignKey(Paquetes, db_column='paquetes') # Field name made lowercase.
+    	producto = models.ForeignKey(Producto, db_column='producto') # Field name made lowercase.
+    	paquetes = models.ForeignKey(Paquetes, db_column='paquetes') # Field name made lowercase.
+	class Meta:
+		db_table = 'paquete_has_producto'
+
+
+
 
 
