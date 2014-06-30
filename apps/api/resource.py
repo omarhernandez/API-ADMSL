@@ -979,9 +979,11 @@ class ReporteAjusteInventarioResource(ModelResource):
 			#obtenemos el producto filtrado por la sucursal y el codigo exacto ignoring case 
 
 			current_product = inventario.objects.filter( Q(producto__codigo__iexact = codigo ) , Q(sucursal__id   = sucursal_ ) )[0]
+			print current_product.__dict__
 
 			#cantidad en el sistema
 			existencia_current_product_in_system = int(current_product.existencia)
+			print existencia_current_product_in_system
 			bundle.obj.sistema = existencia_current_product_in_system
 
 			#productos faltantes
@@ -998,14 +1000,23 @@ class ReporteAjusteInventarioResource(ModelResource):
 
 				bundle.obj.sobrante = 0
 
+
 			if faltante > 0 :
 
-				current_rango = producto_has_rango.objects.filter( producto =   current_product , rango__min = 1, rango__max = 1 , sucursal  = bundle.obj.sucursal )[0]
+				current_product =  current_product.producto 
+				try:
+
+					current_rango = producto_has_rango.objects.filter( producto =   current_product.id , rango__min = 1, rango__max = 1 , sucursal  = sucursal_ )[0]
+
+				except Exception as error:
+
+					current_rango = producto_has_rango.objects.filter( producto =   current_product , rango__min = 1, rango__max = 1 , sucursal  = bundle.obj.sucursal )
+
 				deuda = current_rango.costo * faltante
 
 				bundle.obj.costo_publico = deuda
 			else:
-				bundle.obj.costo_publico = 0L
+				bundle.obj.costo_publico = 0
 
 			bundle.obj.save()
 
