@@ -40,6 +40,8 @@ class Sucursal(models.Model):
     num_ext = models.CharField(max_length=45L, blank=True)
     folio_sucursal = models.CharField(max_length=50L, blank=True)
     descuento = models.CharField(max_length=10L, blank=True)
+
+
     class Meta:
         db_table = 'Sucursal'
 
@@ -345,5 +347,13 @@ class ConfiguracionComision(models.Model):
 
 	class Meta:
 		db_table = 'configuracion_comision'
+
+
+class Paquetes(models.Model):
+    producto = models.ForeignKey(Producto, db_column='producto') # Field name made lowercase.
+
+class PaquetesHasProducto(models.Model):
+    producto = models.ForeignKey(Producto, db_column='producto') # Field name made lowercase.
+    paquetes = models.ForeignKey(Paquetes, db_column='paquetes') # Field name made lowercase.
 
 
