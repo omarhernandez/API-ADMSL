@@ -104,6 +104,7 @@ class ProductoResource(ModelResource):
 	class Meta:
 		queryset = Producto.objects.all()
 		resource_name = 'producto'
+		always_return_data = True
 		authorization= Authorization()
 		filtering = {
 
