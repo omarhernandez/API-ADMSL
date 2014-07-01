@@ -1323,6 +1323,24 @@ class PaquetesResource(ModelResource):
 
 		authorization= Authorization()
 
+	def dehydrate(self , bundle ): 
+	
+		obj_paquete = PaquetesHasProducto.objects.filter( paquetes  = bundle.obj )
+
+		producto = []
+
+		for producto_ in obj_paquete:
+
+			producto.append({ 	
+						       "id":  producto_.producto.id  , 
+						       "resource_uri" : "/api/v1/producto/{0}/".format(producto_.producto.id),
+						       "codigo": producto_.producto.codigo 
+						})
+
+
+		bundle.data["productos_paquete" ] =  producto
+
+		return bundle
 
 
 #************************************************************************************************************
