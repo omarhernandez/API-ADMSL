@@ -267,7 +267,7 @@ class VentaResource(ModelResource):
 	 	
 			attribute = lambda bundle: venta_has_producto.objects.filter(venta = bundle.obj)
 	  		
-		, null = True , full = True		)    
+		, null = True , full = False )    
 
 
 
@@ -280,6 +280,7 @@ class VentaResource(ModelResource):
 
 	def dehydrate(self , bundle):
 		#bundle.data["folio"] = bundle.obj.id
+		del bundle.data["producto"]
 
 		return bundle
 
