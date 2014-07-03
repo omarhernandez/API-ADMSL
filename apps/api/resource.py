@@ -307,6 +307,87 @@ class VentaResource(ModelResource):
 		bundle.obj.url_reporte = "{0}_{1}_.pdf".format( name_utf8_decoded , datetime.datetime.utcnow().strftime('%m_%d_%Y_%s') )
 		bundle.obj.save()
 
+
+		sucursal = bundle.obj.sucursal
+
+		qs_usuariosucursal_has_sucursal = UsuarioHasSucursal.objects.filter( Sucursal_id  = sucursal)[0]
+		current_user = qs_usuariosucursal_has_sucursal.usuario
+
+		#instancia de usuario
+		#current_user = qs_usuariosucursal_has_sucursal 
+
+		#instancia de usuario has sucursal
+		current_user = UsuarioSucursal.objects.filter( usuario =  current_user )[0]
+
+
+
+		#guarda el usuario_sucursal que hizo la venta
+		VentaUsuarioSucursal.objects.create( usuario_sucursal = current_user , venta = bundle.obj , nombre_usuario =  current_user.usuario.nombre  )
+
+		#se busca si la venta sera asignada aun cliente
+
+
+
+		#id del cliente obtenido por parametro en body JSON
+		id_cliente  = bundle.data["cliente"] or False
+
+		#si existe un id guardamos la venta al cliente
+		if id_cliente:
+
+			#objeto del cliente
+			obj_cliente  = ClienteDatos.objects.filter( id = id_cliente)[0]
+			#se guarda la venta al cliente
+			VentaCliente.objects.create( cliente_datos = obj_cliente , venta = bundle.obj )
+
+
+		#sucursal =   re.search('\/api\/v1\/sucursal\/(\d+)\/', str(bundle.data["sucursal"])).group(1)
+		#sucursal = Sucursal.objects.filter(id = sucursal)
+
+		range_products_by_sucursal = producto_has_rango.objects.filter(sucursal =  sucursal )
+
+
+		
+		for producto in productos:
+
+			id_producto =   re.search('\/api\/v1\/producto\/(\d+)\/', str(producto["producto"])).group(1)
+			id_producto = Producto.objects.filter(id = id_producto)[0]
+			cantidad = int(producto["cantidad"])
+
+			#decuenta el producto en venta al inventario de la sucursal actual
+
+			existencia_producto_inventario = inventario.objects.filter ( producto = id_producto , sucursal = sucursal ).values("existencia")[0]["existencia"]
+
+			nueva_existencia = (existencia_producto_inventario  - cantidad)
+
+			inventario.objects.filter ( producto = id_producto , sucursal = sucursal ).update(existencia =   nueva_existencia  )
+	
+			#guardamos la venta en el kardex
+			Kardex.objects.create( folio = bundle.obj.folio , sucursal = sucursal[0] , tipo_registro = "TICKET" , inventario_inicial = 0L , 
+						entradas = 0L , salidas = cantidad, existencia = existencia_producto_inventario , descripcion = "venta en sucursal" , producto = id_producto )
+
+					
+
+			#se busca el precio del control conforme al rango en el que se encuentre, este valor de guarda en venta_has_producto, que es a que precio se adquirio el producto
+			cantidad_en_rango = 0L
+			for product_range in range_products_by_sucursal:
+
+
+				try:
+					if  product_range.rango.min <= cantidad  and cantidad <= product_range.rango.max and product_range.producto.id == id_producto.id :
+
+						cantidad_en_rango  = product_range.costo
+						break
+				except:
+					raise NotFound("Error en rango, verifica que el producto tenga asignados todos los rangos")
+
+
+			#guarda los productos dentro de la venta
+			try:
+				venta_has_producto.objects.create( venta = bundle.obj , producto = id_producto , cantidad = cantidad , costo_por_producto = cantidad_en_rango ) 
+			except:
+				raise NotFound("Error en rango, verifica que el producto tenga asignados todos los rangos")
+
+
 		return bundle
 
 
