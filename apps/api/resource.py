@@ -307,42 +307,6 @@ class VentaResource(ModelResource):
 		bundle.obj.url_reporte = "{0}_{1}_.pdf".format( name_utf8_decoded , datetime.datetime.utcnow().strftime('%m_%d_%Y_%s') )
 		bundle.obj.save()
 
-
-		sucursal = bundle.obj.sucursal
-
-		qs_usuariosucursal_has_sucursal = UsuarioHasSucursal.objects.filter( Sucursal_id  = sucursal)[0]
-		current_user = qs_usuariosucursal_has_sucursal.usuario
-
-		#instancia de usuario
-		#current_user = qs_usuariosucursal_has_sucursal 
-
-		#instancia de usuario has sucursal
-		current_user = UsuarioSucursal.objects.filter( usuario =  current_user )[0]
-
-
-
-		#guarda el usuario_sucursal que hizo la venta
-		VentaUsuarioSucursal.objects.create( usuario_sucursal = current_user , venta = bundle.obj , nombre_usuario =  current_user.usuario.nombre  )
-
-		#se busca si la venta sera asignada aun cliente
-
-
-
-		#id del cliente obtenido por parametro en body JSON
-		id_cliente  = bundle.data["cliente"] or False
-
-		#si existe un id guardamos la venta al cliente
-		if id_cliente:
-
-			#objeto del cliente
-			obj_cliente  = ClienteDatos.objects.filter( id = id_cliente)[0]
-			#se guarda la venta al cliente
-			VentaCliente.objects.create( cliente_datos = obj_cliente , venta = bundle.obj )
-
-
-		#sucursal =   re.search('\/api\/v1\/sucursal\/(\d+)\/', str(bundle.data["sucursal"])).group(1)
-		#sucursal = Sucursal.objects.filter(id = sucursal)
-
 		return bundle
 
 
