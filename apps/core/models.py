@@ -362,7 +362,18 @@ class PaquetesHasProducto(models.Model):
 	class Meta:
 		db_table = 'paquete_has_producto'
 
+class CargarFactura(models.Model):
 
+	fecha = models.DateTimeField()
+    	codigo = models.CharField(max_length=45L, blank=True)
+	cantidad = models.IntegerField()
+	sucursal = models.IntegerField()
+    	numero_factura = models.CharField(max_length=45L, blank=True)
+	procesada = models.IntegerField()
+	
+	class Meta:
+	
+		db_table = 'cargar_factura'
 
 
 

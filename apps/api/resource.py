@@ -1384,16 +1384,34 @@ class PaquetesResource(ModelResource):
 
 		bundle.data["all_productos_in_paquete"] = _all_products 
 
-
-		print _control_remoto_en_paquete 
+		#print _control_remoto_en_paquete 
 		#asignacion de todos los rangos que tiene el control remoto al paquete acutal
-		rango_control_remoto_en_paquete = producto_has_rango.objects.filter( producto = _control_remoto_en_paquete )
+		#rango_control_remoto_en_paquete = producto_has_rango.objects.filter( producto = _control_remoto_en_paquete )
 		
-		print rango_control_remoto_en_paquete.__dict__
+		#print rango_control_remoto_en_paquete.__dict__
 
 		return bundle
+
 #************************************************************************************************************
-#*********************************************  Paquetes has productos  ***********************************
+#*********************************************  Cargar Factura **********************************************
 #************************************************************************************************************
+
+
+class CargarFacturaResource(ModelResource):
+	"""Cargar factura """
+	class Meta:
+		allowed_methods = ["get", "post" , "put", "delete"]
+		queryset = CargarFactura.objects.all()
+		always_return_data = True
+		resource_name = 'cargarfactura'
+		filtering = {
+			  	"fecha" : ALL_WITH_RELATIONS,
+			  	"codigo" : ALL_WITH_RELATIONS,
+			  	"sucursal" : ALL_WITH_RELATIONS,
+			  	"numero_factura" : ALL_WITH_RELATIONS,
+			  	"procesada" : ALL_WITH_RELATIONS,
+			  }
+		authorization= Authorization()
+
 
 

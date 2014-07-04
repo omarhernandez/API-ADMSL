@@ -10,7 +10,7 @@ DATABASES = {'default': dj_database_url.config(default= 'mysql://b90765a3f69a4d:
 #DATABASES = { 'default': dj_database_url.config(default='postgres://gbitfdbauwyedl:awnV6ozkiol619BFitzqGGwUst@ec2-107-20-191-205.compute-1.amazonaws.com:5432/d6hn86ogou3lmm')}
 
 
-DEPLOY = False 
+DEPLOY = True 
 
 DEBUG = True
 TASTYPIE_FULL_DEBUG = True 
@@ -27,7 +27,7 @@ if DEPLOY:
 	DATABASES = {
 	    'default': {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'admisel',                      # Or path to database file if using sqlite3.
+        'NAME': 'heroku_37421aebe3e67f6',                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': 'root',
         'PASSWORD': 'nf9ckpg',
