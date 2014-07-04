@@ -11,8 +11,8 @@ DATABASES = {'default': dj_database_url.config(default= 'mysql://b90765a3f69a4d:
 
 
 DEBUG = True
-DEPLOY = False 
-TASTYPIE_FULL_DEBUG = False
+DEPLOY = True 
+TASTYPIE_FULL_DEBUG = True 
 
 TEMPLATE_DEBUG = DEBUG
 
