@@ -362,7 +362,7 @@ class VentaResource(ModelResource):
 			inventario.objects.filter ( producto = id_producto , sucursal = sucursal ).update(existencia =   nueva_existencia  )
 	
 			#guardamos la venta en el kardex
-			Kardex.objects.create( folio = bundle.obj.folio , sucursal = sucursal[0] , tipo_registro = "TICKET" , inventario_inicial = 0L , 
+			Kardex.objects.create( folio = bundle.obj.folio , sucursal = sucursal , tipo_registro = "TICKET" , inventario_inicial = 0L , 
 						entradas = 0L , salidas = cantidad, existencia = existencia_producto_inventario , descripcion = "venta en sucursal" , producto = id_producto )
 
 					
