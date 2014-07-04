@@ -1331,7 +1331,7 @@ class PaquetesResource(ModelResource):
 
 	def dehydrate(self , bundle ): 
 	
-		obj_paquete = bundle.data["all_productos_in_paquete"] 
+		obj_paquete = PaquetesHasProducto.objects.filter( paquetes = bundle.obj )
 
 		producto = []
 
@@ -1343,8 +1343,10 @@ class PaquetesResource(ModelResource):
 						       "codigo": producto_.productos.codigo 
 						})
 
-		del bundle.data["productos_paquete" ]
-		del bundle.data["all_productos_in_paquete" ]
+		try:
+			del bundle.data["productos_paquete" ]
+		except:
+			pass
 		bundle.data["productos_paquete" ] =  producto
 
 		return bundle
@@ -1365,7 +1367,6 @@ class PaquetesResource(ModelResource):
 		#save m2m relationship data
 		_productos = bundle.data["productos_paquete"]
 
-		_all_products = []
 		_control_remoto_en_paquete = []
 
 		#asignacion de todos los productos que conteiene el paquete
@@ -1380,9 +1381,8 @@ class PaquetesResource(ModelResource):
 
 
 			product_in_paquete = PaquetesHasProducto.objects.create( paquetes = _current_paquete , productos = id_producto )
-			_all_products.append( product_in_paquete )	
 
-		bundle.data["all_productos_in_paquete"] = _all_products 
+		#bundle.data["all_productos_in_paquete"] = _all_products 
 
 		#print _control_remoto_en_paquete 
 		#asignacion de todos los rangos que tiene el control remoto al paquete acutal
