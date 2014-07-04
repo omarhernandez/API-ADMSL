@@ -364,10 +364,10 @@ class PaquetesHasProducto(models.Model):
 
 class CargarFactura(models.Model):
 
-	fecha = models.DateTimeField()
+    	fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
     	codigo = models.CharField(max_length=45L, blank=True)
 	cantidad = models.IntegerField()
-	sucursal = models.IntegerField()
+    	sucursal = models.ForeignKey(Sucursal, db_column='sucursal') # Field name made lowercase.
     	numero_factura = models.CharField(max_length=45L, blank=True)
 	procesada = models.IntegerField()
 	

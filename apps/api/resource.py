@@ -1399,17 +1399,19 @@ class PaquetesResource(ModelResource):
 
 class CargarFacturaResource(ModelResource):
 	"""Cargar factura """
+
+	sucursal = fields.ForeignKey(SucursalResource, 'sucursal'     )
 	class Meta:
 		allowed_methods = ["get", "post" , "put", "delete"]
 		queryset = CargarFactura.objects.all()
 		always_return_data = True
 		resource_name = 'cargarfactura'
 		filtering = {
-			  	"fecha" : ALL_WITH_RELATIONS,
-			  	"codigo" : ALL_WITH_RELATIONS,
-			  	"sucursal" : ALL_WITH_RELATIONS,
-			  	"numero_factura" : ALL_WITH_RELATIONS,
-			  	"procesada" : ALL_WITH_RELATIONS,
+				"fecha" : ["lte","gte", "lt","gt"],
+			  	"codigo" : ["icontains"],
+			  	"sucursal" : ["exact"],
+			  	"numero_factura" : ["exact"],
+			  	"procesada" : ["exact"],
 			  }
 		authorization= Authorization()
 
