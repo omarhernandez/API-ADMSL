@@ -985,11 +985,18 @@ class ReporteAjusteInventarioResource(ModelResource):
 
 			#cantidad en el sistema
 			existencia_current_product_in_system = int(current_product.existencia)
+
+
 			print existencia_current_product_in_system
+
 			bundle.obj.sistema = existencia_current_product_in_system
 
 			#productos faltantes
 			faltante = ( existencia_current_product_in_system - fisico ) 
+
+			if( faltante <= 0:
+					faltante = 0
+
 			bundle.obj.faltante = faltante 
 
 
