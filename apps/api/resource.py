@@ -1294,7 +1294,7 @@ class ConfiguracionComisionResource(ModelResource):
 	usuario = fields.ForeignKey("apps.api.resource.UsuarioResource", 'usuario'    ,  null = True , full = True )
 
 	class Meta:
-		allowed_methods = ["get", "post" , "put", "delelte"]
+		allowed_methods = ["get", "post" , "put", "delete"]
 		queryset = ConfiguracionComision.objects.all()
 		always_return_data = True
 		resource_name = 'configuracioncomision'
@@ -1395,6 +1395,5 @@ class PaquetesResource(ModelResource):
 #************************************************************************************************************
 #*********************************************  Paquetes has productos  ***********************************
 #************************************************************************************************************
-
 
 
