@@ -341,7 +341,7 @@ class VentaResource(ModelResource):
 
 
 		sucursal =   re.search('\/api\/v1\/sucursal\/(\d+)\/', str(bundle.data["sucursal"])).group(1)
-		sucursal = Sucursal.objects.filter(id = sucursal)
+		sucursal = Sucursal.objects.filter(id = sucursal)[0]
 
 		range_products_by_sucursal = producto_has_rango.objects.filter(sucursal =  sucursal )
 
