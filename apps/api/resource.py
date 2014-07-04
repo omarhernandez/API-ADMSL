@@ -981,13 +981,10 @@ class ReporteAjusteInventarioResource(ModelResource):
 			#obtenemos el producto filtrado por la sucursal y el codigo exacto ignoring case 
 
 			current_product = inventario.objects.filter( Q(producto__codigo__iexact = codigo ) , Q(sucursal__id   = sucursal_ ) )[0]
-			print current_product.__dict__
 
 			#cantidad en el sistema
 			existencia_current_product_in_system = int(current_product.existencia)
 
-
-			print existencia_current_product_in_system
 
 			bundle.obj.sistema = existencia_current_product_in_system
 
@@ -1297,7 +1294,7 @@ class ConfiguracionComisionResource(ModelResource):
 	usuario = fields.ForeignKey("apps.api.resource.UsuarioResource", 'usuario'    ,  null = True , full = True )
 
 	class Meta:
-		allowed_methods = ["get", "post"]
+		allowed_methods = ["get", "post" , "put", "delelte"]
 		queryset = ConfiguracionComision.objects.all()
 		always_return_data = True
 		resource_name = 'configuracioncomision'
@@ -1331,26 +1328,70 @@ class PaquetesResource(ModelResource):
 
 		authorization= Authorization()
 
+
 	def dehydrate(self , bundle ): 
 	
-		obj_paquete = PaquetesHasProducto.objects.filter( paquetes  = bundle.obj )
+		obj_paquete = bundle.data["all_productos_in_paquete"] 
 
 		producto = []
 
 		for producto_ in obj_paquete:
 
 			producto.append({ 	
-						       "id":  producto_.producto.id  , 
-						       "resource_uri" : "/api/v1/producto/{0}/".format(producto_.producto.id),
-						       "codigo": producto_.producto.codigo 
+						       "id":  producto_.productos.id  , 
+						       "resource_uri" : "/api/v1/producto/{0}/".format(producto_.productos.id),
+						       "codigo": producto_.productos.codigo 
 						})
 
-
+		del bundle.data["productos_paquete" ]
+		del bundle.data["all_productos_in_paquete" ]
 		bundle.data["productos_paquete" ] =  producto
 
 		return bundle
 
 
+
+	def obj_create(self, bundle, request=None, **kwargs): 
+
+		bundle = self.full_hydrate(bundle) 
+
+		_current_id_paquete = re.search('\/api\/v1\/producto\/(\d+)\/', str(bundle.data["producto"])).group(1)
+		bundle.obj.producto.id = _current_id_paquete 
+
+		bundle.obj.save()
+
+		_current_paquete = bundle.obj
+
+		#save m2m relationship data
+		_productos = bundle.data["productos_paquete"]
+
+		_all_products = []
+		_control_remoto_en_paquete = []
+
+		#asignacion de todos los productos que conteiene el paquete
+		for key , _producto in enumerate(_productos):
+
+
+			id_producto =   re.search('\/api\/v1\/producto\/(\d+)\/', str(_producto["producto"])).group(1)
+			id_producto = Producto.objects.filter(id = id_producto)[0]
+
+			if key == 0:
+				_control_remoto_en_paquete = id_producto 
+
+
+			product_in_paquete = PaquetesHasProducto.objects.create( paquetes = _current_paquete , productos = id_producto )
+			_all_products.append( product_in_paquete )	
+
+		bundle.data["all_productos_in_paquete"] = _all_products 
+
+
+		print _control_remoto_en_paquete 
+		#asignacion de todos los rangos que tiene el control remoto al paquete acutal
+		rango_control_remoto_en_paquete = producto_has_rango.objects.filter( producto = _control_remoto_en_paquete )
+		
+		print rango_control_remoto_en_paquete.__dict__
+
+		return bundle
 #************************************************************************************************************
 #*********************************************  Paquetes has productos  ***********************************
 #************************************************************************************************************
@@ -1358,7 +1399,7 @@ class PaquetesResource(ModelResource):
 
 class PaquetesHasProductosResource(ModelResource):
 	"""Paquetes has productos """
-	producto = fields.ForeignKey(ProductoResource, 'producto' , full = True     )
+	productos = fields.ForeignKey(ProductoResource, 'productos' , full = True     )
 	paquetes = fields.ForeignKey(PaquetesResource , 'paquetes' , full = True     )
 
 	class Meta:
