@@ -10,8 +10,9 @@ DATABASES = {'default': dj_database_url.config(default= 'mysql://b90765a3f69a4d:
 #DATABASES = { 'default': dj_database_url.config(default='postgres://gbitfdbauwyedl:awnV6ozkiol619BFitzqGGwUst@ec2-107-20-191-205.compute-1.amazonaws.com:5432/d6hn86ogou3lmm')}
 
 
-DEBUG = True
 DEPLOY = False 
+
+DEBUG = True
 TASTYPIE_FULL_DEBUG = True 
 
 TEMPLATE_DEBUG = DEBUG

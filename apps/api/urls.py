@@ -35,7 +35,7 @@ v1_api.register(DepositoSucursalResource())
 v1_api.register(FacturarVentaResource())
 v1_api.register(ConfiguracionComisionResource())
 v1_api.register(PaquetesResource())
-v1_api.register(PaquetesHasProductosResource())
+#v1_api.register(PaquetesHasProductosResource())
 #v1_api.register(VentaHasProductoResource())
 
 

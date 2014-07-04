@@ -1397,21 +1397,4 @@ class PaquetesResource(ModelResource):
 #************************************************************************************************************
 
 
-class PaquetesHasProductosResource(ModelResource):
-	"""Paquetes has productos """
-	productos = fields.ForeignKey(ProductoResource, 'productos' , full = True     )
-	paquetes = fields.ForeignKey(PaquetesResource , 'paquetes' , full = True     )
-
-	class Meta:
-		allowed_methods = ["get", "post"]
-		queryset = PaquetesHasProducto.objects.all()
-		always_return_data = True
-		resource_name = 'paquetehasproducto'
-		filtering = {
-			  	"producto" : ALL_WITH_RELATIONS,
-			  	"paquetes" : ALL_WITH_RELATIONS,
-			  }
-
-		authorization= Authorization()
-
 
