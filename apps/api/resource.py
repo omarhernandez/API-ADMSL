@@ -994,7 +994,7 @@ class ReporteAjusteInventarioResource(ModelResource):
 			#productos faltantes
 			faltante = ( existencia_current_product_in_system - fisico ) 
 
-			if( faltante <= 0:
+			if faltante <= 0:
 					faltante = 0
 
 			bundle.obj.faltante = faltante 
