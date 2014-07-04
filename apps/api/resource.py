@@ -267,7 +267,7 @@ class VentaResource(ModelResource):
 	 	
 			attribute = lambda bundle: venta_has_producto.objects.filter(venta = bundle.obj)
 	  		
-		, null = True , full = False )    
+		, null = True , full = True)    
 
 
 
