@@ -280,7 +280,7 @@ class VentaResource(ModelResource):
 
 	def dehydrate(self , bundle):
 		#bundle.data["folio"] = bundle.obj.id
-		del bundle.data["producto"]
+		#del bundle.data["producto"]
 
 		return bundle
 
