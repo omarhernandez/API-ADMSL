@@ -35,5 +35,7 @@ v1_api.register(FacturarVentaResource())
 v1_api.register(ConfiguracionComisionResource())
 v1_api.register(PaquetesResource())
 v1_api.register(CargarFacturaResource())
+v1_api.register(CargarFacturaEnInventarioResource())
+v1_api.register(CargarFacturaHasProductosResource())
 
 

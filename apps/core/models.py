@@ -366,6 +366,7 @@ class CargarFactura(models.Model):
     	fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
     	sucursal = models.ForeignKey(Sucursal, db_column='sucursal') # Field name made lowercase.
 	numero_factura = models.CharField(max_length=45L)
+	procesado = models.IntegerField( default = 0)
 	
 	class Meta:
 		db_table = 'cargar_factura'
@@ -383,5 +384,11 @@ class FacturaHasProductos(models.Model):
 	class Meta:
 		db_table = 'factura_has_productos' 
 
-
+class CargarFacturaEnInventario(models.Model):
+    	sucursal = models.ForeignKey(Sucursal, db_column='sucursal') # Field name made lowercase.
+	numero_factura = models.IntegerField(null=True, blank=True)
+	procesada = models.IntegerField(null=True, blank=True)
+	
+	class Meta:
+		db_table = 'cargar_factura_en_inventario'
 

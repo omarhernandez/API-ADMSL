@@ -1245,6 +1245,7 @@ class DepositoSucursalResource(ModelResource):
 		resource_name = 'depositosucursal'
 		filtering = {
 			  	"corte_dia" : ALL_WITH_RELATIONS,
+				"fecha" : ["lte","gte", "lt","gt"],
 			  }
 		authorization= Authorization()
 
@@ -1431,7 +1432,7 @@ class CargarFacturaResource(ModelResource):
 		#_current_id_factura  = re.search('\/api\/v1\/producto\/(\d+)\/', str(bundle.data["producto"])).group(1)
 		codigos_  = bundle.data["codigo"]
 		for codigo in codigos_:
-			FacturaHasProductos.objects.create(factura = factura , cantidad_emitida = codigo["cantidad_emitida"])
+			FacturaHasProductos.objects.create(factura = factura , cantidad_emitida = codigo["cantidad_emitida"] , codigo = codigo["codigo"] )
 
 		return bundle
 
@@ -1444,11 +1445,69 @@ class CargarFacturaHasProductosResource(ModelResource):
 	"""Cargar factura has productos  """
 
 	class Meta:
-		#allowed_methods = ["get", "post" , "put", "delete"]
+		allowed_methods = ["get", "post" , "put", "delete"]
 		queryset = FacturaHasProductos.objects.all()
+		resource_name = 'productosfactura'
 		always_return_data = True
 		authorization= Authorization()
 
+#*********************************************  Cargar  Factura en un inoventario de una sucursal     ******
+#************************************************************************************************************
+
+
+
+class CargarFacturaEnInventarioResource(ModelResource):
+	""" Inventario de una sucursal actualizado por una facutra en el sucursal."""
+
+	sucursal = fields.ForeignKey("apps.api.resource.SucursalSinInventarioResource" , 'sucursal' , full = True     )
+
+	class Meta:
+		queryset = CargarFacturaEnInventario.objects.all()
+		always_return_data = True
+		resource_name = 'cargarfacturainventario'
+		filtering = {
+			  	"sucursal" : ["exact"],
+			  	"numero_factura" : ["exact"],
+			  }
+		authorization= Authorization()
+
+	def obj_create(self, bundle, request=None, **kwargs): 
+
+		print bundle
+		bundle = self.full_hydrate(bundle)
+		bundle.obj.procesada = 1
+		bundle.obj.save()
+
+		#carga los nuevos productos en el inventairo de una factura
+		if bundle.data["procesada"]:
+
+			print "cargar factura"
+			factura_id =  bundle.data["numero_factura"]
+			sucursal_id = re.search('\/api\/v1\/sucursal\/(\d+)\/', str(bundle.data["sucursal"])).group(1)
+
+			factura_instance = CargarFactura.objects.filter( sucursal = sucursal_id , procesado = 0 , numero_factura = factura_id  ) 
+
+			#productos dentro de una factura que se van a iterar y buscar en el inventario de la sucursal para actualizar los datos
+			Productos_factura = FacturaHasProductos.objects.filter ( factura = factura_instance )
+
+			for _producto_in_factura in Productos_factura:
+
+				_codigo_producto  = _producto_in_factura.codigo
+				_current_producto_en_inventario =  qs_producto_en_inventario  = inventario.objects.filter( producto__codigo = _codigo_producto )
+				_current_producto_en_inventario = qs_producto_en_inventario[0]
+
+				#existencia del producto en inventario
+				_current_existencia_in_producto  = _current_producto_en_inventario.existencia 
+
+				#se suma la existencia mas los productos que se enviaron por una factura
+				_existencia_total = _current_existencia_in_producto + _producto_in_factura.cantidad_emitida
+
+				#actualizamos la existencia del inventario
+				print qs_producto_en_inventario.update( existencia = _existencia_total ) 
+
+				factura_instance.update( procesado = 1 )
+
+		return bundle
 
 
 
