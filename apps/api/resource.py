@@ -1399,21 +1399,56 @@ class PaquetesResource(ModelResource):
 
 class CargarFacturaResource(ModelResource):
 	"""Cargar factura """
-
 	sucursal = fields.ForeignKey(SucursalResource, 'sucursal'     )
+	codigo = fields.ToManyField('apps.api.resource.CargarFacturaHasProductosResource',  
+	 	
+			attribute = lambda bundle: FacturaHasProductos.objects.filter(factura = bundle.obj)
+	  		
+		, null = True , full = True)    
+
+
 	class Meta:
+
 		allowed_methods = ["get", "post" , "put", "delete"]
 		queryset = CargarFactura.objects.all()
 		always_return_data = True
 		resource_name = 'cargarfactura'
 		filtering = {
 				"fecha" : ["lte","gte", "lt","gt"],
-			  	"codigo" : ["icontains"],
 			  	"sucursal" : ["exact"],
 			  	"numero_factura" : ["exact"],
-			  	"procesada" : ["exact"],
 			  }
 		authorization= Authorization()
+
+	def obj_create(self, bundle, request=None, **kwargs): 
+
+		bundle = self.full_hydrate(bundle) 
+
+		bundle.obj.save()
+
+		factura = bundle.obj
+
+		#_current_id_factura  = re.search('\/api\/v1\/producto\/(\d+)\/', str(bundle.data["producto"])).group(1)
+		codigos_  = bundle.data["codigo"]
+		for codigo in codigos_:
+			FacturaHasProductos.objects.create(factura = factura , cantidad_emitida = codigo["cantidad_emitida"])
+
+		return bundle
+
+
+#*********************************************  Cargar  Factura has productos  ******************************
+#************************************************************************************************************
+
+
+class CargarFacturaHasProductosResource(ModelResource):
+	"""Cargar factura has productos  """
+
+	class Meta:
+		#allowed_methods = ["get", "post" , "put", "delete"]
+		queryset = FacturaHasProductos.objects.all()
+		always_return_data = True
+		authorization= Authorization()
+
 
 
 

@@ -359,21 +359,29 @@ class Paquetes(models.Model):
 class PaquetesHasProducto(models.Model):
     	productos = models.ForeignKey(Producto, db_column='productos') # Field name made lowercase.
     	paquetes = models.ForeignKey(Paquetes, db_column='paquetes') # Field name made lowercase.
-	class Meta:
-		db_table = 'paquete_has_producto'
+	class Meta: db_table = 'paquete_has_producto'
+
 
 class CargarFactura(models.Model):
-
     	fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
-    	codigo = models.CharField(max_length=45L, blank=True)
-	cantidad = models.IntegerField()
     	sucursal = models.ForeignKey(Sucursal, db_column='sucursal') # Field name made lowercase.
-    	numero_factura = models.CharField(max_length=45L, blank=True)
-	procesada = models.IntegerField()
+	numero_factura = models.CharField(max_length=45L)
 	
 	class Meta:
-	
 		db_table = 'cargar_factura'
+
+
+class FacturaHasProductos(models.Model):
+
+    	factura = models.ForeignKey(CargarFactura, db_column='factura') # Field name made lowercase.
+	codigo = models.CharField(max_length=45L)
+	cantidad_emitida   = models.IntegerField()
+	procesado = models.IntegerField( default = 0)
+	comentario = models.TextField( default = "" )
+	cantidad_recibida = models.IntegerField( default = 0 )
+	
+	class Meta:
+		db_table = 'factura_has_productos' 
 
 
 
