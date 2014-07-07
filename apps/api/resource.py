@@ -966,6 +966,17 @@ class ReporteAjusteInventarioResource(ModelResource):
 
 		authorization= Authorization()
 	
+	def dehydrate(self , bundle):
+		_codigo_producto = bundle.data["codigo"]
+		_sucursal = bundle.data["sucursal"].obj
+
+		producto_in_inventairo = inventario.objects.all().filter( sucursal = _sucursal.id , producto__codigo = _codigo_producto  )[0]
+
+		bundle.data["id_inventario_en_producto"] = producto_in_inventairo.producto_id
+		return bundle
+
+
+
 
 	def obj_create(self, bundle, request=None, **kwargs): 
 		""" Se hace un ajuste de inventario por una sucursal semanalmente """
@@ -1385,11 +1396,9 @@ class PaquetesResource(ModelResource):
 
 		#bundle.data["all_productos_in_paquete"] = _all_products 
 
-		#print _control_remoto_en_paquete 
 		#asignacion de todos los rangos que tiene el control remoto al paquete acutal
 		#rango_control_remoto_en_paquete = producto_has_rango.objects.filter( producto = _control_remoto_en_paquete )
 		
-		#print rango_control_remoto_en_paquete.__dict__
 
 		return bundle
 
@@ -1473,7 +1482,6 @@ class CargarFacturaEnInventarioResource(ModelResource):
 
 	def obj_create(self, bundle, request=None, **kwargs): 
 
-		print bundle
 		bundle = self.full_hydrate(bundle)
 		bundle.obj.procesada = 1
 		bundle.obj.save()
@@ -1481,7 +1489,6 @@ class CargarFacturaEnInventarioResource(ModelResource):
 		#carga los nuevos productos en el inventairo de una factura
 		if bundle.data["procesada"]:
 
-			print "cargar factura"
 			factura_id =  bundle.data["numero_factura"]
 			sucursal_id = re.search('\/api\/v1\/sucursal\/(\d+)\/', str(bundle.data["sucursal"])).group(1)
 
@@ -1503,7 +1510,6 @@ class CargarFacturaEnInventarioResource(ModelResource):
 				_existencia_total = _current_existencia_in_producto + _producto_in_factura.cantidad_emitida
 
 				#actualizamos la existencia del inventario
-				print qs_producto_en_inventario.update( existencia = _existencia_total ) 
 
 				factura_instance.update( procesado = 1 )
 
