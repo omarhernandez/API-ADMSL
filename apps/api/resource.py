@@ -972,7 +972,7 @@ class ReporteAjusteInventarioResource(ModelResource):
 
 		producto_in_inventairo = inventario.objects.all().filter( sucursal = _sucursal.id , producto__codigo = _codigo_producto  )[0]
 
-		bundle.data["id_inventario_en_producto"] = producto_in_inventairo.producto_id
+		bundle.data["id_inventario_en_producto"] = producto_in_inventairo.id
 		return bundle
 
 
