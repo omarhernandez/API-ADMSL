@@ -1121,7 +1121,7 @@ class CorteDiaResource(ModelResource):
 		always_return_data = True
 		resource_name = 'cortedia'
 		filtering = {
-			  	"sucursal" : ["exact"],
+			  	"sucursal" : ALL_WITH_RELATIONS ,
 			  	"usuario" : ["exact"],
 			 	"fecha" : ["lte","gte", "lt","gt"],
 			  }
