@@ -1147,17 +1147,33 @@ class CorteDiaResource(ModelResource):
 
 		sucursal =   re.search('\/api\/v1\/sucursal\/(\d+)\/', str(bundle.data["sucursal"])).group(1)
 
-		year = date.today().year
-		month = date.today().month
-		day = date.today().day
+		#el ultimo corte del dia
+		try:
+			fecha_ultimo_corte = CorteDia.objects.filter( sucursal  = sucursal ).order_by("-id")[0].fecha
+
+			FacturarVenta_qs =    FacturarVenta.objects.filter ( fecha__gt  = fecha_ultimo_corte ,  sucursal = sucursal)
+			id_venta_facturacion = FacturarVenta_qs.values("id")
+
+			ventas_desde_ultimo_corte = venta.objects.filter( fecha__gt  = fecha_ultimo_corte , sucursal = sucursal ).exclude( id__in = id_venta_facturacion )
+			ventas_hoy = ventas_desde_ultimo_corte
+
+		except:
+			#si es el primer corte del dia
+
+			year = date.today().year
+			month = date.today().month
+			day = date.today().day
+
+			#calcular el total a facturar de ventas
+			FacturarVenta_qs =    FacturarVenta.objects.filter ( fecha__year = year , fecha__month = month , fecha__day = day ,  sucursal = sucursal)
+			id_venta_facturacion = FacturarVenta_qs.values("id")
+
+			#ventas totales diarias  por sucursal objectos
+			ventas_hoy = venta.objects.filter( fecha__year = year , fecha__month = month , fecha__day = day , sucursal = sucursal ).exclude( id__in = id_venta_facturacion )
 
 
-		#calcular el total a facturar de ventas
-		FacturarVenta_qs =    FacturarVenta.objects.filter ( fecha__year = year , fecha__month = month , fecha__day = day ,  sucursal = sucursal)
-		id_venta_facturacion = FacturarVenta_qs.values("id")
+		print ventas_hoy
 
-		#ventas totales diarias  por sucursal objectos
-		ventas_hoy = venta.objects.filter( fecha__year = year , fecha__month = month , fecha__day = day , sucursal = sucursal ).exclude( id__in = id_venta_facturacion )
 
 		ventas_hoy_total = 0
 
@@ -1183,10 +1199,9 @@ class CorteDiaResource(ModelResource):
 			ventas_facturas	 +=  venta_a_facturar.venta.total
 
 		ventas_hoy_total_con_factura = ventas_hoy_total
+
 		#total de la venta incluyendo facturas
-		ventas_hoy_total_con_factura += ventas_facturas
-
-
+		#ventas_hoy_total_con_factura += ventas_facturas
 
 		bundle.obj.deposito_1 =  ventas_hoy_total * .60
 		bundle.obj.deposito_2 =  ventas_hoy_total * .40
@@ -1194,10 +1209,6 @@ class CorteDiaResource(ModelResource):
 		bundle.obj.venta_mayoreo = ventas_hoy_mayoreo
 		bundle.obj.venta_publico = ventas_hoy_publico
 		bundle.obj.total =  ventas_hoy_total_con_factura
-
-
-
-
 
 		bundle.obj.save()
 
@@ -1388,6 +1399,7 @@ class PaquetesResource(ModelResource):
 			id_producto =   re.search('\/api\/v1\/producto\/(\d+)\/', str(_producto["producto"])).group(1)
 			id_producto = Producto.objects.filter(id = id_producto)[0]
 
+			#se obtiene el paquete el control remot en la primera posicion
 			if key == 0:
 				_control_remoto_en_paquete = id_producto 
 
@@ -1398,6 +1410,7 @@ class PaquetesResource(ModelResource):
 
 		#asignacion de todos los rangos que tiene el control remoto al paquete acutal
 		#rango_control_remoto_en_paquete = producto_has_rango.objects.filter( producto = _control_remoto_en_paquete )
+		
 		
 
 		return bundle
