@@ -37,5 +37,6 @@ v1_api.register(PaquetesResource())
 v1_api.register(CargarFacturaResource())
 v1_api.register(CargarFacturaEnInventarioResource())
 v1_api.register(CargarFacturaHasProductosResource())
+v1_api.register(AsistenciaResource())
 
 

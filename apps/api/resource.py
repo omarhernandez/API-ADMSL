@@ -25,6 +25,31 @@ class ISELAuthentication(Authorization):
 
 	def is_authenticated( self , request , **kwargs ):
 		return False
+#************************************************************************************************************
+#********************************************* Asistencia Sucursal*******************************************
+#************************************************************************************************************
+
+
+class AsistenciaResource(ModelResource):
+
+	usuario = fields.ForeignKey("apps.api.resource.UsuarioSucursalResource", 'usuario'    ,  null = True , full = True )
+	sucursal = fields.ForeignKey("apps.api.resource.SucursalSinInventarioResource", 'sucursal'    ,  null = True ,full = True )
+
+	class Meta:
+		queryset = Asistencia.objects.all()
+		allowed_methods = ["get"]
+		resource_name ='asistencia'
+		authorization= Authorization()
+
+
+		filtering  = {
+
+			  "fecha" : ["lte","gte", "lt","gt"],
+
+			}
+
+
+
 
 #************************************************************************************************************
 #********************************************* Usuario Sucursal *******************************************
@@ -581,6 +606,8 @@ class LoginResource(ModelResource):
 			bundle.data["nombre"] = user_exist[0].nombre
 
 			if user_exist[0].rol == "sucursal":
+
+
 				#bundle.data["info"] = UsuarioSucursal.objects.filter ( usuario = user_exist ) 
 				UsuarioSucursalResponse = UsuarioSucursal.objects.filter ( usuario = user_exist )
     
@@ -601,6 +628,21 @@ class LoginResource(ModelResource):
 				bundle.data["sucursal"].pop("_state")
 				bundle.data["sucursal"]["resource_uri"] =   "api/v1/sucursal/{0}/".format( current_obj_sucursal_.id )
 				bundle.data["rol"] = "sucursal"
+
+				#pase de aistencia 
+				#checar si el usuario no ha pasado asistencia al iniciar secion
+
+				year = date.today().year
+				month = date.today().month
+				day = date.today().day
+
+				sucursal = Sucursal.objects.get(pk= current_obj_sucursal_.id )
+				#calcular el total a facturar de ventas
+				paso_asistencia = Asistencia.objects.filter( fecha__year = year , fecha__month = month , fecha__day = day ,  sucursal = sucursal , usuario = UsuarioSucursalResponse[0])
+				pasa_asistencia = False if len(paso_asistencia) >  0  is not None else True
+
+				if pasa_asistencia:
+					Asistencia.objects.create( usuario = UsuarioSucursalResponse[0]  , sucursal = sucursal) 
 			
 	 	
 			if user_exist[0].rol == "supervisor":
@@ -648,7 +690,7 @@ class UsuarioResource(ModelResource):
 	class Meta:
 		always_return_data = True
 		allowed_methods = ['get', 'post' , 'delete' , "put"]		
-		#excludes = ["password"]
+		excludes = ["password"]
 		queryset = Usuario.objects.all().distinct()
 		resource_name = 'usuario'
 		authorization= ISELAuthentication()
@@ -895,7 +937,7 @@ class HistorialVentaResource(ModelResource):
 
 class UsuarioSucursalResource(ModelResource):
 
-	usuario = fields.ForeignKey("apps.api.resource.UsuarioResource", 'usuario'    ,  null = True )
+	usuario = fields.ForeignKey("apps.api.resource.UsuarioResource", 'usuario'    ,  null = True , full = True )
 	class Meta:
 		queryset = UsuarioSucursal.objects.all()
 		resource_name ='usuariosucursal'

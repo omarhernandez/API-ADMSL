@@ -40,6 +40,7 @@ class Sucursal(models.Model):
     num_ext = models.CharField(max_length=45L, blank=True)
     folio_sucursal = models.CharField(max_length=50L, blank=True)
     descuento = models.CharField(max_length=10L, blank=True)
+    hora_entrada = models.DateTimeField( db_column = "hora_entrada" )
 
 
     class Meta:
@@ -391,4 +392,13 @@ class CargarFacturaEnInventario(models.Model):
 	
 	class Meta:
 		db_table = 'cargar_factura_en_inventario'
+
+
+class Asistencia(models.Model):
+	fecha = models.DateTimeField( auto_now_add = True) 
+	usuario = models.ForeignKey(UsuarioSucursal , db_column = "usuario") 
+	sucursal = models.ForeignKey(Sucursal , db_column = "sucursal") # Field name made lowercase.
+	
+	class Meta:
+		db_table = 'asistencia'
 
