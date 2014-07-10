@@ -1,38 +1,24 @@
-# Django settings for admisel project.
-#HEROKU_POSTGRESQL_RED_URL
 import os,sys
-
 import dj_database_url
 
-#DATABASES = {'default': dj_database_url.config(default= 'postgres://czdbfbxhdgroah:JvGaRToNvtFGBv6yoIfPAg7_xc@ec2-107-20-191-205.compute-1.amazonaws.com:5432/dc48ggb50iq7u4' )}
-DATABASES = {'default': dj_database_url.config(default= 'mysql://b90765a3f69a4d:fbb51098@us-cdbr-east-05.cleardb.net/heroku_37421aebe3e67f6?reconnect=true' )}
-#GRAY
-#DATABASES = { 'default': dj_database_url.config(default='postgres://gbitfdbauwyedl:awnV6ozkiol619BFitzqGGwUst@ec2-107-20-191-205.compute-1.amazonaws.com:5432/d6hn86ogou3lmm')}
-
-
-DEPLOY  = False
-
-DEBUG = True
-TASTYPIE_FULL_DEBUG = True 
-
+DATABASES = {'default': dj_database_url.config(default= os.environ.get("CREDENTIALS_HEROKU")	)}
+DEPLOY  = os.environ.get("DEV",False) 
+TASTYPIE_FULL_DEBUG = DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-ADMINS = (
-    # ('Your Name', 'your_email@example.com'),
-)
+ADMINS = ()
 
 MANAGERS = ADMINS
 
 if DEPLOY:
 	DATABASES = {
 	    'default': {
-        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'heroku_37421aebe3e67f6',                      # Or path to database file if using sqlite3.
-        # The following settings are not used with sqlite3:
+        'ENGINE': 'django.db.backends.mysql', 
+        'NAME': os.environ.get("DB_NAME_API") ,
         'USER': 'root',
-        'PASSWORD': 'nf9ckpg',
-        'HOST': 'localhost',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-        'PORT': '',                      # Set to empty string for default.
+        'PASSWORD': os.environ.get("CREDENTIALS_HEROKU"),
+        'HOST': 'localhost',                      
+        'PORT': '',                      
     }
 }
 
