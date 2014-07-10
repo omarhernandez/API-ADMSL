@@ -40,7 +40,7 @@ class Sucursal(models.Model):
     num_ext = models.CharField(max_length=45L, blank=True)
     folio_sucursal = models.CharField(max_length=50L, blank=True)
     descuento = models.CharField(max_length=10L, blank=True)
-    hora_entrada = models.DateTimeField( db_column = "hora_entrada" )
+    hora_entrada = models.DateTimeField( db_column = "hora_entrada", blank = True , null = True )
 
 
     class Meta:
