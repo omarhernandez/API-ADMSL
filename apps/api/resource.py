@@ -67,11 +67,6 @@ class AsistenciaResource(ModelResource):
 		minutos_diferencia = hora_entrada_usuario_minuto - hora_entrada_en_sucursal_minuto
 		horas_diferencia = hora_entrada_usuario_hora - hora_entrada_en_sucursal_hora
 
-		print hora_entrada_en_sucursal , hora_entrada_usuario
-
-		print "retardo" , minutos_diferencia
-		print "hora", horas_diferencia
-
 		bundle.data["tiempo_retardo"] = "{0}hrs. - {1} Min.".format(horas_diferencia , minutos_diferencia) if horas_diferencia > 0 else  "{0}".format( minutos_diferencia )
 
 		return bundle
