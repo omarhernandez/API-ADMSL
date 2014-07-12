@@ -1150,6 +1150,7 @@ class KardexResource(ModelResource):
 		filtering = {
 			  	"sucursal" : ["exact"],
 			  	"producto" : ["exact"],
+			 	"fecha" : ["lte","gte", "lt","gt"],
 			  }
 		authorization= Authorization()
 
