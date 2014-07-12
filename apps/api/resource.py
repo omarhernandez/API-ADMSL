@@ -377,7 +377,7 @@ class VentaResource(ModelResource):
 
 
 
-		bundle.obj.url_reporte = "{0}_{1}_.pdf".format( name_utf8_decoded , datetime.datetime.utcnow().strftime('%m_%d_%Y_%s') )
+		bundle.obj.url_reporte = "{0}_{1}_.pdf".format( name_utf8_decoded , datetime.utcnow().strftime('%m_%d_%Y_%s') )
 		bundle.obj.save()
 
 
