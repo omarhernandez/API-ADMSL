@@ -283,6 +283,44 @@ class Kardex(models.Model):
 		db_table = 'kardex'
 
 
+class Bitacora(models.Model):
+
+    	sucursal = models.ForeignKey(Sucursal, db_column='sucursal') # Field name made lowercase.
+    	fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
+
+	#Entradas
+	entrada_compra_factura  = models.IntegerField( default = 0)
+    	entrada_cambios = models.IntegerField(default = 0)
+
+	entrada_total = models.IntegerField( default = 0 )
+ 
+	#SALIDAS
+	salida_ventas = models.IntegerField( default = 0)
+
+    	salida_cambios = models.IntegerField( default = 0)
+	salida_total = models.IntegerField( default = 0)
+	disponible_fisico = models.IntegerField( default = 0)
+
+	#SISTEMA
+	sistema_existencia = models.IntegerField( default = 0)
+	sistema_dif_ajustes = models.IntegerField( default = 0)
+	sistema_cambios = models.IntegerField( default = 0)
+	total_existencia = models.IntegerField( default = 0)
+
+	diferencia = models.IntegerField( default = 0)
+
+	#ventas efectivo
+	ventas_publico = models.FloatField( default = 0)
+	ventas_mayoreo = models.FloatField( default = 0)
+	dep_en_facturas = models.FloatField( default = 0)
+	gastos = models.FloatField( default = 0)
+	total_a_depositar = models.FloatField( default = 0)
+
+
+	class Meta:
+		db_table = 'bitacora'
+
+
 class CorteDia(models.Model):
 
     	sucursal = models.ForeignKey(Sucursal, db_column='sucursal') # Field name made lowercase.

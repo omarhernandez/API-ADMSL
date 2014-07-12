@@ -24,6 +24,31 @@ class ISELAuthentication(Authorization):
 
 	def is_authenticated( self , request , **kwargs ):
 		return False
+
+
+
+#************************************************************************************************************
+#********************************************* bitacora Sucursal*******************************************
+#************************************************************************************************************
+
+
+class BitacoraResource(ModelResource):
+
+	sucursal = fields.ForeignKey("apps.api.resource.SucursalSinInventarioResource", 'sucursal'    ,  null = True ,full = True )
+
+	class Meta:
+		queryset = Bitacora.objects.all()
+		allowed_methods = ["get"]
+		resource_name ='bitacora'
+		authorization= Authorization()
+
+		filtering  = {
+
+			  "fecha" : ["lte","gte", "lt","gt"],
+
+			}
+
+
 #************************************************************************************************************
 #********************************************* Asistencia Sucursal*******************************************
 #************************************************************************************************************
@@ -340,7 +365,7 @@ class VentaResource(ModelResource):
 		productos = bundle.data["producto"]
 
 
-		t = datetime.datetime.utcnow().strftime('%m_%d_%Y')
+		t = datetime.utcnow().strftime('%m_%d_%Y')
 
 		name_sucursal = unicode(bundle.obj.sucursal.nombre.lower() )
 		name_sucursal = unicodedata.normalize('NFKD', unicode(name_sucursal) ).encode('ascii', 'ignore').replace(" ","_").lower()
