@@ -16,7 +16,7 @@ if DEPLOY:
         'ENGINE': 'django.db.backends.mysql', 
         'NAME': os.environ.get("DB_NAME_API") ,
         'USER': 'root',
-        'PASSWORD': os.environ.get("CREDENTIALS_HEROKU"),
+        'PASSWORD': os.environ.get("PASSWORD"),
         'HOST': 'localhost',                      
         'PORT': '',                      
     }

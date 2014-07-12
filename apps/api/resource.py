@@ -1,10 +1,9 @@
 #encoding:utf-8
-from datetime import date
+from datetime import date , datetime
 from tastypie.authentication import BasicAuthentication
 from django.db.models import Q , F
 from tastypie.exceptions import * 
 import unicodedata
-import datetime
 from django.core import serializers
 import re 
 from tastypie import fields
@@ -47,6 +46,35 @@ class AsistenciaResource(ModelResource):
 			  "fecha" : ["lte","gte", "lt","gt"],
 
 			}
+
+
+	def dehydrate(self , bundle ): 
+
+		#hora de entrada de un usuario
+		hora_entrada_usuario = bundle.data.get("fecha")
+
+		hora_entrada_usuario_hora = hora_entrada_usuario.hour 
+		hora_entrada_usuario_minuto  = hora_entrada_usuario.minute
+
+
+		#hora de entrada fijada en la sucursal
+		hora_entrada_en_sucursal  = bundle.data.get("sucursal").data.get("hora_entrada")
+
+		hora_entrada_en_sucursal_minuto = hora_entrada_en_sucursal.minute
+		hora_entrada_en_sucursal_hora = hora_entrada_en_sucursal.hour
+
+
+		minutos_diferencia = hora_entrada_usuario_minuto - hora_entrada_en_sucursal_minuto
+		horas_diferencia = hora_entrada_usuario_hora - hora_entrada_en_sucursal_hora
+
+		print hora_entrada_en_sucursal , hora_entrada_usuario
+
+		print "retardo" , minutos_diferencia
+		print "hora", horas_diferencia
+
+		bundle.data["tiempo_retardo"] = "{0}hrs. - {1} Min.".format(horas_diferencia , minutos_diferencia) if horas_diferencia > 0 else  "{0}".format( minutos_diferencia )
+
+		return bundle
 
 
 
@@ -801,8 +829,6 @@ class AsignacionSupervisorPlazaResource(ModelResource):
 			"sucursal"  : ["exact"],
 
 				}
-
-
 #************************************************************************************************************
 #********************************************* Venta Usuario Sucursal ***************************************
 #************************************************************************************************************
