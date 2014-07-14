@@ -48,8 +48,7 @@ class BitacoraResource(ModelResource):
 
 			}
 
-	def hydrate_sucursal(self , bundle ): 
-		print "hehe"
+	def dehydrate(self , bundle ): 
 
 		return bundle
 
@@ -1266,7 +1265,6 @@ class CorteDiaResource(ModelResource):
 			ventas_hoy = venta.objects.filter( fecha__year = year , fecha__month = month , fecha__day = day , sucursal = sucursal ).exclude( id__in = id_venta_facturacion )
 
 
-		print ventas_hoy
 
 
 		ventas_hoy_total = 0
@@ -1599,22 +1597,27 @@ class CargarFacturaEnInventarioResource(ModelResource):
 			factura_id =  bundle.data["numero_factura"]
 			sucursal_id = re.search('\/api\/v1\/sucursal\/(\d+)\/', str(bundle.data["sucursal"])).group(1)
 
-			factura_instance = CargarFactura.objects.filter( sucursal = sucursal_id , procesado = 0 , numero_factura = factura_id  ) 
+			factura_instance = factura_data  = CargarFactura.objects.filter( sucursal = sucursal_id , procesado = 0 , numero_factura = factura_id  )
+
 
 			#productos dentro de una factura que se van a iterar y buscar en el inventario de la sucursal para actualizar los datos
-			Productos_factura = FacturaHasProductos.objects.filter ( factura = factura_instance )
+			Productos_factura = FacturaHasProductos.objects.filter ( factura = factura_data[0] )
 
 			for _producto_in_factura in Productos_factura:
 
 				_codigo_producto  = _producto_in_factura.codigo
-				_current_producto_en_inventario =  qs_producto_en_inventario  = inventario.objects.filter( producto__codigo = _codigo_producto )
-				_current_producto_en_inventario = qs_producto_en_inventario[0]
+				_current_producto_en_inventario =  qs_producto_en_inventario  = inventario.objects.filter( producto__codigo  = _codigo_producto )
+
+				_current_producto_en_inventario = _current_producto_en_inventario_instance  = qs_producto_en_inventario
+
+				_current_producto_en_inventario = _current_producto_en_inventario[0]
 
 				#existencia del producto en inventario
 				_current_existencia_in_producto  = _current_producto_en_inventario.existencia 
 
 				#se suma la existencia mas los productos que se enviaron por una factura
 				_existencia_total = _current_existencia_in_producto + _producto_in_factura.cantidad_emitida
+				_current_producto_en_inventario_instance.update( existencia = _existencia_total )
 
 				#actualizamos la existencia del inventario
 
