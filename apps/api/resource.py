@@ -48,6 +48,11 @@ class BitacoraResource(ModelResource):
 
 			}
 
+	def hydrate_sucursal(self , bundle ): 
+		print "hehe"
+
+		return bundle
+
 
 #************************************************************************************************************
 #********************************************* Asistencia Sucursal*******************************************
@@ -738,7 +743,7 @@ class UsuarioResource(ModelResource):
 	class Meta:
 		always_return_data = True
 		allowed_methods = ['get', 'post' , 'delete' , "put"]		
-		excludes = ["password"]
+		#excludes = ["password"]
 		queryset = Usuario.objects.all().distinct()
 		resource_name = 'usuario'
 		authorization= ISELAuthentication()
