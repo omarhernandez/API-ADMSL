@@ -1603,6 +1603,7 @@ class CargarFacturaEnInventarioResource(ModelResource):
 			#productos dentro de una factura que se van a iterar y buscar en el inventario de la sucursal para actualizar los datos
 			Productos_factura = FacturaHasProductos.objects.filter ( factura = factura_data[0] )
 
+
 			for _producto_in_factura in Productos_factura:
 
 				_codigo_producto  = _producto_in_factura.codigo
