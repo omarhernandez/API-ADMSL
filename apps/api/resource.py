@@ -213,6 +213,18 @@ class SucursalResource(ModelResource):
 			    }
 
 
+	def obj_create(self, bundle, request=None, **kwargs): 
+
+		bundle = self.full_hydrate(bundle)
+		bundle.obj.save()
+
+		print "create bitacora"
+		Bitacora.objects.create( sucursal = bundle.obj)
+
+		return bundle
+
+
+
 #************************************************************************************************************
 #*********************************************Rango ******************************************************
 #************************************************************************************************************
@@ -695,6 +707,8 @@ class LoginResource(ModelResource):
 
 				if pasa_asistencia:
 					Asistencia.objects.create( usuario = UsuarioSucursalResponse[0]  , sucursal = sucursal) 
+					#crea la bitacora para el dia de hoy, cuenta el producto inicial
+					update_bitacora_by_sucursal_id(sucursal.id,contar_producto_inicial = True )
 			
 	 	
 			if user_exist[0].rol == "supervisor":
@@ -1023,6 +1037,43 @@ class CambioResource(ModelResource):
 		}
 
 		authorization= Authorization()
+
+
+	def obj_create(self, bundle, request=None, **kwargs): 
+
+		bundle = self.full_hydrate(bundle)
+		bundle.obj.save()
+
+		modelo_entrada_ = inventario.objects.filter( producto__codigo =  bundle.obj.modelo_entrada )
+		nueva_existencia = modelo_entrada_[0].existencia - 1
+		modelo_entrada_.update( existencia = nueva_existencia )
+
+
+		modelo_salida_ = inventario.objects.filter( producto__codigo =  bundle.obj.modelo_salida )
+		nueva_existencia = modelo_salida_[0].existencia - 1
+		modelo_salida_.update( existencia = nueva_existencia )
+
+
+		#current time at now
+		year = date.today().year
+		month = date.today().month
+		day = date.today().day
+
+		bitacora = Bitacora.objects.filter( fecha__year = year , fecha__month = month , fecha__day = day , sucursal = bundle.obj.sucursal )
+
+		entrada_cambio_bitacora = bitacora[0].entrada_cambios +1
+		#productos que estan entrando por cambios
+		bitacora.update( entrada_cambios = entrada_cambio_bitacora  )
+
+		salida_cambio_bitacora = bitacora[0].salida_cambios + 1
+		#producto que estan saliendo por cambios
+		bitacora.update( salida_cambios = salida_cambio_bitacora )
+
+
+
+		return bundle
+
+
 
 
 #************************************************************************************************************
@@ -1597,34 +1648,84 @@ class CargarFacturaEnInventarioResource(ModelResource):
 			factura_id =  bundle.data["numero_factura"]
 			sucursal_id = re.search('\/api\/v1\/sucursal\/(\d+)\/', str(bundle.data["sucursal"])).group(1)
 
-			factura_instance = factura_data  = CargarFactura.objects.filter( sucursal = sucursal_id , procesado = 0 , numero_factura = factura_id  )
+			try:
+
+				factura_instance = factura_data  = CargarFactura.objects.filter( sucursal = sucursal_id , procesado = 0 , numero_factura = factura_id  )
 
 
-			#productos dentro de una factura que se van a iterar y buscar en el inventario de la sucursal para actualizar los datos
-			Productos_factura = FacturaHasProductos.objects.filter ( factura = factura_data[0] )
+				#productos dentro de una factura que se van a iterar y buscar en el inventario de la sucursal para actualizar los datos
+				Productos_factura = FacturaHasProductos.objects.filter ( factura = factura_data[0] )
 
 
-			for _producto_in_factura in Productos_factura:
+				for _producto_in_factura in Productos_factura:
 
-				_codigo_producto  = _producto_in_factura.codigo
-				_current_producto_en_inventario =  qs_producto_en_inventario  = inventario.objects.filter( producto__codigo  = _codigo_producto )
+					_codigo_producto  = _producto_in_factura.codigo
+					_current_producto_en_inventario =  qs_producto_en_inventario  = inventario.objects.filter( producto__codigo  = _codigo_producto )
 
-				_current_producto_en_inventario = _current_producto_en_inventario_instance  = qs_producto_en_inventario
+					_current_producto_en_inventario = _current_producto_en_inventario_instance  = qs_producto_en_inventario
 
-				_current_producto_en_inventario = _current_producto_en_inventario[0]
+					_current_producto_en_inventario = _current_producto_en_inventario[0]
 
-				#existencia del producto en inventario
-				_current_existencia_in_producto  = _current_producto_en_inventario.existencia 
+					#existencia del producto en inventario
+					_current_existencia_in_producto  = _current_producto_en_inventario.existencia 
 
-				#se suma la existencia mas los productos que se enviaron por una factura
-				_existencia_total = _current_existencia_in_producto + _producto_in_factura.cantidad_emitida
-				_current_producto_en_inventario_instance.update( existencia = _existencia_total )
+					#se suma la existencia mas los productos que se enviaron por una factura
+					_existencia_total = _current_existencia_in_producto + _producto_in_factura.cantidad_emitida
+					_current_producto_en_inventario_instance.update( existencia = _existencia_total )
 
-				#actualizamos la existencia del inventario
+					#actualizamos la existencia del inventario
 
-				factura_instance.update( procesado = 1 )
+					factura_instance.update( procesado = 1 )
+					update_bitacora_by_sucursal_id(sucursal_id)
 
-		return bundle
+			except Exception as error:
+				raise NotFound( error )
+
+			return bundle
+		
+
+
+def update_bitacora_by_sucursal_id(sucursal_id ,contar_producto_inicial = False ):
+	print sucursal_id , contar_producto_inicial 
+
+	#current time at now
+	year = date.today().year
+	month = date.today().month
+	day = date.today().day
+	print "todo aqui"
+
+
+	bitacora = bitacora_qs  = Bitacora.objects.filter( fecha__year = year , fecha__month = month , fecha__day = day , sucursal = sucursal_id ) 
+	#se creaa una bitacora para el dia de hoy
+	if len(bitacora) is 0 :
+		print "se crea una bitacora"
+		bitacora = Bitacora.objects.create( sucursal_id  = sucursal_id )
+		bitacora = Bitacora.objects.filter( id = bitacora.id )
+	else:
+		#la bitacora ya existia para el dia de hoy 
+		pass
+
+
+	#contar todo el producto inicial de una sucursal
+	if contar_producto_inicial:
+
+		print bitacora
+		print bitacora
+
+		existencia_inicial  = 0
+		existencia_productos =[ producto.existencia for producto in  inventario.objects.filter( sucursal__id  = sucursal_id) ]
+		existencia_inicial = sum(existencia_productos)
+
+		bitacora.update(inicial = existencia_inicial )
+
+
+	#entradas en compra factura
+	ProductosFactura = FacturaHasProductos.objects.filter( factura__fecha__year = year , factura__fecha__month = month , 
+								factura__fecha__day = day , factura__sucursal = sucursal_id , factura__procesado = 1 )
+
+	list_productos_en_factura = [ producto_.cantidad_emitida  for producto_ in  ProductosFactura ]
+	list_productos_en_factura = sum(list_productos_en_factura)
+	bitacora.update( entrada_compra_factura = list_productos_en_factura )
 
 
 

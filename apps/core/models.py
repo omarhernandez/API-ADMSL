@@ -288,6 +288,8 @@ class Bitacora(models.Model):
     	sucursal = models.ForeignKey(Sucursal, db_column='sucursal') # Field name made lowercase.
     	fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
 
+	inicial =  models.IntegerField( default = 0)  
+
 	#Entradas
 	entrada_compra_factura  = models.IntegerField( default = 0)
     	entrada_cambios = models.IntegerField(default = 0)
