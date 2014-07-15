@@ -28,8 +28,6 @@ class ISELAuthentication(Authorization):
 	def is_authenticated( self , request , **kwargs ):
 		return False
 
-
-
 #************************************************************************************************************
 #********************************************* bitacora Sucursal*******************************************
 #************************************************************************************************************
@@ -1691,12 +1689,19 @@ class CargarFacturaEnInventarioResource(ModelResource):
 
 				#productos dentro de una factura que se van a iterar y buscar en el inventario de la sucursal para actualizar los datos
 				Productos_factura = FacturaHasProductos.objects.filter ( factura = factura_data[0] )
+				print Productos_factura
+
 
 
 				for _producto_in_factura in Productos_factura:
 
 					_codigo_producto  = _producto_in_factura.codigo
-					_current_producto_en_inventario =  qs_producto_en_inventario  = inventario.objects.filter( producto__codigo  = _codigo_producto )
+					print _codigo_producto
+
+					_current_producto_en_inventario =  qs_producto_en_inventario  = inventario.objects.filter( 
+							sucursal  = sucursal_id, producto__codigo  = _codigo_producto )
+
+					print _codigo_producto ,_current_producto_en_inventario
 
 					_current_producto_en_inventario = _current_producto_en_inventario_instance  = qs_producto_en_inventario
 
@@ -1717,7 +1722,7 @@ class CargarFacturaEnInventarioResource(ModelResource):
 					#se actualiza el disponible fisico de una sucursal
 					update_disponible_fisico_in_bitacora(sucursal_id)
 
-					return bundle
+				return bundle
 
 			except Exception as error:
 				raise NotFound( error )
