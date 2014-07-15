@@ -1842,11 +1842,11 @@ def calcular_ventas_totales(sucursal):
 
 		gastos_en_sucursal = GastosSucursal.objects.filter( fecha__year = year , fecha__month = month , fecha__day = day , corte_dia__sucursal = sucursal)
 
-		gastos = [ gasto for gasto in gastos_en_sucursal ]
-		gastos = sum(gastos)
+		gastos_list = [ gasto.gastos for gasto in gastos_en_sucursal ]
+		_gastos = sum(gastos_list)
 
 		bitacora.update( ventas_publico = ventas_hoy_publico , ventas_mayoreo = ventas_hoy_mayoreo , 
-				dep_en_facturas = ventas_facturas , gastos = gastos , total_a_depositar = ventas_hoy_total)
+				dep_en_facturas = ventas_facturas , gastos = _gastos , total_a_depositar = ventas_hoy_total)
 
 
 
