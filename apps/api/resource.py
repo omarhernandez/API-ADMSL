@@ -16,6 +16,7 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 
 MAYOREO_INT = 2
+HORA_CENTRAL_MX = -5
 
 class ISELAuthentication(Authorization):
 
@@ -76,20 +77,25 @@ class AsistenciaResource(ModelResource):
 		filtering  = {
 
 			  "fecha" : ["lte","gte", "lt","gt"],
+			  "sucursal" :ALL_WITH_RELATIONS,
 
 			}
 
 
 	def dehydrate(self , bundle ): 
 
+		#print bundle.request
+		#current_time_at_mx_zone = datetime.now()
+
 		#hora de entrada de un usuario
 		hora_entrada_usuario = bundle.data.get("fecha")
 
-		hora_entrada_usuario_hora = hora_entrada_usuario.hour 
+		hora_entrada_usuario_hora = hora_entrada_usuario.hour + HORA_CENTRAL_MX
 		hora_entrada_usuario_minuto  = hora_entrada_usuario.minute
 
 
 		#hora de entrada fijada en la sucursal
+		#print bundle.data.get("sucursal")
 		hora_entrada_en_sucursal  = bundle.data.get("sucursal").data.get("hora_entrada")
 
 		hora_entrada_en_sucursal_minuto = hora_entrada_en_sucursal.minute
@@ -97,6 +103,7 @@ class AsistenciaResource(ModelResource):
 
 
 		minutos_diferencia = hora_entrada_usuario_minuto - hora_entrada_en_sucursal_minuto
+		#print hora_entrada_usuario_hora , hora_entrada_en_sucursal ,  hora_entrada_en_sucursal_hora 
 		horas_diferencia = hora_entrada_usuario_hora - hora_entrada_en_sucursal_hora
 
 		bundle.data["tiempo_retardo"] = "{0}hrs. - {1} Min.".format(horas_diferencia , minutos_diferencia) if horas_diferencia > 0 else  "{0}".format( minutos_diferencia )
