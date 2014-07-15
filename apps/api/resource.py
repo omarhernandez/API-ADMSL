@@ -15,6 +15,8 @@ from tastypie.exceptions import Unauthorized
 from django.contrib.auth.models import User
 from django.db.models import Q
 
+MAYOREO_INT = 2
+
 class ISELAuthentication(Authorization):
 
 	def create_list( self , object_list, bundle):
@@ -218,7 +220,6 @@ class SucursalResource(ModelResource):
 		bundle = self.full_hydrate(bundle)
 		bundle.obj.save()
 
-		print "create bitacora"
 		Bitacora.objects.create( sucursal = bundle.obj)
 
 		return bundle
@@ -435,6 +436,12 @@ class VentaResource(ModelResource):
 		range_products_by_sucursal = producto_has_rango.objects.filter(sucursal =  sucursal )
 
 
+		#current time at now
+		year = date.today().year
+		month = date.today().month
+		day = date.today().day
+
+		bitacora =  Bitacora.objects.filter( fecha__year = year , fecha__month = month , fecha__day = day , sucursal = sucursal ) 
 		
 		for producto in productos:
 
@@ -442,6 +449,14 @@ class VentaResource(ModelResource):
 			id_producto = Producto.objects.filter(id = id_producto)[0]
 			cantidad = int(producto["cantidad"])
 
+			#salida ventas para bitacoras
+			salida_venta = bitacora[0].salida_ventas + cantidad
+			bitacora.update( salida_ventas = salida_venta )
+			
+			#salidas_total en bitacora
+			salida_total = bitacora[0].salida_total + cantidad
+			bitacora.update( salida_total = salida_total )
+			
 			#decuenta el producto en venta al inventario de la sucursal actual
 
 			existencia_producto_inventario = inventario.objects.filter ( producto = id_producto , sucursal = sucursal ).values("existencia")[0]["existencia"]
@@ -476,6 +491,9 @@ class VentaResource(ModelResource):
 			except:
 				raise NotFound("Error en rango, verifica que el producto tenga asignados todos los rangos")
 
+		#se actualiza el disponible fisico de una sucursal
+		update_disponible_fisico_in_bitacora(sucursal.id)
+		calcular_ventas_totales(sucursal)
 
 		return bundle
 
@@ -1070,6 +1088,20 @@ class CambioResource(ModelResource):
 		bitacora.update( salida_cambios = salida_cambio_bitacora )
 
 
+		entrada_total = bitacora[0].entrada_total + 1
+		#producto que estan saliendo por cambios
+		bitacora.update( entrada_total = entrada_total )
+
+
+		#salidas_total en bitacora
+		salida_total = bitacora[0].salida_total +  1 
+		bitacora.update( salida_total = salida_total )
+		
+
+		#se actualiza el disponible fisico de una sucursal
+		update_disponible_fisico_in_bitacora(bundle.obj.sucursal.id)
+
+		update_bitacora_existencias_de_sistema( bundle.obj.sucursal.id )
 
 		return bundle
 
@@ -1287,7 +1319,6 @@ class CorteDiaResource(ModelResource):
 
 		bundle = self.full_hydrate(bundle)
 
-		MAYOREO_INT = 2
 
 		sucursal =   re.search('\/api\/v1\/sucursal\/(\d+)\/', str(bundle.data["sucursal"])).group(1)
 
@@ -1678,39 +1709,36 @@ class CargarFacturaEnInventarioResource(ModelResource):
 					factura_instance.update( procesado = 1 )
 					update_bitacora_by_sucursal_id(sucursal_id)
 
+					#se actualiza el disponible fisico de una sucursal
+					update_disponible_fisico_in_bitacora(sucursal_id)
+
+					return bundle
+
 			except Exception as error:
 				raise NotFound( error )
 
-			return bundle
 		
 
 
 def update_bitacora_by_sucursal_id(sucursal_id ,contar_producto_inicial = False ):
-	print sucursal_id , contar_producto_inicial 
 
 	#current time at now
 	year = date.today().year
 	month = date.today().month
 	day = date.today().day
-	print "todo aqui"
-
 
 	bitacora = bitacora_qs  = Bitacora.objects.filter( fecha__year = year , fecha__month = month , fecha__day = day , sucursal = sucursal_id ) 
 	#se creaa una bitacora para el dia de hoy
 	if len(bitacora) is 0 :
-		print "se crea una bitacora"
 		bitacora = Bitacora.objects.create( sucursal_id  = sucursal_id )
 		bitacora = Bitacora.objects.filter( id = bitacora.id )
 	else:
 		#la bitacora ya existia para el dia de hoy 
 		pass
 
-
 	#contar todo el producto inicial de una sucursal
-	if contar_producto_inicial:
+	if contar_producto_inicial or bitacora[0].inicial == 0:
 
-		print bitacora
-		print bitacora
 
 		existencia_inicial  = 0
 		existencia_productos =[ producto.existencia for producto in  inventario.objects.filter( sucursal__id  = sucursal_id) ]
@@ -1726,6 +1754,100 @@ def update_bitacora_by_sucursal_id(sucursal_id ,contar_producto_inicial = False 
 	list_productos_en_factura = [ producto_.cantidad_emitida  for producto_ in  ProductosFactura ]
 	list_productos_en_factura = sum(list_productos_en_factura)
 	bitacora.update( entrada_compra_factura = list_productos_en_factura )
+
+	entrada_total = bitacora[0].entrada_total +  list_productos_en_factura
+	bitacora.update( entrada_total = entrada_total )
+
+
+
+	#actualizamos existencia
+	update_bitacora_existencias_de_sistema( sucursal_id )
+
+
+#se actualiza la existencia del sistema con cualquier cambio 
+def update_bitacora_existencias_de_sistema(sucursal_id):
+		year = date.today().year
+		month = date.today().month
+		day = date.today().day
+
+		bitacora =  Bitacora.objects.filter( fecha__year = year , fecha__month = month , fecha__day = day , sucursal = sucursal_id )
+
+		existencia_inicial  = 0
+		existencia_productos =[ producto.existencia for producto in  inventario.objects.filter( sucursal__id  = sucursal_id) ]
+		existencia_inicial = sum(existencia_productos)
+
+		bitacora.update(total_existencia = existencia_inicial )
+
+
+def update_disponible_fisico_in_bitacora(sucursal):
+
+		sucursal_id = sucursal
+		year = date.today().year
+		month = date.today().month
+		day = date.today().day
+
+		bitacora =  Bitacora.objects.filter( fecha__year = year , fecha__month = month , fecha__day = day , sucursal = sucursal_id )
+
+		existencia_total  = 0
+		existencia_productos = [ producto.existencia for producto in  inventario.objects.filter( sucursal__id  = sucursal_id) ]
+		existencia_total = sum(existencia_productos)
+
+		bitacora.update(total_existencia = existencia_total )
+
+
+def calcular_ventas_totales(sucursal):
+		sucursal_id = sucursal
+
+		year = date.today().year
+		month = date.today().month
+		day = date.today().day
+
+		#calcular el total a facturar de ventas
+		FacturarVenta_qs =    FacturarVenta.objects.filter ( fecha__year = year , fecha__month = month , fecha__day = day ,  sucursal = sucursal)
+		id_venta_facturacion = FacturarVenta_qs.values("id")
+
+		#ventas totales diarias  por sucursal objectos
+		ventas_hoy = venta.objects.filter( fecha__year = year , fecha__month = month , fecha__day = day , sucursal = sucursal ).exclude( id__in = id_venta_facturacion )
+
+		ventas_hoy_total = 0
+
+		#ventas totales a publico por sucursal
+		ventas_hoy_publico =0  
+
+		#ventas totales a mayoreo por sucursal
+		ventas_hoy_mayoreo = 0
+		for venta_ in ventas_hoy:
+
+			ventas_hoy_total+= venta_.total
+
+			if venta_.total_productos >= MAYOREO_INT:
+				ventas_hoy_mayoreo+= venta_.total
+			else:
+				ventas_hoy_publico+=venta_.total
+
+
+		ventas_facturas = 0
+
+
+		for venta_a_facturar in FacturarVenta_qs:
+			ventas_facturas	 +=  venta_a_facturar.venta.total
+
+		ventas_hoy_total_con_factura = ventas_hoy_total
+
+		year = date.today().year
+		month = date.today().month
+		day = date.today().day
+
+		bitacora =  Bitacora.objects.filter( fecha__year = year , fecha__month = month , fecha__day = day , sucursal = sucursal)
+
+		gastos_en_sucursal = GastosSucursal.objects.filter( fecha__year = year , fecha__month = month , fecha__day = day , corte_dia__sucursal = sucursal)
+
+		gastos = [ gasto for gasto in gastos_en_sucursal ]
+		gastos = sum(gastos)
+
+		bitacora.update( ventas_publico = ventas_hoy_publico , ventas_mayoreo = ventas_hoy_mayoreo , 
+				dep_en_facturas = ventas_facturas , gastos = gastos , total_a_depositar = ventas_hoy_total)
+
 
 
 
