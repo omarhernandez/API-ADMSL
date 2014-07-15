@@ -84,7 +84,6 @@ class AsistenciaResource(ModelResource):
 
 	def dehydrate(self , bundle ): 
 
-		#print bundle.request
 		#current_time_at_mx_zone = datetime.now()
 
 		#hora de entrada de un usuario
@@ -95,7 +94,6 @@ class AsistenciaResource(ModelResource):
 
 
 		#hora de entrada fijada en la sucursal
-		#print bundle.data.get("sucursal")
 		hora_entrada_en_sucursal  = bundle.data.get("sucursal").data.get("hora_entrada")
 
 		hora_entrada_en_sucursal_minuto = hora_entrada_en_sucursal.minute
@@ -103,10 +101,9 @@ class AsistenciaResource(ModelResource):
 
 
 		minutos_diferencia = hora_entrada_usuario_minuto - hora_entrada_en_sucursal_minuto
-		#print hora_entrada_usuario_hora , hora_entrada_en_sucursal ,  hora_entrada_en_sucursal_hora 
 		horas_diferencia = hora_entrada_usuario_hora - hora_entrada_en_sucursal_hora
 
-		bundle.data["tiempo_retardo"] = "{0}hrs. - {1} Min.".format(horas_diferencia , minutos_diferencia) if horas_diferencia > 0 else  "{0}".format( minutos_diferencia )
+		bundle.data["tiempo_retardo"] = "{0}hrs. - {1} Min.".format(horas_diferencia , minutos_diferencia) if horas_diferencia > 0 else  "{0} min.".format( minutos_diferencia )
 
 		return bundle
 
