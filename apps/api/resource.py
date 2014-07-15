@@ -47,6 +47,7 @@ class BitacoraResource(ModelResource):
 		filtering  = {
 
 			  "fecha" : ["lte","gte", "lt","gt"],
+			  "sucursal" : ALL_WITH_RELATIONS,
 
 			}
 
