@@ -1,6 +1,6 @@
 #encoding:utf-8
 from django.utils import timezone
-from datetime import date , datetime
+from datetime import date , datetime , timedelta
 from tastypie.authentication import BasicAuthentication
 from django.db.models import Q , F
 from tastypie.exceptions import *
@@ -435,11 +435,13 @@ class VentaResource(ModelResource):
 
 		range_products_by_sucursal = producto_has_rango.objects.filter(sucursal =  sucursal )
 
-
 		#current time at now
-		year = date.today().year
-		month = date.today().month
-		day = date.today().day
+		current_time = timezone.now() - timedelta(hours=5)
+		year = current_time.year
+		month = current_time.month
+		day = current_time.day
+
+
 
 		bitacora =  Bitacora.objects.filter( fecha__year = year , fecha__month = month , fecha__day = day , sucursal = sucursal )
 
@@ -1074,6 +1076,8 @@ class CambioResource(ModelResource):
 		bundle.obj.cantidad_modelo_salida = len_cantidad_modelo_salida 
 		bundle.obj.cantidad_modelo_entrada = len_cantidad_modelo_entrada 
 
+		print bundle.obj.__dict__
+
 
 		bundle.obj.save()
 
@@ -1084,6 +1088,7 @@ class CambioResource(ModelResource):
 			_modelo_entrada_str = _modelo_entrada.get("modelo_entrada") 
 			modelo_entrada_ = inventario.objects.filter( producto__codigo =  _modelo_entrada_str )
 			nueva_existencia = modelo_entrada_[0].existencia + _modelo_entrada.get("cantidad")      
+			print modelo_entrada_[0].existencia , _modelo_entrada.get("cantidad") , nueva_existencia
 			modelo_entrada_.update( existencia = nueva_existencia )
 
 
@@ -1093,15 +1098,18 @@ class CambioResource(ModelResource):
 			_modelo_salida_str = _modelo_salida.get("modelo_salida") 
 			modelo_salida_ = inventario.objects.filter( producto__codigo =  _modelo_salida_str )
 			nueva_existencia = modelo_salida_[0].existencia -  _modelo_salida.get("cantidad")      
+			print modelo_salida_[0].existencia , _modelo_salida.get("cantidad") , nueva_existencia
 			modelo_salida_.update( existencia = nueva_existencia )
 
 
 
 
 		#current time at now
-		year = date.today().year
-		month = date.today().month
-		day = date.today().day
+		current_time = timezone.now() - timedelta(hours=5)
+		year = current_time.year
+		month = current_time.month
+		day = current_time.day
+
 
 		bitacora = Bitacora.objects.filter( fecha__year = year , fecha__month = month , fecha__day = day , sucursal = bundle.obj.sucursal )
 
@@ -1753,9 +1761,12 @@ class CargarFacturaEnInventarioResource(ModelResource):
 def update_bitacora_by_sucursal_id(sucursal_id ,contar_producto_inicial = False ):
 
 	#current time at now
-	year = date.today().year
-	month = date.today().month
-	day = date.today().day
+	current_time = timezone.now() - timedelta(hours=5)
+	year = current_time.year
+	month = current_time.month
+	day = current_time.day
+
+
 
 	bitacora = bitacora_qs  = Bitacora.objects.filter( fecha__year = year , fecha__month = month , fecha__day = day , sucursal = sucursal_id )
 	#se creaa una bitacora para el dia de hoy
@@ -1796,9 +1807,15 @@ def update_bitacora_by_sucursal_id(sucursal_id ,contar_producto_inicial = False 
 
 #se actualiza la existencia del sistema con cualquier cambio 
 def update_bitacora_existencias_de_sistema(sucursal_id):
-		year = date.today().year
-		month = date.today().month
-		day = date.today().day
+
+		#current time at now
+		current_time = timezone.now() - timedelta(hours=5)
+		year = current_time.year
+		month = current_time.month
+		day = current_time.day
+
+
+
 
 		bitacora =  Bitacora.objects.filter( fecha__year = year , fecha__month = month , fecha__day = day , sucursal = sucursal_id )
 
@@ -1812,9 +1829,11 @@ def update_bitacora_existencias_de_sistema(sucursal_id):
 def update_disponible_fisico_in_bitacora(sucursal):
 
 		sucursal_id = sucursal
-		year = date.today().year
-		month = date.today().month
-		day = date.today().day
+		#current time at now
+		current_time = timezone.now() - timedelta(hours=5)
+		year = current_time.year
+		month = current_time.month
+		day = current_time.day
 
 		bitacora =  Bitacora.objects.filter( fecha__year = year , fecha__month = month , fecha__day = day , sucursal = sucursal_id )
 
@@ -1826,11 +1845,13 @@ def update_disponible_fisico_in_bitacora(sucursal):
 
 
 def calcular_ventas_totales(sucursal):
-		sucursal_id = sucursal
 
-		year = date.today().year
-		month = date.today().month
-		day = date.today().day
+		sucursal_id = sucursal
+		#current time at now
+		current_time = timezone.now() - timedelta(hours=5)
+		year = current_time.year
+		month = current_time.month
+		day = current_time.day
 
 		#calcular el total a facturar de ventas
 		FacturarVenta_qs =    FacturarVenta.objects.filter ( fecha__year = year , fecha__month = month , fecha__day = day ,  sucursal = sucursal)
@@ -1864,9 +1885,14 @@ def calcular_ventas_totales(sucursal):
 
 		ventas_hoy_total_con_factura = ventas_hoy_total
 
-		year = date.today().year
-		month = date.today().month
-		day = date.today().day
+		#current time at now
+		current_time = timezone.now() - timedelta(hours=5)
+		year = current_time.year
+		month = current_time.month
+		day = current_time.day
+
+
+
 
 		bitacora =  Bitacora.objects.filter( fecha__year = year , fecha__month = month , fecha__day = day , sucursal = sucursal)
 
