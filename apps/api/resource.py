@@ -465,6 +465,8 @@ class VentaResource(ModelResource):
 
 			nueva_existencia = (existencia_producto_inventario  - cantidad)
 
+
+
 			inventario.objects.filter ( producto = id_producto , sucursal = sucursal ).update(existencia =   nueva_existencia  )
 
 			#guardamos la venta en el kardex
@@ -1066,43 +1068,25 @@ class CambioResource(ModelResource):
 		modelos_entrada = bundle.data.get("entrada")
 		modelos_salida = bundle.data.get("salida")
 
-
 		len_cantidad_modelo_salida =  sum([ modelo.get("cantidad") for modelo in modelos_salida] ) 
 		len_cantidad_modelo_entrada = sum([ modelo.get("cantidad") for modelo in modelos_entrada] ) 
 
-		bundle.obj.modelo_entrada = ",".join( [ ( ( modelo.get("modelo_entrada") + "," ) * modelo.get("cantidad") )[:-1]  for modelo in modelos_entrada ]) 
-		bundle.obj.modelo_salida = ",".join( [ ( ( modelo.get("modelo_salida") + "," ) * modelo.get("cantidad") )[:-1]  for modelo in modelos_salida ]) 
+		if len(modelos_entrada)<=1:
+
+			bundle.obj.modelo_entrada = ",".join( [ modelo.get("modelo_entrada")  for modelo in modelos_entrada ]) 
+		else:
+			bundle.obj.modelo_entrada = ",".join( [ ( ( modelo.get("modelo_entrada") + "," ) * modelo.get("cantidad") )[:-1]  for modelo in modelos_entrada ]) 
+
+		if len(modelos_salida)<= 1:
+
+			bundle.obj.modelo_salida = ",".join( [  modelo.get("modelo_salida")  for modelo in modelos_salida ]) 
+		else:
+			bundle.obj.modelo_salida = ",".join( [ ( ( modelo.get("modelo_salida") + "," ) * modelo.get("cantidad") )[:-1]  for modelo in modelos_salida ]) 
 
 		bundle.obj.cantidad_modelo_salida = len_cantidad_modelo_salida 
 		bundle.obj.cantidad_modelo_entrada = len_cantidad_modelo_entrada 
 
-		print bundle.obj.__dict__
-
-
 		bundle.obj.save()
-
-
-		#sumar los modelos de entrada al inventario
-		for _modelo_entrada in  modelos_entrada:
-
-			_modelo_entrada_str = _modelo_entrada.get("modelo_entrada") 
-			modelo_entrada_ = inventario.objects.filter( producto__codigo =  _modelo_entrada_str )
-			nueva_existencia = modelo_entrada_[0].existencia + _modelo_entrada.get("cantidad")      
-			print modelo_entrada_[0].existencia , _modelo_entrada.get("cantidad") , nueva_existencia
-			modelo_entrada_.update( existencia = nueva_existencia )
-
-
-		#restar los modelos de salida al inventario
-		for _modelo_salida in  modelos_salida:
-
-			_modelo_salida_str = _modelo_salida.get("modelo_salida") 
-			modelo_salida_ = inventario.objects.filter( producto__codigo =  _modelo_salida_str )
-			nueva_existencia = modelo_salida_[0].existencia -  _modelo_salida.get("cantidad")      
-			print modelo_salida_[0].existencia , _modelo_salida.get("cantidad") , nueva_existencia
-			modelo_salida_.update( existencia = nueva_existencia )
-
-
-
 
 		#current time at now
 		current_time = timezone.now() - timedelta(hours=5)
@@ -1110,25 +1094,51 @@ class CambioResource(ModelResource):
 		month = current_time.month
 		day = current_time.day
 
-
 		bitacora = Bitacora.objects.filter( fecha__year = year , fecha__month = month , fecha__day = day , sucursal = bundle.obj.sucursal )
 
-		entrada_cambio_bitacora = bitacora[0].entrada_cambios +1
+		#sumar los modelos de entrada al inventario
+		total_productos_entrada_inventario =  0
+		for _modelo_entrada in  modelos_entrada:
+
+			_modelo_entrada_str = _modelo_entrada.get("modelo_entrada") 
+			modelo_entrada_ = inventario.objects.filter( producto__codigo =  _modelo_entrada_str )
+			nueva_existencia = modelo_entrada_[0].existencia + _modelo_entrada.get("cantidad")      
+			total_productos_entrada_inventario += _modelo_entrada.get("cantidad")
+			print modelo_entrada_[0].existencia , _modelo_entrada.get("cantidad") , nueva_existencia
+			modelo_entrada_.update( existencia = nueva_existencia )
+
+
+		print total_productos_entrada_inventario
 		#productos que estan entrando por cambios
+		entrada_cambio_bitacora = bitacora[0].entrada_cambios + total_productos_entrada_inventario
 		bitacora.update( entrada_cambios = entrada_cambio_bitacora  )
 
-		salida_cambio_bitacora = bitacora[0].salida_cambios + 1
+
+		total_productos_salida_inventario =  0
+		#restar los modelos de salida al inventario
+		for _modelo_salida in  modelos_salida:
+
+			_modelo_salida_str = _modelo_salida.get("modelo_salida") 
+			modelo_salida_ = inventario.objects.filter( producto__codigo =  _modelo_salida_str )
+			nueva_existencia = modelo_salida_[0].existencia -  _modelo_salida.get("cantidad")      
+
+			total_productos_salida_inventario += _modelo_salida.get("cantidad") 
+			print modelo_salida_[0].existencia , _modelo_salida.get("cantidad") , nueva_existencia
+			modelo_salida_.update( existencia = nueva_existencia )
+
+
 		#producto que estan saliendo por cambios
+		salida_cambio_bitacora = bitacora[0].salida_cambios + total_productos_salida_inventario
 		bitacora.update( salida_cambios = salida_cambio_bitacora )
 
 
-		entrada_total = bitacora[0].entrada_total + 1
-		#producto que estan saliendo por cambios
+		#producto que estan entrando en total por cambios
+		entrada_total = bitacora[0].entrada_total + total_productos_entrada_inventario
 		bitacora.update( entrada_total = entrada_total )
 
 
 		#salidas_total en bitacora
-		salida_total = bitacora[0].salida_total +  1
+		salida_total = bitacora[0].salida_total +  total_productos_salida_inventario
 		bitacora.update( salida_total = salida_total )
 
 
