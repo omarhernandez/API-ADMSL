@@ -1,4 +1,4 @@
-import os,sys
+import os, sys
 import dj_database_url
 
 DATABASES = {'default': dj_database_url.config(default= os.environ.get("CREDENTIALS_HEROKU")	)}

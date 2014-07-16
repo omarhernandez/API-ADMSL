@@ -244,6 +244,8 @@ class Cambio(models.Model):
 	modelo_salida = models.CharField(max_length=45L)
 	diferencia_precio = models.FloatField()
 	motivo_cambio = models.TextField()
+    	cantidad_modelo_entrada = models.IntegerField()
+    	cantidad_modelo_salida = models.IntegerField()
 	
 	class Meta:
 		db_table = 'cambio'

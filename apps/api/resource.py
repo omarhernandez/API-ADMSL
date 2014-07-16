@@ -1,11 +1,12 @@
 #encoding:utf-8
+from django.utils import timezone
 from datetime import date , datetime
 from tastypie.authentication import BasicAuthentication
 from django.db.models import Q , F
-from tastypie.exceptions import * 
+from tastypie.exceptions import *
 import unicodedata
 from django.core import serializers
-import re 
+import re
 from tastypie import fields
 from apps.core.models import *
 from tastypie.exceptions import BadRequest
@@ -19,12 +20,8 @@ MAYOREO_INT = 2
 HORA_CENTRAL_MX = -5
 
 class ISELAuthentication(Authorization):
-
 	def create_list( self , object_list, bundle):
 		raise Unauthorized("sorry, dont create")
-		 
-
-
 	def is_authenticated( self , request , **kwargs ):
 		return False
 
@@ -50,7 +47,7 @@ class BitacoraResource(ModelResource):
 
 			}
 
-	def dehydrate(self , bundle ): 
+	def dehydrate(self , bundle ):
 
 		return bundle
 
@@ -80,7 +77,7 @@ class AsistenciaResource(ModelResource):
 			}
 
 
-	def dehydrate(self , bundle ): 
+	def dehydrate(self , bundle ):
 
 		#current_time_at_mx_zone = datetime.now()
 
@@ -201,12 +198,12 @@ class ProductoResource(ModelResource):
 #************************************************************************************************************
 
 class SucursalResource(ModelResource):
-	
-	inventario = fields.ToManyField('apps.api.resource.InventarioResource',  
-	 	
+
+	inventario = fields.ToManyField('apps.api.resource.InventarioResource',
+
 			attribute = lambda bundle:      inventario.objects.filter(sucursal = bundle.obj)
-	  		
-		, null = True , full = True		)    
+
+		, null = True , full = True		)
 
 	class Meta:
 		queryset = Sucursal.objects.all()
@@ -218,7 +215,7 @@ class SucursalResource(ModelResource):
 			    }
 
 
-	def obj_create(self, bundle, request=None, **kwargs): 
+	def obj_create(self, bundle, request=None, **kwargs):
 
 		bundle = self.full_hydrate(bundle)
 		bundle.obj.save()
@@ -256,8 +253,8 @@ class ProductoHasRangoesource(ModelResource):
 		queryset = producto_has_rango.objects.all()
 		resource_name = 'producto_has_rango'
 		authorization= Authorization()
-	
-		filtering = { 
+
+		filtering = {
 
 			"producto" : ALL_WITH_RELATIONS,
 			"sucursal" : ALL_WITH_RELATIONS,
@@ -289,11 +286,11 @@ class InventarioResource(ModelResource):
 		resource_name = 'inventario'
 		filtering = {
 			  	"sucursal" : ["exact"],
-			  	"producto" : ALL_WITH_RELATIONS 
+			  	"producto" : ALL_WITH_RELATIONS
 			  }
 		authorization= Authorization()
 
-	def dehydrate(self , bundle ): 
+	def dehydrate(self , bundle ):
 
 
 		obj_producto = producto_has_rango.objects.filter( Q( sucursal = bundle.obj.sucursal ) , Q( producto = bundle.obj.producto) )
@@ -301,14 +298,14 @@ class InventarioResource(ModelResource):
 
 		for rango_producto in obj_producto:
 			producto_rango.append({ "id":  rango_producto.id  , "costo" : rango_producto.costo  ,  "producto" : "/api/v1/producto/{0}/".format( rango_producto.producto.id ) ,
-						"rango" : { 
+						"rango" : {
 
 							"id" : rango_producto.rango.id,
 							"resource_uri" : "/api/v1/rango/{0}/".format(rango_producto.rango.id),
 							"max" :  rango_producto.rango.max,
 							"min" :  rango_producto.rango.min,
-							 
-							} , 
+
+							} ,
 						        "resource_uri" : "/api/v1/producto_has_rango/{0}/".format(rango_producto.id),
 						        "sucursal": "/api/v1/sucursal/{0}/".format(rango_producto.sucursal.id)
 						})
@@ -340,15 +337,15 @@ class InventarioResource(ModelResource):
 			inventario_g = inventario_g.filter(producto__codigo__iexact  = codigo[0] )
 
 		try:
-			id_sucursal =  int(request.GET.get('sucursal')) 
+			id_sucursal =  int(request.GET.get('sucursal'))
 			return  inventario_g.filter( sucursal = id_sucursal)
-			
+
 			#return inventario_g.filter( id__in  =  id_inventario_g_sucursal)
 
 		except:
 
-			return inventario_g 
-	
+			return inventario_g
+
 
 
 
@@ -356,11 +353,11 @@ class VentaResource(ModelResource):
 	""" venta de una sucursal."""
 
 	sucursal = fields.ForeignKey(SucursalResource, 'sucursal'     )
-	producto = fields.ToManyField('apps.api.resource.VentaHasProductoResource',  
-	 	
+	producto = fields.ToManyField('apps.api.resource.VentaHasProductoResource',
+
 			attribute = lambda bundle: venta_has_producto.objects.filter(venta = bundle.obj)
-	  		
-		, null = True , full = True)    
+
+		, null = True , full = True)
 
 
 
@@ -377,8 +374,8 @@ class VentaResource(ModelResource):
 
 		return bundle
 
-	
-	def obj_create(self, bundle, request=None, **kwargs): 
+
+	def obj_create(self, bundle, request=None, **kwargs):
 		""" se crea una venta """
 
 		bundle = self.full_hydrate(bundle)
@@ -389,7 +386,7 @@ class VentaResource(ModelResource):
 
 		name_sucursal = unicode(bundle.obj.sucursal.nombre.lower() )
 		name_sucursal = unicodedata.normalize('NFKD', unicode(name_sucursal) ).encode('ascii', 'ignore').replace(" ","_").lower()
-		
+
 
 
 
@@ -407,7 +404,7 @@ class VentaResource(ModelResource):
 		current_user = qs_usuariosucursal_has_sucursal.usuario
 
 		#instancia de usuario
-		#current_user = qs_usuariosucursal_has_sucursal 
+		#current_user = qs_usuariosucursal_has_sucursal
 
 		#instancia de usuario has sucursal
 		current_user = UsuarioSucursal.objects.filter( usuario =  current_user )[0]
@@ -444,8 +441,8 @@ class VentaResource(ModelResource):
 		month = date.today().month
 		day = date.today().day
 
-		bitacora =  Bitacora.objects.filter( fecha__year = year , fecha__month = month , fecha__day = day , sucursal = sucursal ) 
-		
+		bitacora =  Bitacora.objects.filter( fecha__year = year , fecha__month = month , fecha__day = day , sucursal = sucursal )
+
 		for producto in productos:
 
 			id_producto =   re.search('\/api\/v1\/producto\/(\d+)\/', str(producto["producto"])).group(1)
@@ -455,11 +452,11 @@ class VentaResource(ModelResource):
 			#salida ventas para bitacoras
 			salida_venta = bitacora[0].salida_ventas + cantidad
 			bitacora.update( salida_ventas = salida_venta )
-			
+
 			#salidas_total en bitacora
 			salida_total = bitacora[0].salida_total + cantidad
 			bitacora.update( salida_total = salida_total )
-			
+
 			#decuenta el producto en venta al inventario de la sucursal actual
 
 			existencia_producto_inventario = inventario.objects.filter ( producto = id_producto , sucursal = sucursal ).values("existencia")[0]["existencia"]
@@ -467,12 +464,12 @@ class VentaResource(ModelResource):
 			nueva_existencia = (existencia_producto_inventario  - cantidad)
 
 			inventario.objects.filter ( producto = id_producto , sucursal = sucursal ).update(existencia =   nueva_existencia  )
-	
+
 			#guardamos la venta en el kardex
-			Kardex.objects.create( folio = bundle.obj.folio , sucursal = sucursal , tipo_registro = "TICKET" , inventario_inicial = 0L , 
+			Kardex.objects.create( folio = bundle.obj.folio , sucursal = sucursal , tipo_registro = "TICKET" , inventario_inicial = 0L ,
 						entradas = 0L , salidas = cantidad, existencia = existencia_producto_inventario , descripcion = "venta en sucursal" , producto = id_producto )
 
-					
+
 
 			#se busca el precio del control conforme al rango en el que se encuentre, este valor de guarda en venta_has_producto, que es a que precio se adquirio el producto
 			cantidad_en_rango = 0L
@@ -490,7 +487,7 @@ class VentaResource(ModelResource):
 
 			#guarda los productos dentro de la venta
 			try:
-				venta_has_producto.objects.create( venta = bundle.obj , producto = id_producto , cantidad = cantidad , costo_por_producto = cantidad_en_rango ) 
+				venta_has_producto.objects.create( venta = bundle.obj , producto = id_producto , cantidad = cantidad , costo_por_producto = cantidad_en_rango )
 			except:
 				raise NotFound("Error en rango, verifica que el producto tenga asignados todos los rangos")
 
@@ -516,10 +513,10 @@ class VentaHasProductoResource(ModelResource):
 		resource_name = 'ventahasproducto'
 		filtering = { "sucursal" : ["exact"] }
 		authorization= Authorization()
-	
+
 	#class SucursalInventarioResource(ModelResource):
-	#""" Administrador de productos - El administrador de admisel puede modificar el rango y el stock de los productos 
-	#en las sucursales, no corresponde a la seccion de inventarios, esta seccion solo es para dar de alta un producto 
+	#""" Administrador de productos - El administrador de admisel puede modificar el rango y el stock de los productos
+	#en las sucursales, no corresponde a la seccion de inventarios, esta seccion solo es para dar de alta un producto
 	#asignarle el rango, y posteriormente asignarselo a una sucursal, para generar existencia, se hace a traves del cargo
 	#de factura."""
 
@@ -545,7 +542,7 @@ class ClienteResource(ModelResource):
 	usuario_creador = fields.ForeignKey("apps.api.resource.UsuarioResource", 'usuario_creador'    , full = True , null = True )
 	class Meta:
 
-		allowed_methods = ['get',"post" ,"put" ]		
+		allowed_methods = ['get',"post" ,"put" ]
 		queryset = ClienteDatos.objects.all()
 		resource_name = 'cliente'
 		always_return_data = True
@@ -564,7 +561,7 @@ class ClienteResource(ModelResource):
 			}
 
 
-	def dehydrate(self , bundle ): 
+	def dehydrate(self , bundle ):
 
 		cliente_datos = {}
 		try:
@@ -618,12 +615,12 @@ class ClienteReporteResource(ModelResource):
 	sucursal = fields.ForeignKey(SucursalResource , 'sucursal'    , full = False , null = True )
 	usuario_creador = fields.ForeignKey("api.resource.UsuarioResource", 'Usuario'    , full = False , null = True )
 
-	
-	cliente_datos_facturacion= fields.ToManyField('apps.api.resource.ClienteFacturacionSinRelacionResource',  
-	 	
+
+	cliente_datos_facturacion= fields.ToManyField('apps.api.resource.ClienteFacturacionSinRelacionResource',
+
 			attribute = lambda bundle:      ClienteFacturacion.objects.filter(cliente_datos = bundle.obj)
-	  		
-		, null = True , full = True		)    
+
+		, null = True , full = True		)
 
 
 
@@ -669,7 +666,7 @@ class LoginResource(ModelResource):
 	class Meta:
 		excludes = ["password", "email" , "id" , "nombre" , "resource_uri" , "tel_cel"]
 		queryset = Usuario.objects.all().distinct()
-		allowed_methods = ['get' ]		
+		allowed_methods = ['get' ]
 		resource_name = 'login'
 		limit = 1
 
@@ -684,7 +681,7 @@ class LoginResource(ModelResource):
 
 		if user_exist:
 
-			
+
 			bundle.data["usuario_resource_uri"] = "api/v1/usuario/{0}/".format( user_exist[0].id )
 			bundle.data["loggin"] = True
 			bundle.data["message"] = "201"
@@ -693,9 +690,9 @@ class LoginResource(ModelResource):
 			if user_exist[0].rol == "sucursal":
 
 
-				#bundle.data["info"] = UsuarioSucursal.objects.filter ( usuario = user_exist ) 
+				#bundle.data["info"] = UsuarioSucursal.objects.filter ( usuario = user_exist )
 				UsuarioSucursalResponse = UsuarioSucursal.objects.filter ( usuario = user_exist )
-    
+
 				bundle.data["usuario_informacion"] =  {
 					"salario_real":  UsuarioSucursalResponse[0].salario_real,
 					"num_seguro_social": UsuarioSucursalResponse[0].num_seguro_social,
@@ -714,7 +711,7 @@ class LoginResource(ModelResource):
 				bundle.data["sucursal"]["resource_uri"] =   "api/v1/sucursal/{0}/".format( current_obj_sucursal_.id )
 				bundle.data["rol"] = "sucursal"
 
-				#pase de aistencia 
+				#pase de aistencia
 				#checar si el usuario no ha pasado asistencia al iniciar secion
 
 				year = date.today().year
@@ -727,19 +724,19 @@ class LoginResource(ModelResource):
 				pasa_asistencia = False if len(paso_asistencia) >  0  is not None else True
 
 				if pasa_asistencia:
-					Asistencia.objects.create( usuario = UsuarioSucursalResponse[0]  , sucursal = sucursal) 
+					Asistencia.objects.create( usuario = UsuarioSucursalResponse[0]  , sucursal = sucursal)
 					#crea la bitacora para el dia de hoy, cuenta el producto inicial
 					update_bitacora_by_sucursal_id(sucursal.id,contar_producto_inicial = True )
-			
-	 	
+
+
 			if user_exist[0].rol == "supervisor":
 				bundle.data["rol"] = "supervisor"
 
-	
+
 			if user_exist[0].rol == "foraneo":
 				bundle.data["rol"] = "foraneo"
 
-	
+
 			if user_exist[0].rol == "administrador":
 				bundle.data["rol"] = "administrador"
 
@@ -751,12 +748,12 @@ class LoginResource(ModelResource):
 			del bundle.data["rol"]
 
 		return bundle
-	
+
 	def alter_list_data_to_serialize(self, request, data):
 
 		del data["meta"]
 		return data
-	
+
 
 #************************************************************************************************************
 #*********************************************   Usuario ****************************************************
@@ -776,7 +773,7 @@ class UsuarioResource(ModelResource):
 
 	class Meta:
 		always_return_data = True
-		allowed_methods = ['get', 'post' , 'delete' , "put"]		
+		allowed_methods = ['get', 'post' , 'delete' , "put"]
 		#excludes = ["password"]
 		queryset = Usuario.objects.all().distinct()
 		resource_name = 'usuario'
@@ -826,7 +823,7 @@ class UsuarioResource(ModelResource):
 		bundle.data["datos"] = datos
 		#del bundle.data["logged"]
 
-		
+
 
 		return bundle
 
@@ -943,13 +940,13 @@ class HistorialVentaResource(ModelResource):
 
 	sucursal = fields.ForeignKey(SucursalSinInventarioResource , 'sucursal' , full = True     )
 
-	
+
 	class Meta:
-		allowed_methods = ['get' ]		
-		queryset = venta.objects.all().order_by('-fecha') 
+		allowed_methods = ['get' ]
+		queryset = venta.objects.all().order_by('-fecha')
 		resource_name = 'historialventa'
-		filtering = { 
-		
+		filtering = {
+
 		"sucursal" : ALL_WITH_RELATIONS,
 		#"usuario" : ["iexact"],
 		"fecha" : ["lte","gte", "lt","gt"],
@@ -960,7 +957,7 @@ class HistorialVentaResource(ModelResource):
 		id_current_obj = bundle.obj.id
 		try:
 			VentaUsuarioSucursalQS = VentaUsuarioSucursal.objects.filter( venta__id = id_current_obj)[0]
-			bundle.data["vendedor_sucursal"] =  VentaUsuarioSucursalQS.usuario_sucursal.usuario.nombre 
+			bundle.data["vendedor_sucursal"] =  VentaUsuarioSucursalQS.usuario_sucursal.usuario.nombre
 
 		except:
 			bundle.data["vendedor_sucursal"] = "sin asignar"
@@ -999,20 +996,20 @@ class HistorialVentaResource(ModelResource):
 
 
 		try:
-			user_id =  int(request.GET.get('usuario')) 
+			user_id =  int(request.GET.get('usuario'))
 			venta_usuario_sucursal = VentaUsuarioSucursal.objects.filter( usuario_sucursal__usuario  = user_id)
 			id_ventas = []
 
 
 			for ventas_el  in venta_usuario_sucursal:
 				id_ventas.append( ventas_el.venta_id)
-				
+
 			return ventas.filter( id__in  =  id_ventas)
 
 		except:
 
 			return ventas
-	
+
 
 
 #************************************************************************************************************
@@ -1043,13 +1040,13 @@ class CambioResource(ModelResource):
 
 	sucursal = fields.ForeignKey(SucursalSinInventarioResource , 'sucursal' , full = True     )
 
-	
+
 	class Meta:
-		allowed_methods = ['get' , 'post' ]		
-		queryset = Cambio.objects.all().order_by('-fecha') 
+		allowed_methods = ['get' , 'post' ]
+		queryset = Cambio.objects.all().order_by('-fecha')
 		resource_name = 'productocambio'
-		filtering = { 
-		
+		filtering = {
+
 		"sucursal" : ALL_WITH_RELATIONS,
 		"fecha" : ["lte","gte", "lt","gt"],
 		"modelo_entrada" : ["icontains","iexact"],
@@ -1060,19 +1057,45 @@ class CambioResource(ModelResource):
 		authorization= Authorization()
 
 
-	def obj_create(self, bundle, request=None, **kwargs): 
+	def obj_create(self, bundle, request=None, **kwargs):
 
 		bundle = self.full_hydrate(bundle)
+
+		modelos_entrada = bundle.data.get("entrada")
+		modelos_salida = bundle.data.get("salida")
+
+
+		len_cantidad_modelo_salida =  sum([ modelo.get("cantidad") for modelo in modelos_salida] ) 
+		len_cantidad_modelo_entrada = sum([ modelo.get("cantidad") for modelo in modelos_entrada] ) 
+
+		bundle.obj.modelo_entrada = ",".join( [ ( ( modelo.get("modelo_entrada") + "," ) * modelo.get("cantidad") )[:-1]  for modelo in modelos_entrada ]) 
+		bundle.obj.modelo_salida = ",".join( [ ( ( modelo.get("modelo_salida") + "," ) * modelo.get("cantidad") )[:-1]  for modelo in modelos_salida ]) 
+
+		bundle.obj.cantidad_modelo_salida = len_cantidad_modelo_salida 
+		bundle.obj.cantidad_modelo_entrada = len_cantidad_modelo_entrada 
+
+
 		bundle.obj.save()
 
-		modelo_entrada_ = inventario.objects.filter( producto__codigo =  bundle.obj.modelo_entrada )
-		nueva_existencia = modelo_entrada_[0].existencia - 1
-		modelo_entrada_.update( existencia = nueva_existencia )
+
+		#sumar los modelos de entrada al inventario
+		for _modelo_entrada in  modelos_entrada:
+
+			_modelo_entrada_str = _modelo_entrada.get("modelo_entrada") 
+			modelo_entrada_ = inventario.objects.filter( producto__codigo =  _modelo_entrada_str )
+			nueva_existencia = modelo_entrada_[0].existencia + _modelo_entrada.get("cantidad")      
+			modelo_entrada_.update( existencia = nueva_existencia )
 
 
-		modelo_salida_ = inventario.objects.filter( producto__codigo =  bundle.obj.modelo_salida )
-		nueva_existencia = modelo_salida_[0].existencia - 1
-		modelo_salida_.update( existencia = nueva_existencia )
+		#restar los modelos de salida al inventario
+		for _modelo_salida in  modelos_salida:
+
+			_modelo_salida_str = _modelo_salida.get("modelo_salida") 
+			modelo_salida_ = inventario.objects.filter( producto__codigo =  _modelo_salida_str )
+			nueva_existencia = modelo_salida_[0].existencia -  _modelo_salida.get("cantidad")      
+			modelo_salida_.update( existencia = nueva_existencia )
+
+
 
 
 		#current time at now
@@ -1097,9 +1120,9 @@ class CambioResource(ModelResource):
 
 
 		#salidas_total en bitacora
-		salida_total = bitacora[0].salida_total +  1 
+		salida_total = bitacora[0].salida_total +  1
 		bitacora.update( salida_total = salida_total )
-		
+
 
 		#se actualiza el disponible fisico de una sucursal
 		update_disponible_fisico_in_bitacora(bundle.obj.sucursal.id)
@@ -1127,14 +1150,14 @@ class ReporteAjusteInventarioResource(ModelResource):
 	sucursal = fields.ForeignKey(SucursalSinInventarioResource , 'sucursal' , full = True, null = False )
 	usuario = fields.ForeignKey(UsuarioResource, 'usuario' , full = True)
 
-	
+
 	class Meta:
 		always_return_data = True
-		allowed_methods = ['get' , 'post' ]		
+		allowed_methods = ['get' , 'post' ]
 		#excludes = ["sobrante", "faltante" , "fecha" ,  "sistema" , "costo_publico"]
-		queryset = AjusteInventario.objects.all().order_by('-fecha') 
+		queryset = AjusteInventario.objects.all().order_by('-fecha')
 		resource_name = 'ajusteinventario'
-		filtering = { 
+		filtering = {
 
 				"sucursal" : ["exact"],
 				"usuario" : ["exact"],
@@ -1143,7 +1166,7 @@ class ReporteAjusteInventarioResource(ModelResource):
 		}
 
 		authorization= Authorization()
-	
+
 	def dehydrate(self , bundle):
 		_codigo_producto = bundle.data["codigo"]
 		_sucursal = bundle.data["sucursal"].obj
@@ -1156,7 +1179,7 @@ class ReporteAjusteInventarioResource(ModelResource):
 
 
 
-	def obj_create(self, bundle, request=None, **kwargs): 
+	def obj_create(self, bundle, request=None, **kwargs):
 		""" Se hace un ajuste de inventario por una sucursal semanalmente """
 
 		try:
@@ -1167,7 +1190,7 @@ class ReporteAjusteInventarioResource(ModelResource):
 			sucursal_ =   re.search('\/api\/v1\/sucursal\/(\d+)\/', str(bundle.data["sucursal"])).group(1)
 			usuario = re.search('\/api\/v1\/usuario\/(\d+)\/', str(bundle.data["usuario"])).group(1)
 
-			#obtenemos el producto filtrado por la sucursal y el codigo exacto ignoring case 
+			#obtenemos el producto filtrado por la sucursal y el codigo exacto ignoring case
 
 			current_product = inventario.objects.filter( Q(producto__codigo__iexact = codigo ) , Q(sucursal__id   = sucursal_ ) )[0]
 
@@ -1178,19 +1201,19 @@ class ReporteAjusteInventarioResource(ModelResource):
 			bundle.obj.sistema = existencia_current_product_in_system
 
 			#productos faltantes
-			faltante = ( existencia_current_product_in_system - fisico ) 
+			faltante = ( existencia_current_product_in_system - fisico )
 
 			if faltante <= 0:
 					faltante = 0
 
-			bundle.obj.faltante = faltante 
+			bundle.obj.faltante = faltante
 
 
 			sobrante = ( fisico - existencia_current_product_in_system)
 			# si hay productos sobrantes
 			if  sobrante > 0:
 
-				bundle.obj.sobrante = sobrante 
+				bundle.obj.sobrante = sobrante
 			else:
 
 				bundle.obj.sobrante = 0
@@ -1198,7 +1221,7 @@ class ReporteAjusteInventarioResource(ModelResource):
 
 			if faltante > 0 :
 
-				current_product =  current_product.producto 
+				current_product =  current_product.producto
 				try:
 
 					current_rango = producto_has_rango.objects.filter( producto =   current_product.id , rango__min = 1, rango__max = 1 , sucursal  = sucursal_ )[0]
@@ -1228,7 +1251,7 @@ class ReporteAjusteInventarioResource(ModelResource):
 #************************************************************************************************************
 
 
-		
+
 
 class ReporteInventarioResource(ModelResource):
 	""" Existencia de productos en Inventario de una sucursal."""
@@ -1240,7 +1263,7 @@ class ReporteInventarioResource(ModelResource):
 
 	class Meta:
 		queryset =  inventario.objects.all()
-		allowed_methods = ['get' ]		
+		allowed_methods = ['get' ]
 		resource_name = 'reporteexistencia'
 		filtering = {
 			  	"sucursal" : ["exact"],
@@ -1248,7 +1271,7 @@ class ReporteInventarioResource(ModelResource):
 			  }
 		authorization= Authorization()
 		#authorization= BasicAuthentication()
-	
+
 	def dehydrate(self , bundle):
 		bundle.data["sucursal_codigo"] = bundle.obj.sucursal.almacen_admipaq
 		bundle.data["sucursal_nombre"] = bundle.obj.sucursal.nombre
@@ -1318,7 +1341,7 @@ class CorteDiaResource(ModelResource):
 		authorization= Authorization()
 
 
-	def obj_create(self, bundle, request=None, **kwargs): 
+	def obj_create(self, bundle, request=None, **kwargs):
 
 		bundle = self.full_hydrate(bundle)
 
@@ -1338,16 +1361,13 @@ class CorteDiaResource(ModelResource):
 		except:
 			#si es el primer corte del dia
 
-			year = date.today().year
-			month = date.today().month
-			day = date.today().day
-
+			current_time = timezone.now()
 			#calcular el total a facturar de ventas
-			FacturarVenta_qs =    FacturarVenta.objects.filter ( fecha__year = year , fecha__month = month , fecha__day = day ,  sucursal = sucursal)
+			FacturarVenta_qs =    FacturarVenta.objects.filter ( fecha__lte = current_time,   sucursal = sucursal)
 			id_venta_facturacion = FacturarVenta_qs.values("id")
 
 			#ventas totales diarias  por sucursal objectos
-			ventas_hoy = venta.objects.filter( fecha__year = year , fecha__month = month , fecha__day = day , sucursal = sucursal ).exclude( id__in = id_venta_facturacion )
+			ventas_hoy = venta.objects.filter( fecha__lte = current_time ,  sucursal = sucursal ).exclude( id__in = id_venta_facturacion )
 
 
 
@@ -1393,7 +1413,7 @@ class CorteDiaResource(ModelResource):
 		return bundle
 
 
-	def dehydrate(self , bundle ): 
+	def dehydrate(self , bundle ):
 
 		return bundle
 
@@ -1421,7 +1441,7 @@ class SucursalGastosResource(ModelResource):
 			  }
 		authorization= Authorization()
 
-	def dehydrate(self , bundle ): 
+	def dehydrate(self , bundle ):
 
 		return bundle
 
@@ -1529,18 +1549,18 @@ class PaquetesResource(ModelResource):
 		authorization= Authorization()
 
 
-	def dehydrate(self , bundle ): 
-	
+	def dehydrate(self , bundle ):
+
 		obj_paquete = PaquetesHasProducto.objects.filter( paquetes = bundle.obj )
 
 		producto = []
 
 		for producto_ in obj_paquete:
 
-			producto.append({ 	
-						       "id":  producto_.productos.id  , 
+			producto.append({
+						       "id":  producto_.productos.id  ,
 						       "resource_uri" : "/api/v1/producto/{0}/".format(producto_.productos.id),
-						       "codigo": producto_.productos.codigo 
+						       "codigo": producto_.productos.codigo
 						})
 
 		try:
@@ -1553,12 +1573,12 @@ class PaquetesResource(ModelResource):
 
 
 
-	def obj_create(self, bundle, request=None, **kwargs): 
+	def obj_create(self, bundle, request=None, **kwargs):
 
-		bundle = self.full_hydrate(bundle) 
+		bundle = self.full_hydrate(bundle)
 
 		_current_id_paquete = re.search('\/api\/v1\/producto\/(\d+)\/', str(bundle.data["producto"])).group(1)
-		bundle.obj.producto.id = _current_id_paquete 
+		bundle.obj.producto.id = _current_id_paquete
 
 		bundle.obj.save()
 
@@ -1578,17 +1598,17 @@ class PaquetesResource(ModelResource):
 
 			#se obtiene el paquete el control remot en la primera posicion
 			if key == 0:
-				_control_remoto_en_paquete = id_producto 
+				_control_remoto_en_paquete = id_producto
 
 
 			product_in_paquete = PaquetesHasProducto.objects.create( paquetes = _current_paquete , productos = id_producto )
 
-		#bundle.data["all_productos_in_paquete"] = _all_products 
+		#bundle.data["all_productos_in_paquete"] = _all_products
 
 		#asignacion de todos los rangos que tiene el control remoto al paquete acutal
 		#rango_control_remoto_en_paquete = producto_has_rango.objects.filter( producto = _control_remoto_en_paquete )
-		
-		
+
+
 
 		return bundle
 
@@ -1600,11 +1620,11 @@ class PaquetesResource(ModelResource):
 class CargarFacturaResource(ModelResource):
 	"""Cargar factura """
 	sucursal = fields.ForeignKey(SucursalResource, 'sucursal'     )
-	codigo = fields.ToManyField('apps.api.resource.CargarFacturaHasProductosResource',  
-	 	
+	codigo = fields.ToManyField('apps.api.resource.CargarFacturaHasProductosResource',
+
 			attribute = lambda bundle: FacturaHasProductos.objects.filter(factura = bundle.obj)
-	  		
-		, null = True , full = True)    
+
+		, null = True , full = True)
 
 
 	class Meta:
@@ -1620,9 +1640,9 @@ class CargarFacturaResource(ModelResource):
 			  }
 		authorization= Authorization()
 
-	def obj_create(self, bundle, request=None, **kwargs): 
+	def obj_create(self, bundle, request=None, **kwargs):
 
-		bundle = self.full_hydrate(bundle) 
+		bundle = self.full_hydrate(bundle)
 
 		bundle.obj.save()
 
@@ -1670,7 +1690,7 @@ class CargarFacturaEnInventarioResource(ModelResource):
 			  }
 		authorization= Authorization()
 
-	def obj_create(self, bundle, request=None, **kwargs): 
+	def obj_create(self, bundle, request=None, **kwargs):
 
 		bundle = self.full_hydrate(bundle)
 		bundle.obj.procesada = 1
@@ -1698,7 +1718,7 @@ class CargarFacturaEnInventarioResource(ModelResource):
 					_codigo_producto  = _producto_in_factura.codigo
 					print _codigo_producto
 
-					_current_producto_en_inventario =  qs_producto_en_inventario  = inventario.objects.filter( 
+					_current_producto_en_inventario =  qs_producto_en_inventario  = inventario.objects.filter(
 							sucursal  = sucursal_id, producto__codigo  = _codigo_producto )
 
 					print _codigo_producto ,_current_producto_en_inventario
@@ -1708,7 +1728,7 @@ class CargarFacturaEnInventarioResource(ModelResource):
 					_current_producto_en_inventario = _current_producto_en_inventario[0]
 
 					#existencia del producto en inventario
-					_current_existencia_in_producto  = _current_producto_en_inventario.existencia 
+					_current_existencia_in_producto  = _current_producto_en_inventario.existencia
 
 					#se suma la existencia mas los productos que se enviaron por una factura
 					_existencia_total = _current_existencia_in_producto + _producto_in_factura.cantidad_emitida
@@ -1727,7 +1747,7 @@ class CargarFacturaEnInventarioResource(ModelResource):
 			except Exception as error:
 				raise NotFound( error )
 
-		
+
 
 
 def update_bitacora_by_sucursal_id(sucursal_id ,contar_producto_inicial = False ):
@@ -1737,13 +1757,13 @@ def update_bitacora_by_sucursal_id(sucursal_id ,contar_producto_inicial = False 
 	month = date.today().month
 	day = date.today().day
 
-	bitacora = bitacora_qs  = Bitacora.objects.filter( fecha__year = year , fecha__month = month , fecha__day = day , sucursal = sucursal_id ) 
+	bitacora = bitacora_qs  = Bitacora.objects.filter( fecha__year = year , fecha__month = month , fecha__day = day , sucursal = sucursal_id )
 	#se creaa una bitacora para el dia de hoy
 	if len(bitacora) is 0 :
 		bitacora = Bitacora.objects.create( sucursal_id  = sucursal_id )
 		bitacora = Bitacora.objects.filter( id = bitacora.id )
 	else:
-		#la bitacora ya existia para el dia de hoy 
+		#la bitacora ya existia para el dia de hoy
 		pass
 
 	#contar todo el producto inicial de una sucursal
@@ -1758,7 +1778,7 @@ def update_bitacora_by_sucursal_id(sucursal_id ,contar_producto_inicial = False 
 
 
 	#entradas en compra factura
-	ProductosFactura = FacturaHasProductos.objects.filter( factura__fecha__year = year , factura__fecha__month = month , 
+	ProductosFactura = FacturaHasProductos.objects.filter( factura__fecha__year = year , factura__fecha__month = month ,
 								factura__fecha__day = day , factura__sucursal = sucursal_id , factura__procesado = 1 )
 
 	list_productos_en_factura = [ producto_.cantidad_emitida  for producto_ in  ProductosFactura ]
@@ -1822,7 +1842,7 @@ def calcular_ventas_totales(sucursal):
 		ventas_hoy_total = 0
 
 		#ventas totales a publico por sucursal
-		ventas_hoy_publico =0  
+		ventas_hoy_publico =0
 
 		#ventas totales a mayoreo por sucursal
 		ventas_hoy_mayoreo = 0
@@ -1855,7 +1875,7 @@ def calcular_ventas_totales(sucursal):
 		gastos_list = [ gasto.gastos for gasto in gastos_en_sucursal ]
 		_gastos = sum(gastos_list)
 
-		bitacora.update( ventas_publico = ventas_hoy_publico , ventas_mayoreo = ventas_hoy_mayoreo , 
+		bitacora.update( ventas_publico = ventas_hoy_publico , ventas_mayoreo = ventas_hoy_mayoreo ,
 				dep_en_facturas = ventas_facturas , gastos = _gastos , total_a_depositar = ventas_hoy_total)
 
 
