@@ -1759,7 +1759,7 @@ class CargarFacturaEnInventarioResource(ModelResource):
 
 					Kardex.objects.create( folio = factura_id , sucursal = _tmp_obj_prod_.sucursal , tipo_registro = "FACTURA" , inventario_inicial = 0L ,
 
-			 		entradas = _producto_in_factura.cantidad_emitida  , salidas = 0L , existencia = nueva_existencia , descripcion = "Cargar producto de factura en inventario" , 
+			 		entradas = _producto_in_factura.cantidad_emitida  , salidas = 0L , existencia = _tmp_obj_prod_.existencia, descripcion = "Cargar producto de factura en inventario" , 
 
 					producto = _tmp_obj_prod_.producto )
 					#end guardamos la venta en el kardex
