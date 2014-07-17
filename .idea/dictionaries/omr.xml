@@ -2,11 +2,15 @@
   <dictionary name="omr">
     <words>
       <w>asistencia</w>
+      <w>bitacora</w>
+      <w>cambio</w>
       <w>cambios</w>
       <w>cargar</w>
       <w>datos</w>
       <w>factura</w>
       <w>facturacion</w>
+      <w>nombre</w>
+      <w>salida</w>
       <w>sucursal</w>
       <w>usuario</w>
       <w>venta</w>

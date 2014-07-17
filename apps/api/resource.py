@@ -24,7 +24,7 @@ class ISELAuthentication(Authorization):
         return False
 
 
-#************************************************************************************************************
+# ************************************************************************************************************
 #********************************************* bitacora Sucursal*******************************************
 #************************************************************************************************************
 
@@ -192,15 +192,16 @@ class SucursalResource(ModelResource):
 
                                     attribute=lambda bundle: inventario.objects.filter(sucursal=bundle.obj)
 
-                                    , null=True, full=True	)
+                                    , null=True, full=True)
+
     class Meta:
         queryset = Sucursal.objects.all()
         resource_name = 'sucursal'
-        authorization= Authorization()
+        authorization = Authorization()
         filtering = {
 
-                "nombre": ["icontains"]
-            }
+            "nombre": ["icontains"]
+        }
 
 
     def obj_create(self, bundle, request=None, **kwargs):
@@ -481,19 +482,19 @@ class VentaHasProductoResource(ModelResource):
         filtering = {"sucursal": ["exact"]}
         authorization = Authorization()
 
-    #class SucursalInventarioResource(ModelResource):
-    #""" Administrador de productos - El administrador de admisel puede modificar el rango y el stock de los productos
-    #en las sucursales, no corresponde a la seccion de inventarios, esta seccion solo es para dar de alta un producto
-    #asignarle el rango, y posteriormente asignarselo a una sucursal, para generar existencia, se hace a traves del cargo
-    #de factura."""
+        #class SucursalInventarioResource(ModelResource):
+        #""" Administrador de productos - El administrador de admisel puede modificar el rango y el stock de los productos
+        #en las sucursales, no corresponde a la seccion de inventarios, esta seccion solo es para dar de alta un producto
+        #asignarle el rango, y posteriormente asignarselo a una sucursal, para generar existencia, se hace a traves del cargo
+        #de factura."""
 
-    #sucursal = fields.ForeignKey(SucursalResource, 'sucursal'    , full = True , null = True )
-    #producto = fields.ForeignKey(ProductoResource, 'producto'    , full = True , null = True )
-    #rango = fields.ForeignKey(RangoResource , 'rango'    , full = True , null = True )
-    #class Meta:
-    #queryset = SucursalInventario.objects.all()
-    #resource_name = 'adminproductos'
-    #authorization= Authorization()
+        #sucursal = fields.ForeignKey(SucursalResource, 'sucursal'    , full = True , null = True )
+        #producto = fields.ForeignKey(ProductoResource, 'producto'    , full = True , null = True )
+        #rango = fields.ForeignKey(RangoResource , 'rango'    , full = True , null = True )
+        #class Meta:
+        #queryset = SucursalInventario.objects.all()
+        #resource_name = 'adminproductos'
+        #authorization= Authorization()
 
 
 #************************************************************************************************************
@@ -582,18 +583,18 @@ class ClienteReporteResource(ModelResource):
                                                    attribute=lambda bundle: ClienteFacturacion.objects.filter(
                                                        cliente_datos=bundle.obj)
 
-                                                   , null=True, full=True	)
-    class Meta:
+                                                   , null=True, full=True)
 
+    class Meta:
         queryset = ClienteDatos.objects.all().order_by("-fecha")
         resource_name = 'reportecliente'
-        authorization= Authorization()
-        filtering  = {
+        authorization = Authorization()
+        filtering = {
 
 
-            "nombre"  : ["icontains"],
+            "nombre": ["icontains"],
 
-            "fecha" : ["lte","gte", "lt","gt"],
+            "fecha": ["lte", "gte", "lt", "gt"],
 
 
         }
@@ -616,28 +617,26 @@ class ClienteReporteResource(ModelResource):
 
 
 class LoginResource(ModelResource):
-
-
     class Meta:
-        excludes = ["password", "email" , "id" , "nombre" , "resource_uri" , "tel_cel"]
+        excludes = ["password", "email", "id", "nombre", "resource_uri", "tel_cel"]
         queryset = Usuario.objects.all().distinct()
-        allowed_methods = ['get' ]
+        allowed_methods = ['get']
         resource_name = 'login'
         limit = 1
 
 
-    def dehydrate(self , bundle ):
+    def dehydrate(self, bundle):
 
         del bundle.data["resource_uri"]
-        get_email= bundle.request.GET.get("email") or False
+        get_email = bundle.request.GET.get("email") or False
         get_password = unicode(bundle.request.GET.get("password"))
 
-        user_exist = Usuario.objects.filter( Q(email =get_email ) , Q(password =get_password))
+        user_exist = Usuario.objects.filter(Q(email=get_email), Q(password=get_password))
 
         if user_exist:
 
 
-            bundle.data["usuario_resource_uri"] = "api/v1/usuario/{0}/".format(user_exist[0].id )
+            bundle.data["usuario_resource_uri"] = "api/v1/usuario/{0}/".format(user_exist[0].id)
             bundle.data["loggin"] = True
             bundle.data["message"] = "201"
             bundle.data["nombre"] = user_exist[0].nombre
@@ -647,10 +646,10 @@ class LoginResource(ModelResource):
 
                 print user_exist
                 #bundle.data["info"] = UsuarioSucursal.objects.filter ( usuario = user_exist )
-                UsuarioSucursalResponse = UsuarioSucursal.objects.filter (usuario =user_exist )
+                UsuarioSucursalResponse = UsuarioSucursal.objects.filter(usuario=user_exist)
                 print UsuarioSucursalResponse
 
-                bundle.data["usuario_informacion"] =  {
+                bundle.data["usuario_informacion"] = {
 
                     "salario_real": UsuarioSucursalResponse[0].salario_real,
                     "num_seguro_social": UsuarioSucursalResponse[0].num_seguro_social,
@@ -1040,7 +1039,7 @@ class CambioResource(ModelResource):
             Kardex.objects.create(folio=bundle.obj.folio_ticket, sucursal=bundle.obj.sucursal, tipo_registro="CAMBIO",
                                   inventario_inicial=0L,
                                   entradas=_modelo_entrada.get("cantidad"), salidas=0L, existencia=nueva_existencia,
-                                  descripcion="cambio de producto entrada", producto=modelo_entrada_[0])
+                                  descripcion="cambio de producto entrada", producto=modelo_entrada_[0].producto)
 
         print total_productos_entrada_inventario
         #productos que estan entrando por cambios
@@ -1063,12 +1062,13 @@ class CambioResource(ModelResource):
             Kardex.objects.create(folio=bundle.obj.folio_ticket, sucursal=bundle.obj.sucursal, tipo_registro="CAMBIO",
                                   inventario_inicial=0L,
                                   entradas=0L, salidas=_modelo_salida.get("cantidad"), existencia=nueva_existencia,
-                                  descripcion="cambio de producto salida ", producto=modelo_salida_[0])
+                                  descripcion="cambio de producto salida ", producto=modelo_salida_[0].producto)
 
 
 
         #producto que estan saliendo por cambios
         salida_cambio_bitacora = bitacora[0].salida_cambios + total_productos_salida_inventario
+
         bitacora.update(salida_cambios=salida_cambio_bitacora)
 
 
@@ -1086,6 +1086,8 @@ class CambioResource(ModelResource):
         update_disponible_fisico_in_bitacora(bundle.obj.sucursal.id)
 
         update_bitacora_existencias_de_sistema(bundle.obj.sucursal.id)
+
+        update_bitacora_by_sucursal_id(bundle.obj.sucursal.id)
 
         return bundle
 
@@ -1225,6 +1227,7 @@ class ReporteInventarioResource(ModelResource):
             "producto": ["exact"],
         }
         authorization = Authorization()
+
     #authorization= BasicAuthentication()
 
     def dehydrate(self, bundle):
@@ -1233,9 +1236,9 @@ class ReporteInventarioResource(ModelResource):
         return bundle
 
 
-    #def alter_list_data_to_serialize(self, request, data):
-    #	inv = inventario.objects.all().values("sucursal","existencia","sucursal__almacen_admipaq").distinct()
-    #	return data
+        #def alter_list_data_to_serialize(self, request, data):
+        #	inv = inventario.objects.all().values("sucursal","existencia","sucursal__almacen_admipaq").distinct()
+        #	return data
 
 
 #************************************************************************************************************
@@ -1300,15 +1303,15 @@ class CorteDiaResource(ModelResource):
 
             FacturarVenta_qs = FacturarVenta.objects.filter(fecha__gt=fecha_ultimo_corte, sucursal=sucursal)
 
-            id_venta_facturacion = False if len(FacturarVenta_qs) is 0 else FacturarVenta_qs.values("venta_id")[0]["venta_id"]
+            id_venta_facturacion = False if len(FacturarVenta_qs) is 0 else FacturarVenta_qs.values("venta_id")[0][
+                "venta_id"]
 
             ventas_desde_ultimo_corte = venta.objects.filter(fecha__gt=fecha_ultimo_corte, sucursal=sucursal)
 
             if not id_venta_facturacion:
                 ventas_desde_ultimo_corte = ventas_desde_ultimo_corte.exclude(id__in=id_venta_facturacion)
 
-            _cambios_hoy = Cambio.objects.filter(fecha__gt=fecha_ultimo_corte , sucursal=sucursal)
-
+            _cambios_hoy = Cambio.objects.filter(fecha__gt=fecha_ultimo_corte, sucursal=sucursal)
 
             ventas_hoy = ventas_desde_ultimo_corte
 
@@ -1321,7 +1324,8 @@ class CorteDiaResource(ModelResource):
 
             FacturarVenta_qs = FacturarVenta.objects.filter(fecha__lte=current_time, sucursal=sucursal)
 
-            id_venta_facturacion = False if len(FacturarVenta_qs) is 0 else FacturarVenta_qs.values("venta_id")[0]["venta_id"]
+            id_venta_facturacion = False if len(FacturarVenta_qs) is 0 else FacturarVenta_qs.values("venta_id")[0][
+                "venta_id"]
 
             #ventas totales diarias  por sucursal objectos
             ventas_hoy = venta.objects.filter(fecha__lte=current_time, sucursal=sucursal)
@@ -1330,7 +1334,6 @@ class CorteDiaResource(ModelResource):
                 ventas_hoy = ventas_hoy.exclude(id__in=id_venta_facturacion)
 
             _cambios_hoy = Cambio.objects.filter(fecha__lte=current_time, sucursal=sucursal)
-
 
         ventas_hoy_total = 0
 
@@ -1352,12 +1355,12 @@ class CorteDiaResource(ModelResource):
 
         #cambios al total
         for _cambio in _cambios_hoy:
-            ventas_hoy_total +=_cambio.diferencia_precio
+            ventas_hoy_total += _cambio.diferencia_precio
 
             if _cambio.cantidad_modelo_salida >= MAYOREO_INT:
-                 ventas_hoy_mayoreo += _cambio.diferencia_precio
+                ventas_hoy_mayoreo += _cambio.diferencia_precio
             else:
-                ventas_hoy_publico +=_cambio.diferencia_precio
+                ventas_hoy_publico += _cambio.diferencia_precio
 
 
 
@@ -1824,7 +1827,6 @@ def calcular_ventas_totales(sucursal):
     for venta_ in ventas_hoy:
 
         ventas_hoy_total += venta_.total
-
         if venta_.total_productos >= MAYOREO_INT:
             ventas_hoy_mayoreo += venta_.total
         else:
