@@ -1108,6 +1108,13 @@ class CambioResource(ModelResource):
 			modelo_entrada_.update( existencia = nueva_existencia )
 
 
+			#guardamos la venta en el kardex
+			Kardex.objects.create( folio = bundle.obj.folio_ticket , sucursal = bundle.obj.sucursal , tipo_registro = "CAMBIO" , inventario_inicial = 0L ,
+			 entradas = _modelo_entrada.get("cantidad")   , salidas = 0L , existencia = nueva_existencia , descripcion = "cambio de producto entrada" , producto = modelo_entrada_[0] )
+
+
+
+
 		print total_productos_entrada_inventario
 		#productos que estan entrando por cambios
 		entrada_cambio_bitacora = bitacora[0].entrada_cambios + total_productos_entrada_inventario
@@ -1125,6 +1132,12 @@ class CambioResource(ModelResource):
 			total_productos_salida_inventario += _modelo_salida.get("cantidad") 
 			print modelo_salida_[0].existencia , _modelo_salida.get("cantidad") , nueva_existencia
 			modelo_salida_.update( existencia = nueva_existencia )
+
+
+			#guardamos la venta en el kardex
+			Kardex.objects.create( folio = bundle.obj.folio_ticket , sucursal = bundle.obj.sucursal , tipo_registro = "CAMBIO" , inventario_inicial = 0L ,
+			 entradas = 0L , salidas = _modelo_salida.get("cantidad")  , existencia = nueva_existencia , descripcion = "cambio de producto salida " , producto = modelo_salida_[0] )
+
 
 
 		#producto que estan saliendo por cambios
@@ -1740,6 +1753,17 @@ class CargarFacturaEnInventarioResource(ModelResource):
 							sucursal  = sucursal_id, producto__codigo  = _codigo_producto )
 
 					print _codigo_producto ,_current_producto_en_inventario
+
+					#guardamos la venta en el kardex
+					_tmp_obj_prod_  = _current_producto_en_inventario[0]
+
+					Kardex.objects.create( folio = factura_id , sucursal = _tmp_obj_prod_.sucursal , tipo_registro = "FACTURA" , inventario_inicial = 0L ,
+
+			 		entradas = _producto_in_factura.cantidad_emitida  , salidas = 0L , existencia = nueva_existencia , descripcion = "Cargar producto de factura en inventario" , 
+
+					producto = _tmp_obj_prod_.producto )
+					#end guardamos la venta en el kardex
+
 
 					_current_producto_en_inventario = _current_producto_en_inventario_instance  = qs_producto_en_inventario
 
