@@ -1,3 +1,15 @@
 <component name="ProjectDictionaryState">
-  <dictionary name="omr" />
+  <dictionary name="omr">
+    <words>
+      <w>asistencia</w>
+      <w>cambios</w>
+      <w>cargar</w>
+      <w>datos</w>
+      <w>factura</w>
+      <w>facturacion</w>
+      <w>sucursal</w>
+      <w>usuario</w>
+      <w>venta</w>
+    </words>
+  </dictionary>
 </component>
