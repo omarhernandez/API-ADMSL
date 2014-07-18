@@ -73,27 +73,38 @@ class AsistenciaResource(ModelResource):
 
 
     def dehydrate(self, bundle):
+       # calcular_ventas_totales(191)
         #current_time_at_mx_zone = datetime.now()
 
         #hora de entrada de un usuario
-        hora_entrada_usuario = bundle.data.get("fecha")
+        hora_entrada_usuario = bundle.data.get("fecha") -  timedelta(hours=5)
 
-        hora_entrada_usuario_hora = hora_entrada_usuario.hour + HORA_CENTRAL_MX
         hora_entrada_usuario_minuto = hora_entrada_usuario.minute
 
+        hora_entrada_usuario_hora = hora_entrada_usuario.hour
 
         #hora de entrada fijada en la sucursal
         hora_entrada_en_sucursal = bundle.data.get("sucursal").data.get("hora_entrada")
 
         hora_entrada_en_sucursal_minuto = hora_entrada_en_sucursal.minute
-        hora_entrada_en_sucursal_hora = hora_entrada_en_sucursal.hour
+
+        hora_entrada_sucursal = ( hora_entrada_en_sucursal - timedelta(hours=6) )
+
+        hora_entrada_en_sucursal_hora = hora_entrada_sucursal.hour
 
         minutos_diferencia = hora_entrada_usuario_minuto - hora_entrada_en_sucursal_minuto
+
         horas_diferencia = hora_entrada_usuario_hora - hora_entrada_en_sucursal_hora
 
+        #bundle.data["sucursal"].data["hora_entrada"]=  bundle.data.get("sucursal").data.get("hora_entrada") -  timedelta(hours=6)
+
+        if horas_diferencia < 0:
+            bundle.data["tiempo_retardo"]  = "Sin retardo"
+            return bundle
+
         bundle.data["tiempo_retardo"] = "{0}hrs. - {1} Min.".format(horas_diferencia,
-                                                                    minutos_diferencia) if horas_diferencia > 0 else  "{0} min.".format(
-            minutos_diferencia)
+                                                                    minutos_diferencia) if horas_diferencia > 0 else "{0} min.".format(minutos_diferencia)
+
 
         return bundle
 
@@ -357,14 +368,9 @@ class VentaResource(ModelResource):
         bundle = self.full_hydrate(bundle)
         productos = bundle.data["producto"]
 
-        t = datetime.utcnow().strftime('%m_%d_%Y')
-
         name_sucursal = unicode(bundle.obj.sucursal.nombre.lower())
-        name_sucursal = unicodedata.normalize('NFKD', unicode(name_sucursal)).encode('ascii', 'ignore').replace(" ",
-                                                                                                                "_").lower()
-
-        name_utf8_decoded = name_sucursal  #unicodedata.normalize('NFKD', unicode(bundle.obj.sucursal.nombre.lower().decode('utf-8') ) ).encode('ascii', 'ignore')
-
+        name_sucursal = unicodedata.normalize('NFKD', unicode(name_sucursal)).encode('ascii', 'ignore').replace(" ", "_").lower()
+        name_utf8_decoded = name_sucursal
         bundle.obj.url_reporte = "{0}_{1}_.pdf".format(name_utf8_decoded, datetime.utcnow().strftime('%m_%d_%Y_%s'))
         bundle.obj.save()
 
@@ -378,12 +384,8 @@ class VentaResource(ModelResource):
 
         #instancia de usuario has sucursal
         current_user = UsuarioSucursal.objects.filter(usuario=current_user)[0]
-
-
-
         #guarda el usuario_sucursal que hizo la venta
-        VentaUsuarioSucursal.objects.create(usuario_sucursal=current_user, venta=bundle.obj,
-                                            nombre_usuario=current_user.usuario.nombre)
+        VentaUsuarioSucursal.objects.create(usuario_sucursal=current_user, venta=bundle.obj, nombre_usuario=current_user.usuario.nombre)
 
         #se busca si la venta sera asignada aun cliente
 
@@ -404,27 +406,19 @@ class VentaResource(ModelResource):
 
         range_products_by_sucursal = producto_has_rango.objects.filter(sucursal=sucursal)
 
-        #current time at now
-        current_time = timezone.now() - timedelta(hours=5)
-        year = current_time.year
-        month = current_time.month
-        day = current_time.day
 
-        bitacora = Bitacora.objects.filter(fecha__year=year, fecha__month=month, fecha__day=day, sucursal=sucursal)
 
+
+
+
+        salida_ventas_total = 0
         for producto in productos:
 
             id_producto = re.search('\/api\/v1\/producto\/(\d+)\/', str(producto["producto"])).group(1)
             id_producto = Producto.objects.filter(id=id_producto)[0]
             cantidad = int(producto["cantidad"])
 
-            #salida ventas para bitacoras
-            salida_venta = bitacora[0].salida_ventas + cantidad
-            bitacora.update(salida_ventas=salida_venta)
-
-            #salidas_total en bitacora
-            salida_total = bitacora[0].salida_total + cantidad
-            bitacora.update(salida_total=salida_total)
+            salida_ventas_total += cantidad
 
             #decuenta el producto en venta al inventario de la sucursal actual
 
@@ -463,9 +457,31 @@ class VentaResource(ModelResource):
             except:
                 raise NotFound("Error en rango, verifica que el producto tenga asignados todos los rangos")
 
+
+        existe_corte_de_dia, datetime_ultima_transaccion = get_fecha_ultima_transaccion_by_sucursal_id(sucursal.id)
+
+        if existe_corte_de_dia:
+            bitacora = Bitacora.objects.filter(fecha__gte=datetime_ultima_transaccion, sucursal=sucursal)
+        else:
+            bitacora = Bitacora.objects.filter(fecha__lte=datetime_ultima_transaccion, sucursal=sucursal)
+
+
+        #salida ventas para bitacoras
+        salida_venta = bitacora[0].salida_ventas + salida_ventas_total
+        bitacora.update(salida_ventas=salida_venta)
+
+
+        #salidas_total en bitacora
+        salida_total = bitacora[0].salida_ventas + bitacora[0].salida_cambios
+        bitacora.update(salida_total=salida_total)
+
+
+
         #se actualiza el disponible fisico de una sucursal
-        update_disponible_fisico_in_bitacora(sucursal.id)
+        update_existencia_total_in_bitacora(sucursal.id)
         calcular_ventas_totales(sucursal)
+        update_disponible_fisico(sucursal=sucursal)
+
 
         return bundle
 
@@ -644,10 +660,8 @@ class LoginResource(ModelResource):
             if user_exist[0].rol == "sucursal":
 
 
-                print user_exist
                 #bundle.data["info"] = UsuarioSucursal.objects.filter ( usuario = user_exist )
                 UsuarioSucursalResponse = UsuarioSucursal.objects.filter(usuario=user_exist)
-                print UsuarioSucursalResponse
 
                 bundle.data["usuario_informacion"] = {
 
@@ -677,10 +691,9 @@ class LoginResource(ModelResource):
                 day = date.today().day
 
                 sucursal = Sucursal.objects.get(pk=current_obj_sucursal_.id)
-                #calcular el total a facturar de ventas
                 paso_asistencia = Asistencia.objects.filter(fecha__year=year, fecha__month=month, fecha__day=day,
                                                             sucursal=sucursal, usuario=UsuarioSucursalResponse[0])
-                pasa_asistencia = False if len(paso_asistencia) > 0 is not None else True
+                pasa_asistencia = False if len(paso_asistencia) is not 0 else True
 
                 if pasa_asistencia:
                     Asistencia.objects.create(usuario=UsuarioSucursalResponse[0], sucursal=sucursal)
@@ -920,12 +933,27 @@ class HistorialVentaResource(ModelResource):
         ventas = venta.objects.all().order_by('-fecha')
 
         try:
+            fecha_gte = querystring_get["fecha__gte"] or False
+        except:
+            fecha_gte = False
+        try:
+            fecha_lte = querystring_get["fecha__lte"] or False
+        except:
+            fecha_lte = False
+
+        try:
             id_sucursal = querystring_get["sucursal__in"] or False
         except:
             id_sucursal = False
 
         if id_sucursal:
             ventas = ventas.filter(sucursal__in=id_sucursal)
+
+        if fecha_gte:
+            ventas = ventas.filter(fecha__gte=fecha_gte[0])
+
+        if fecha_lte:
+            ventas = ventas.filter(fecha__lte=fecha_lte[0])
 
         try:
             user_id = int(request.GET.get('usuario'))
@@ -1016,13 +1044,15 @@ class CambioResource(ModelResource):
         bundle.obj.save()
 
         #current time at now
-        current_time = timezone.now() - timedelta(hours=5)
-        year = current_time.year
-        month = current_time.month
-        day = current_time.day
+        sucursal = bundle.obj.sucursal
+        existe_corte_de_dia, datetime_ultima_transaccion = get_fecha_ultima_transaccion_by_sucursal_id(sucursal)
 
-        bitacora = Bitacora.objects.filter(fecha__year=year, fecha__month=month, fecha__day=day,
-                                           sucursal=bundle.obj.sucursal)
+        if existe_corte_de_dia:
+            bitacora = Bitacora.objects.filter(fecha__gte=datetime_ultima_transaccion, sucursal=sucursal)
+        else:
+            bitacora = Bitacora.objects.filter(fecha__lte=datetime_ultima_transaccion, sucursal=sucursal)
+
+
 
         #sumar los modelos de entrada al inventario
         total_productos_entrada_inventario = 0
@@ -1031,7 +1061,6 @@ class CambioResource(ModelResource):
             modelo_entrada_ = inventario.objects.filter(producto__codigo=_modelo_entrada_str)
             nueva_existencia = modelo_entrada_[0].existencia + _modelo_entrada.get("cantidad")
             total_productos_entrada_inventario += _modelo_entrada.get("cantidad")
-            print modelo_entrada_[0].existencia, _modelo_entrada.get("cantidad"), nueva_existencia
             modelo_entrada_.update(existencia=nueva_existencia)
 
 
@@ -1041,7 +1070,6 @@ class CambioResource(ModelResource):
                                   entradas=_modelo_entrada.get("cantidad"), salidas=0L, existencia=nueva_existencia,
                                   descripcion="cambio de producto entrada", producto=modelo_entrada_[0].producto)
 
-        print total_productos_entrada_inventario
         #productos que estan entrando por cambios
         entrada_cambio_bitacora = bitacora[0].entrada_cambios + total_productos_entrada_inventario
         bitacora.update(entrada_cambios=entrada_cambio_bitacora)
@@ -1054,7 +1082,6 @@ class CambioResource(ModelResource):
             nueva_existencia = modelo_salida_[0].existencia - _modelo_salida.get("cantidad")
 
             total_productos_salida_inventario += _modelo_salida.get("cantidad")
-            print modelo_salida_[0].existencia, _modelo_salida.get("cantidad"), nueva_existencia
             modelo_salida_.update(existencia=nueva_existencia)
 
 
@@ -1078,17 +1105,18 @@ class CambioResource(ModelResource):
 
 
         #salidas_total en bitacora
-        salida_total = bitacora[0].salida_total + total_productos_salida_inventario
+        salida_total = bitacora[0].salida_ventas + bitacora[0].salida_cambios
         bitacora.update(salida_total=salida_total)
 
 
         #se actualiza el disponible fisico de una sucursal
-        update_disponible_fisico_in_bitacora(bundle.obj.sucursal.id)
+        update_existencia_total_in_bitacora(bundle.obj.sucursal.id)
 
         update_bitacora_existencias_de_sistema(bundle.obj.sucursal.id)
 
         update_bitacora_by_sucursal_id(bundle.obj.sucursal.id)
 
+        update_disponible_fisico(sucursal=bundle.obj.sucursal)
         return bundle
 
 
@@ -1301,14 +1329,15 @@ class CorteDiaResource(ModelResource):
         try:
             fecha_ultimo_corte = CorteDia.objects.filter(sucursal=sucursal).order_by("-id")[0].fecha
 
+
             FacturarVenta_qs = FacturarVenta.objects.filter(fecha__gt=fecha_ultimo_corte, sucursal=sucursal)
 
-            id_venta_facturacion = False if len(FacturarVenta_qs) is 0 else FacturarVenta_qs.values("venta_id")[0][
-                "venta_id"]
+            id_venta_facturacion = False if len(FacturarVenta_qs) is 0 else [ _id.get("venta_id") for _id in FacturarVenta_qs.values("venta_id")]
+
 
             ventas_desde_ultimo_corte = venta.objects.filter(fecha__gt=fecha_ultimo_corte, sucursal=sucursal)
 
-            if not id_venta_facturacion:
+            if  id_venta_facturacion:
                 ventas_desde_ultimo_corte = ventas_desde_ultimo_corte.exclude(id__in=id_venta_facturacion)
 
             _cambios_hoy = Cambio.objects.filter(fecha__gt=fecha_ultimo_corte, sucursal=sucursal)
@@ -1324,16 +1353,16 @@ class CorteDiaResource(ModelResource):
 
             FacturarVenta_qs = FacturarVenta.objects.filter(fecha__lte=current_time, sucursal=sucursal)
 
-            id_venta_facturacion = False if len(FacturarVenta_qs) is 0 else FacturarVenta_qs.values("venta_id")[0][
-                "venta_id"]
+            id_venta_facturacion = False if len(FacturarVenta_qs) is 0 else [ _id.get("venta_id") for _id in FacturarVenta_qs.values("venta_id")]
 
             #ventas totales diarias  por sucursal objectos
             ventas_hoy = venta.objects.filter(fecha__lte=current_time, sucursal=sucursal)
 
-            if not id_venta_facturacion:
+            if  id_venta_facturacion:
                 ventas_hoy = ventas_hoy.exclude(id__in=id_venta_facturacion)
 
             _cambios_hoy = Cambio.objects.filter(fecha__lte=current_time, sucursal=sucursal)
+
 
         ventas_hoy_total = 0
 
@@ -1364,7 +1393,6 @@ class CorteDiaResource(ModelResource):
 
 
 
-
         #total_cambios_hoy = sum([_cambio.diferencia_precio for _cambio in _cambios_hoy])
 
         #ventas_hoy_total += total_cambios_hoy
@@ -1372,12 +1400,21 @@ class CorteDiaResource(ModelResource):
         ventas_facturas = 0
 
         for venta_a_facturar in FacturarVenta_qs:
+
             ventas_facturas += venta_a_facturar.venta.total
+
+            #ventas_hoy_total += venta_a_facturar.venta.total
+
+            if venta_a_facturar.venta.total_productos >= MAYOREO_INT:
+                ventas_hoy_mayoreo += venta_a_facturar.venta.total
+            else:
+                ventas_hoy_publico += venta_a_facturar.venta.total
+
 
         ventas_hoy_total_con_factura = ventas_hoy_total
 
         #total de la venta incluyendo facturas
-        #ventas_hoy_total_con_factura += ventas_facturas
+        ventas_hoy_total_con_factura += ventas_facturas
 
         bundle.obj.deposito_1 = ventas_hoy_total * .60
         bundle.obj.deposito_2 = ventas_hoy_total * .40
@@ -1387,6 +1424,8 @@ class CorteDiaResource(ModelResource):
         bundle.obj.total = ventas_hoy_total_con_factura
 
         bundle.obj.save()
+
+
 
         return bundle
 
@@ -1418,6 +1457,27 @@ class SucursalGastosResource(ModelResource):
     def dehydrate(self, bundle):
         return bundle
 
+    def obj_create(self, bundle, **kwargs):
+
+        bundle = self.full_hydrate(bundle)
+        bundle.obj.save()
+
+        sucursal = bundle.data.get("sucursal")
+
+        bitacora = Bitacora.objects.filter(sucursal=sucursal).order_by("-id")
+
+        _gastos = bundle.data.get("gastos")
+
+        gastos_bitacora = _gastos + bitacora[0].gastos
+
+        bitacora.update(gastos=gastos_bitacora)
+        total_a_depositar_sin_gastos = bitacora[0].total_a_depositar - _gastos
+        bitacora.update(total_a_depositar=total_a_depositar_sin_gastos )
+
+
+
+
+        return bundle
 
 #************************************************************************************************************
 #********************************************* Deposito sucursal************************************************
@@ -1465,7 +1525,16 @@ class FacturarVentaResource(ModelResource):
         }
         authorization = Authorization()
 
+    def obj_create(self, bundle, **kwargs):
 
+        bundle = self.full_hydrate(bundle)
+        bundle.obj.save()
+
+
+        sucursal = re.search('\/api\/v1\/sucursal\/(\d+)\/', str(bundle.data["sucursal"])).group(1)
+        calcular_ventas_totales(sucursal)
+
+        return bundle
 #************************************************************************************************************
 #*********************************************  ConfiguracionComision    ***********************************
 #************************************************************************************************************
@@ -1672,16 +1741,13 @@ class CargarFacturaEnInventarioResource(ModelResource):
 
                 #productos dentro de una factura que se van a iterar y buscar en el inventario de la sucursal para actualizar los datos
                 Productos_factura = FacturaHasProductos.objects.filter(factura=factura_data[0])
-                print Productos_factura
 
                 for _producto_in_factura in Productos_factura:
                     _codigo_producto = _producto_in_factura.codigo
-                    print _codigo_producto
 
                     _current_producto_en_inventario = qs_producto_en_inventario = inventario.objects.filter(
                         sucursal=sucursal_id, producto__codigo=_codigo_producto)
 
-                    print _codigo_producto, _current_producto_en_inventario
 
                     #guardamos la venta en el kardex
                     _tmp_obj_prod_ = _current_producto_en_inventario[0]
@@ -1714,8 +1780,11 @@ class CargarFacturaEnInventarioResource(ModelResource):
                     update_bitacora_by_sucursal_id(sucursal_id)
 
                     #se actualiza el disponible fisico de una sucursal
-                    update_disponible_fisico_in_bitacora(sucursal_id)
+                    update_existencia_total_in_bitacora(sucursal_id)
 
+
+
+                update_disponible_fisico(sucursal=sucursal_id)
                 return bundle
 
             except Exception as error:
@@ -1723,14 +1792,18 @@ class CargarFacturaEnInventarioResource(ModelResource):
 
 
 def update_bitacora_by_sucursal_id(sucursal_id, contar_producto_inicial=False):
-    #current time at now
-    current_time = timezone.now() - timedelta(hours=5)
-    year = current_time.year
-    month = current_time.month
-    day = current_time.day
 
-    bitacora = bitacora_qs = Bitacora.objects.filter(fecha__year=year, fecha__month=month, fecha__day=day,
-                                                     sucursal=sucursal_id)
+    existe_corte_de_dia, datetime_ultima_transaccion = get_fecha_ultima_transaccion_by_sucursal_id(sucursal_id)
+
+    if existe_corte_de_dia:
+
+        bitacora = bitacora_qs = Bitacora.objects.filter(fecha__gte = datetime_ultima_transaccion, sucursal=sucursal_id)
+
+    else:
+
+        bitacora = bitacora_qs = Bitacora.objects.filter(fecha__lte = datetime_ultima_transaccion, sucursal=sucursal_id)
+
+
     #se creaa una bitacora para el dia de hoy
     if len(bitacora) is 0:
         bitacora = Bitacora.objects.create(sucursal_id=sucursal_id)
@@ -1740,7 +1813,8 @@ def update_bitacora_by_sucursal_id(sucursal_id, contar_producto_inicial=False):
         pass
 
     #contar todo el producto inicial de una sucursal
-    if contar_producto_inicial or bitacora[0].inicial == 0:
+    #if contar_producto_inicial or bitacora[0].inicial == 0:
+    if contar_producto_inicial:
         existencia_inicial = 0
         existencia_productos = [producto.existencia for producto in inventario.objects.filter(sucursal__id=sucursal_id)]
         existencia_inicial = sum(existencia_productos)
@@ -1749,15 +1823,18 @@ def update_bitacora_by_sucursal_id(sucursal_id, contar_producto_inicial=False):
 
 
     #entradas en compra factura
-    ProductosFactura = FacturaHasProductos.objects.filter(factura__fecha__year=year, factura__fecha__month=month,
-                                                          factura__fecha__day=day, factura__sucursal=sucursal_id,
-                                                          factura__procesado=1)
+
+    if existe_corte_de_dia:
+        ProductosFactura = FacturaHasProductos.objects.filter( factura__fecha__gte = datetime_ultima_transaccion, factura__sucursal=sucursal_id,factura__procesado=1)
+    else:
+        ProductosFactura = FacturaHasProductos.objects.filter( factura__fecha__lte = datetime_ultima_transaccion, factura__sucursal=sucursal_id,factura__procesado=1)
+
 
     list_productos_en_factura = [producto_.cantidad_emitida for producto_ in ProductosFactura]
     list_productos_en_factura = sum(list_productos_en_factura)
     bitacora.update(entrada_compra_factura=list_productos_en_factura)
 
-    entrada_total = bitacora[0].entrada_total + list_productos_en_factura
+    entrada_total = bitacora[0].entrada_cambios + list_productos_en_factura
     bitacora.update(entrada_total=entrada_total)
 
 
@@ -1768,13 +1845,14 @@ def update_bitacora_by_sucursal_id(sucursal_id, contar_producto_inicial=False):
 
 #se actualiza la existencia del sistema con cualquier cambio 
 def update_bitacora_existencias_de_sistema(sucursal_id):
-    #current time at now
-    current_time = timezone.now() - timedelta(hours=5)
-    year = current_time.year
-    month = current_time.month
-    day = current_time.day
 
-    bitacora = Bitacora.objects.filter(fecha__year=year, fecha__month=month, fecha__day=day, sucursal=sucursal_id)
+    existe_corte_de_dia, datetime_ultima_transaccion = get_fecha_ultima_transaccion_by_sucursal_id(sucursal_id)
+
+
+    if existe_corte_de_dia:
+        bitacora = Bitacora.objects.filter(fecha__gte=datetime_ultima_transaccion, sucursal=sucursal_id)
+    else:
+        bitacora = Bitacora.objects.filter(fecha__lte=datetime_ultima_transaccion, sucursal=sucursal_id)
 
     existencia_inicial = 0
     existencia_productos = [producto.existencia for producto in inventario.objects.filter(sucursal__id=sucursal_id)]
@@ -1783,78 +1861,165 @@ def update_bitacora_existencias_de_sistema(sucursal_id):
     bitacora.update(total_existencia=existencia_inicial)
 
 
-def update_disponible_fisico_in_bitacora(sucursal):
+def update_existencia_total_in_bitacora(sucursal):
+
+    existe_corte_de_dia, datetime_ultima_transaccion = get_fecha_ultima_transaccion_by_sucursal_id(sucursal)
+
     sucursal_id = sucursal
     #current time at now
-    current_time = timezone.now() - timedelta(hours=5)
-    year = current_time.year
-    month = current_time.month
-    day = current_time.day
 
-    bitacora = Bitacora.objects.filter(fecha__year=year, fecha__month=month, fecha__day=day, sucursal=sucursal_id)
+    if existe_corte_de_dia:
+        bitacora = Bitacora.objects.filter(fecha__gte=datetime_ultima_transaccion, sucursal=sucursal_id)
+    else:
+        bitacora = Bitacora.objects.filter(fecha__lte=datetime_ultima_transaccion, sucursal=sucursal_id)
+
 
     existencia_total = 0
     existencia_productos = [producto.existencia for producto in inventario.objects.filter(sucursal__id=sucursal_id)]
     existencia_total = sum(existencia_productos)
 
     bitacora.update(total_existencia=existencia_total)
+    return bitacora
 
 
 def calcular_ventas_totales(sucursal):
     sucursal_id = sucursal
     #current time at now
-    current_time = timezone.now() - timedelta(hours=5)
-    year = current_time.year
-    month = current_time.month
-    day = current_time.day
+    existe_corte_de_dia, datetime_ultima_transaccion = get_fecha_ultima_transaccion_by_sucursal_id(sucursal)
+
 
     #calcular el total a facturar de ventas
-    FacturarVenta_qs = FacturarVenta.objects.filter(fecha__year=year, fecha__month=month, fecha__day=day,
-                                                    sucursal=sucursal)
-    id_venta_facturacion = FacturarVenta_qs.values("id")
+
+    if existe_corte_de_dia:
+        FacturarVenta_qs = FacturarVenta.objects.filter(fecha__gte = datetime_ultima_transaccion, sucursal=sucursal)
+    else:
+        FacturarVenta_qs = FacturarVenta.objects.filter(fecha__lte = datetime_ultima_transaccion, sucursal=sucursal)
+
+
+    id_venta_facturacion = False if len(FacturarVenta_qs) is 0 else [ _id.get("venta_id") for _id in FacturarVenta_qs.values("venta_id")]
 
     #ventas totales diarias  por sucursal objectos
-    ventas_hoy = venta.objects.filter(fecha__year=year, fecha__month=month, fecha__day=day, sucursal=sucursal).exclude(
-        id__in=id_venta_facturacion)
+    if existe_corte_de_dia:
+
+        ventas_hoy = venta.objects.filter(fecha__gte=datetime_ultima_transaccion, sucursal=sucursal)
+    else:
+        ventas_hoy = venta.objects.filter(fecha__lte=datetime_ultima_transaccion, sucursal=sucursal)
+
+
+    #ventas_hoy_total_con_factura = ventas_hoy_total
+
+    if existe_corte_de_dia:
+
+        bitacora = Bitacora.objects.filter(fecha__gte = datetime_ultima_transaccion, sucursal=sucursal)
+    else:
+        bitacora = Bitacora.objects.filter(fecha__lte=datetime_ultima_transaccion, sucursal=sucursal)
+
+
+    if existe_corte_de_dia:
+        _cambios_hoy = Cambio.objects.filter(fecha__gt=datetime_ultima_transaccion, sucursal=sucursal)
+    else:
+        _cambios_hoy = Cambio.objects.filter(fecha__lte=datetime_ultima_transaccion, sucursal=sucursal)
 
     ventas_hoy_total = 0
-
     #ventas totales a publico por sucursal
     ventas_hoy_publico = 0
-
     #ventas totales a mayoreo por sucursal
     ventas_hoy_mayoreo = 0
+
+
+    if id_venta_facturacion:
+        ventas_hoy = ventas_hoy.exclude(id__in=id_venta_facturacion)
+
     for venta_ in ventas_hoy:
 
         ventas_hoy_total += venta_.total
+
         if venta_.total_productos >= MAYOREO_INT:
             ventas_hoy_mayoreo += venta_.total
         else:
             ventas_hoy_publico += venta_.total
 
+
+    #cambios al total
+    for _cambio in _cambios_hoy:
+        ventas_hoy_total += _cambio.diferencia_precio
+
+        if _cambio.cantidad_modelo_salida >= MAYOREO_INT:
+            ventas_hoy_mayoreo += _cambio.diferencia_precio
+        else:
+            ventas_hoy_publico += _cambio.diferencia_precio
+
+
+
     ventas_facturas = 0
 
     for venta_a_facturar in FacturarVenta_qs:
+
         ventas_facturas += venta_a_facturar.venta.total
 
-    ventas_hoy_total_con_factura = ventas_hoy_total
+        if venta_a_facturar.venta.total_productos >= MAYOREO_INT:
+            ventas_hoy_mayoreo += venta_a_facturar.venta.total
+        else:
+            ventas_hoy_publico += venta_a_facturar.venta.total
 
-    #current time at now
-    current_time = timezone.now() - timedelta(hours=5)
-    year = current_time.year
-    month = current_time.month
-    day = current_time.day
 
-    bitacora = Bitacora.objects.filter(fecha__year=year, fecha__month=month, fecha__day=day, sucursal=sucursal)
 
-    gastos_en_sucursal = GastosSucursal.objects.filter(fecha__year=year, fecha__month=month, fecha__day=day,
-                                                       corte_dia__sucursal=sucursal)
+    #gastos_bitacora = _gastos + bitacora[0].gastos
 
-    gastos_list = [gasto.gastos for gasto in gastos_en_sucursal]
-    _gastos = sum(gastos_list)
+    #bitacora.update(gastos=gastos_bitacora)
+    #total_a = bitacora[0].total_a_depositar - _gastos
+    #GastosSucursal
 
+    if existe_corte_de_dia:
+        gastos=GastosSucursal.objects.filter(fecha__gte=datetime_ultima_transaccion)
+    else:
+        gastos=GastosSucursal.objects.filter(fecha__lte=datetime_ultima_transaccion)
+
+
+    _gastos = sum([gasto.gastos for gasto in gastos])
+    gastos_bitacora = ventas_hoy_publico + ventas_hoy_mayoreo - _gastos
+    total_a_depositar_sin_gastos = gastos_bitacora
+
+    #****************************************************************************
     bitacora.update(ventas_publico=ventas_hoy_publico, ventas_mayoreo=ventas_hoy_mayoreo,
-                    dep_en_facturas=ventas_facturas, gastos=_gastos, total_a_depositar=ventas_hoy_total)
+                    dep_en_facturas=ventas_facturas, total_a_depositar=total_a_depositar_sin_gastos)
+
+
+
+def update_disponible_fisico(sucursal=False):
+
+    existe_corte_de_dia, datetime_ultima_transaccion = get_fecha_ultima_transaccion_by_sucursal_id(sucursal)
+
+    if existe_corte_de_dia:
+        bitacora = Bitacora.objects.filter(fecha__gte=datetime_ultima_transaccion, sucursal=sucursal)
+    else:
+        bitacora = Bitacora.objects.filter(fecha__lte=datetime_ultima_transaccion, sucursal=sucursal)
+
+    disponible_fisico_total = (bitacora[0].inicial + bitacora[0].entrada_total) - bitacora[0].salida_total
+    bitacora.update(disponible_fisico=disponible_fisico_total)
+
+
+
+#summary:
+#param @int:sucursal - Id de la sucursal
+#se pretende obtener una fecha para saber hasta que fecha el usuario al llamar el ORM pueda tomar los datos, los datos
+#en la bd estan en UTC, si regresa fecha de ultimo corte, a partir de esta fecha en adelante se tomaran los datos
+#sino regresara la fecha de hoy y  a partir de la fecha de hoy para atras tomara todos los datos, ya que no existia
+#un corte del dia y quiere decir que es la primera vez que se usa el sistema.
+#return @boolean:cortedia_exist , @datetime:datetime
+
+def get_fecha_ultima_transaccion_by_sucursal_id(sucursal):
+
+    fecha_ultimo_corte = CorteDia.objects.filter(sucursal=sucursal)
+
+    if len(fecha_ultimo_corte) is not 0:
+
+        return True, fecha_ultimo_corte.order_by("-id")[0].fecha
+
+    return False, timezone.now()
+
+
+
 
 
 

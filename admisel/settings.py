@@ -3,7 +3,7 @@ import dj_database_url
 
 DATABASES = {'default': dj_database_url.config(default= os.environ.get("CREDENTIALS_HEROKU")	)}
 DEPLOY  = os.environ.get("DEV",False) 
-DEPLOY = False 
+DEPLOY = True
 TASTYPIE_FULL_DEBUG = DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 

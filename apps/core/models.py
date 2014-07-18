@@ -96,30 +96,26 @@ class inventario(models.Model):
 class venta(models.Model):
     sucursal = models.ForeignKey(Sucursal, db_column='Sucursal_id') # Field name made lowercase.
     fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
-
     folio = models.IntegerField( db_column = "folio")
     total = models.FloatField( db_column = "total")
     total_productos = models.IntegerField( db_column = "total_productos")
     url_reporte =   models.CharField(max_length=500L, blank=True , db_column = "url_reporte")
     descuento_cliente =   models.CharField(max_length=500L, blank=True , db_column = "descuento_cliente")
 
-
     class Meta:
         db_table = 'venta'
 
     def save(self):
     
-    	
-	venta_qs = venta.objects.all().filter(sucursal=self.sucursal).aggregate(Max('folio'))
+        venta_qs = venta.objects.all().filter(sucursal=self.sucursal).aggregate(Max('folio'))
 
-	if venta_qs["folio__max"]:
-		last = unicode(venta_qs ["folio__max"])
-		self.folio = int(last)+1
-	else:
-		self.folio = 1
-	
+        if venta_qs["folio__max"]:
+            last = unicode(venta_qs ["folio__max"])
+            self.folio = int(last)+1
+        else:
+            self.folio = 1
 
-	super(venta , self).save()
+        super(venta , self).save()
 
 
 
@@ -132,20 +128,6 @@ class venta_has_producto(models.Model):
 
     class Meta:
         db_table = 'venta_has_producto' 
-	
-	
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 class producto_has_rango(models.Model):
@@ -194,61 +176,61 @@ class UsuarioSucursalHasSucursal(models.Model):
         db_table = 'usuario_sucursal_has_Sucursal'
 
 class Estados(models.Model):
-	estado = models.CharField(max_length=60L)
-	class Meta:
-		db_table = 'estados'
+    estado = models.CharField(max_length=60L)
+    class Meta:
+        db_table = 'estados'
 
 class Municipios(models.Model):
-    	estado = models.ForeignKey(Estados , db_column='estado') # Field name made lowercase.
-	municipio = models.CharField(max_length=49L, blank=True)
+    estado = models.ForeignKey(Estados , db_column='estado') # Field name made lowercase.
+    municipio = models.CharField(max_length=49L, blank=True)
 
-	class Meta:
-		db_table = 'municipios'
+    class Meta:
+        db_table = 'municipios'
 
 class VentaCliente(models.Model):
-	cliente_datos = models.ForeignKey(ClienteDatos , db_column ="cliente_datos")
-	venta = models.ForeignKey(venta, db_column = "venta")
+    cliente_datos = models.ForeignKey(ClienteDatos , db_column ="cliente_datos")
+    venta = models.ForeignKey(venta, db_column = "venta")
 
-	class Meta:
-		db_table = 'venta_cliente'
+    class Meta:
+        db_table = 'venta_cliente'
 
 class AsignacionSupervisorPlaza(models.Model):
-    	usuario = models.ForeignKey('usuario' , db_column = "usuario")
-	sucursal = models.ForeignKey(Sucursal, db_column='sucursal') 
+    usuario = models.ForeignKey('usuario' , db_column = "usuario")
+    sucursal = models.ForeignKey(Sucursal, db_column='sucursal')
 
-	class Meta:
-		db_table = 'asignacion_supervisor_plaza'
+    class Meta:
+        db_table = 'asignacion_supervisor_plaza'
 
 
 class VentaPublico(models.Model):
-	venta = models.ForeignKey(venta, db_column = "venta")
-	class Meta:
-		db_table = 'venta_publico'
+    venta = models.ForeignKey(venta, db_column = "venta")
+    class Meta:
+        db_table = 'venta_publico'
 
 
 class VentaUsuarioSucursal(models.Model):
-    	usuario_sucursal = models.ForeignKey(UsuarioSucursal , db_column = "usuario_sucursal")
-	venta = models.ForeignKey(venta, db_column = "venta")
-	nombre_usuario = models.CharField(max_length=400L)
+    usuario_sucursal = models.ForeignKey(UsuarioSucursal , db_column = "usuario_sucursal")
+    venta = models.ForeignKey(venta, db_column = "venta")
+    nombre_usuario = models.CharField(max_length=400L)
 
-	class Meta:
-		db_table = 'venta_usuario_sucursal'
+    class Meta:
+        db_table = 'venta_usuario_sucursal'
 
 
 class Cambio(models.Model):
 
-    	sucursal = models.ForeignKey(Sucursal, db_column='sucursal') # Field name made lowercase.
-	folio_ticket = models.TextField()
-    	fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
-	modelo_entrada = models.TextField()
-	modelo_salida = models.TextField()
-	diferencia_precio = models.FloatField()
-	motivo_cambio = models.TextField()
-    	cantidad_modelo_entrada = models.IntegerField()
-    	cantidad_modelo_salida = models.IntegerField()
-	
-	class Meta:
-		db_table = 'cambio'
+    sucursal = models.ForeignKey(Sucursal, db_column='sucursal') # Field name made lowercase.
+    folio_ticket = models.TextField()
+    fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
+    modelo_entrada = models.TextField()
+    modelo_salida = models.TextField()
+    diferencia_precio = models.FloatField()
+    motivo_cambio = models.TextField()
+    cantidad_modelo_entrada = models.IntegerField()
+    cantidad_modelo_salida = models.IntegerField()
+
+    class Meta:
+        db_table = 'cambio'
 
 
 class AjusteInventario(models.Model):
@@ -270,111 +252,111 @@ class AjusteInventario(models.Model):
 
 class Kardex(models.Model):
 
-    	fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
-	folio = models.IntegerField()
-    	sucursal = models.ForeignKey(Sucursal, db_column='sucursal') # Field name made lowercase.
-	tipo_registro = models.CharField(max_length=45L)
-	inventario_inicial = models.IntegerField()
-	entradas = models.IntegerField()
-	salidas = models.IntegerField()
-	existencia = models.IntegerField()
-	descripcion = models.TextField()
-    	producto = models.ForeignKey(Producto, db_column='producto') # Field name made lowercase.
+    fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
+    folio = models.IntegerField()
+    sucursal = models.ForeignKey(Sucursal, db_column='sucursal') # Field name made lowercase.
+    tipo_registro = models.CharField(max_length=45L)
+    inventario_inicial = models.IntegerField()
+    entradas = models.IntegerField()
+    salidas = models.IntegerField()
+    existencia = models.IntegerField()
+    descripcion = models.TextField()
+    producto = models.ForeignKey(Producto, db_column='producto') # Field name made lowercase.
 
-	class Meta:
-		db_table = 'kardex'
+    class Meta:
+        db_table = 'kardex'
 
 
 class Bitacora(models.Model):
 
-    	sucursal = models.ForeignKey(Sucursal, db_column='sucursal') # Field name made lowercase.
-    	fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
+    sucursal = models.ForeignKey(Sucursal, db_column='sucursal') # Field name made lowercase.
+    fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
 
-	inicial =  models.IntegerField( default = 0)  
+    inicial =  models.IntegerField( default = 0)
 
-	#Entradas
-	entrada_compra_factura  = models.IntegerField( default = 0)
-    	entrada_cambios = models.IntegerField(default = 0)
+    #Entradas
+    entrada_compra_factura  = models.IntegerField( default = 0)
+    entrada_cambios = models.IntegerField(default = 0)
 
-	entrada_total = models.IntegerField( default = 0 )
+    entrada_total = models.IntegerField( default = 0 )
  
-	#SALIDAS
-	salida_ventas = models.IntegerField( default = 0)
+    #SALIDAS
+    salida_ventas = models.IntegerField( default = 0)
 
-    	salida_cambios = models.IntegerField( default = 0)
-	salida_total = models.IntegerField( default = 0)
-	disponible_fisico = models.IntegerField( default = 0)
+    salida_cambios = models.IntegerField( default = 0)
+    salida_total = models.IntegerField( default = 0)
+    disponible_fisico = models.IntegerField( default = 0)
 
-	#SISTEMA
-	sistema_existencia = models.IntegerField( default = 0)
-	sistema_dif_ajustes = models.IntegerField( default = 0)
-	sistema_cambios = models.IntegerField( default = 0)
-	total_existencia = models.IntegerField( default = 0)
+    #SISTEMA
+    sistema_existencia = models.IntegerField( default = 0)
+    sistema_dif_ajustes = models.IntegerField( default = 0)
+    sistema_cambios = models.IntegerField( default = 0)
+    total_existencia = models.IntegerField( default = 0)
 
-	diferencia = models.IntegerField( default = 0)
+    diferencia = models.IntegerField( default = 0)
 
-	#ventas efectivo
-	ventas_publico = models.FloatField( default = 0)
-	ventas_mayoreo = models.FloatField( default = 0)
-	dep_en_facturas = models.FloatField( default = 0)
-	gastos = models.FloatField( default = 0)
-	total_a_depositar = models.FloatField( default = 0)
+    #ventas efectivo
+    ventas_publico = models.FloatField( default = 0)
+    ventas_mayoreo = models.FloatField( default = 0)
+    dep_en_facturas = models.FloatField( default = 0)
+    gastos = models.FloatField( default = 0)
+    total_a_depositar = models.FloatField( default = 0)
 
 
-	class Meta:
-		db_table = 'bitacora'
+    class Meta:
+        db_table = 'bitacora'
 
 
 class CorteDia(models.Model):
 
-    	sucursal = models.ForeignKey(Sucursal, db_column='sucursal') # Field name made lowercase.
-    	usuario = models.ForeignKey(Usuario , db_column = "usuario")
-    	fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
-	deposito_1 = models.FloatField()
-	deposito_2 = models.FloatField()
-	deposito_3 = models.FloatField()
-	venta_mayoreo = models.FloatField()
-    	venta_publico = models.FloatField()
-	total = models.FloatField()
+    sucursal = models.ForeignKey(Sucursal, db_column='sucursal') # Field name made lowercase.
+    usuario = models.ForeignKey(Usuario , db_column = "usuario")
+    fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
+    deposito_1 = models.FloatField()
+    deposito_2 = models.FloatField()
+    deposito_3 = models.FloatField()
+    venta_mayoreo = models.FloatField()
+    venta_publico = models.FloatField()
+    total = models.FloatField()
 
-    	class Meta:
-	    db_table = 'corte_dia'
+    class Meta:
+        db_table = 'corte_dia'
 
 class GastosSucursal(models.Model):
-    	corte_dia = models.ForeignKey(CorteDia, db_column='corte_dia') # Field name made lowercase.
-    	fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
-	gastos = models.FloatField()
-	concepto = models.TextField()
+    corte_dia = models.ForeignKey(CorteDia, db_column='corte_dia') # Field name made lowercase.
+    fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
+    gastos = models.FloatField()
+    concepto = models.TextField()
 
-	class Meta:
-		db_table = 'gastos_sucursal'
+    class Meta:
+        db_table = 'gastos_sucursal'
 
 
 class DepositosSucursal(models.Model):
 
-    	corte_dia = models.ForeignKey(CorteDia, db_column='corte_dia') # Field name made lowercase.
-	deposito = models.FloatField()
-        numero_cuenta = models.CharField(max_length=200L)
-    	referencia = models.CharField(max_length=150L)
-    	fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
-    	cantidad = models.FloatField()
-        comentario = models.TextField()
-        deposito_real = models.FloatField()
-    	numero_deposito = models.IntegerField()
+    corte_dia = models.ForeignKey(CorteDia, db_column='corte_dia') # Field name made lowercase.
+    deposito = models.FloatField()
+    numero_cuenta = models.CharField(max_length=200L)
+    referencia = models.CharField(max_length=150L)
+    fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
+    cantidad = models.FloatField()
+    comentario = models.TextField()
+    deposito_real = models.FloatField()
+    numero_deposito = models.IntegerField()
 
-        class Meta:
-	        db_table = 'depositos_sucursal'
-	
+    class Meta:
+        db_table = 'depositos_sucursal'
+
 
 class FacturarVenta(models.Model):
 
-    	sucursal = models.ForeignKey(Sucursal, db_column='sucursal') # Field name made lowercase.
-    	venta = models.ForeignKey(venta, db_column='venta') # Field name made lowercase.
-    	cliente = models.ForeignKey(ClienteDatos , db_column = "cliente")
-    	fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
+    sucursal = models.ForeignKey(Sucursal, db_column='sucursal') # Field name made lowercase.
+    venta = models.ForeignKey(venta, db_column='venta') # Field name made lowercase.
+    cliente = models.ForeignKey(ClienteDatos , db_column = "cliente")
+    fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
 
-	class Meta:
-		db_table = 'facturar_venta'
+    class Meta:
+        db_table = 'facturar_venta'
 
 
 
@@ -382,65 +364,67 @@ class FacturarVenta(models.Model):
 
 class ConfiguracionComision(models.Model):
 
-    	sucursal = models.ForeignKey(Sucursal, db_column='sucursal' , related_name="sucursal" ) # Field name made lowercase.
-    	sucursal_comision = models.ForeignKey(Sucursal, db_column='sucursal_comision' , related_name = "sucursal_comision") # Field name made lowercase.
-	usuario = models.ForeignKey(Usuario , db_column = "usuario" )
-	porcentaje_comision_total = models.FloatField(null=True, blank=True)
-	porcentaje_comision = models.FloatField(null=True, blank=True)
+    sucursal = models.ForeignKey(Sucursal, db_column='sucursal' , related_name="sucursal" ) # Field name made lowercase.
+    sucursal_comision = models.ForeignKey(Sucursal, db_column='sucursal_comision' , related_name = "sucursal_comision") # Field name made lowercase.
+    usuario = models.ForeignKey(Usuario , db_column = "usuario" )
+    porcentaje_comision_total = models.FloatField(null=True, blank=True)
+    porcentaje_comision = models.FloatField(null=True, blank=True)
 
-	class Meta:
-		db_table = 'configuracion_comision'
+    class Meta:
+        db_table = 'configuracion_comision'
 
 
 class Paquetes(models.Model):
-    	producto = models.ForeignKey(Producto, db_column='producto') # Field name made lowercase.
+    producto = models.ForeignKey(Producto, db_column='producto') # Field name made lowercase.
 
-	class Meta:
-		db_table = 'paquetes'
+    class Meta:
+        db_table = 'paquetes'
 
 
 class PaquetesHasProducto(models.Model):
-    	productos = models.ForeignKey(Producto, db_column='productos') # Field name made lowercase.
-    	paquetes = models.ForeignKey(Paquetes, db_column='paquetes') # Field name made lowercase.
-	class Meta: db_table = 'paquete_has_producto'
+    productos = models.ForeignKey(Producto, db_column='productos') # Field name made lowercase.
+    paquetes = models.ForeignKey(Paquetes, db_column='paquetes') # Field name made lowercase.
+
+    class Meta:
+        db_table = 'paquete_has_producto'
 
 
 class CargarFactura(models.Model):
-    	fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
-    	sucursal = models.ForeignKey(Sucursal, db_column='sucursal') # Field name made lowercase.
-	numero_factura = models.CharField(max_length=45L)
-	procesado = models.IntegerField( default = 0)
-	
-	class Meta:
-		db_table = 'cargar_factura'
+    fecha = models.DateTimeField( auto_now_add = True, db_column = "fecha" )
+    sucursal = models.ForeignKey(Sucursal, db_column='sucursal') # Field name made lowercase.
+    numero_factura = models.CharField(max_length=45L)
+    procesado = models.IntegerField( default = 0)
+
+    class Meta:
+        db_table = 'cargar_factura'
 
 
 class FacturaHasProductos(models.Model):
 
-    	factura = models.ForeignKey(CargarFactura, db_column='factura') # Field name made lowercase.
-	codigo = models.CharField(max_length=45L)
-	cantidad_emitida   = models.IntegerField()
-	procesado = models.IntegerField( default = 0)
-	comentario = models.TextField( default = "" )
-	cantidad_recibida = models.IntegerField( default = 0 )
-	
-	class Meta:
-		db_table = 'factura_has_productos' 
+    factura = models.ForeignKey(CargarFactura, db_column='factura') # Field name made lowercase.
+    codigo = models.CharField(max_length=45L)
+    cantidad_emitida   = models.IntegerField()
+    procesado = models.IntegerField( default = 0)
+    comentario = models.TextField( default = "" )
+    cantidad_recibida = models.IntegerField( default = 0 )
+
+    class Meta:
+        db_table = 'factura_has_productos'
 
 class CargarFacturaEnInventario(models.Model):
-    	sucursal = models.ForeignKey(Sucursal, db_column='sucursal') # Field name made lowercase.
-	numero_factura = models.IntegerField(null=True, blank=True)
-	procesada = models.IntegerField(null=True, blank=True)
-	
-	class Meta:
-		db_table = 'cargar_factura_en_inventario'
+    sucursal = models.ForeignKey(Sucursal, db_column='sucursal') # Field name made lowercase.
+    numero_factura = models.IntegerField(null=True, blank=True)
+    procesada = models.IntegerField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'cargar_factura_en_inventario'
 
 
 class Asistencia(models.Model):
-	fecha = models.DateTimeField( auto_now_add = True) 
-	usuario = models.ForeignKey(UsuarioSucursal , db_column = "usuario") 
-	sucursal = models.ForeignKey(Sucursal , db_column = "sucursal") # Field name made lowercase.
-	
-	class Meta:
-		db_table = 'asistencia'
+    fecha = models.DateTimeField( auto_now_add = True)
+    usuario = models.ForeignKey(UsuarioSucursal , db_column = "usuario")
+    sucursal = models.ForeignKey(Sucursal , db_column = "sucursal") # Field name made lowercase.
+
+    class Meta:
+        db_table = 'asistencia'
 
