@@ -1,4 +1,7 @@
 # encoding:utf-8
+#Author: Omar S. Hernandez
+#Date: 18th Jul. 2014
+#El viejo.
 from django.utils import timezone
 from datetime import date, datetime, timedelta
 from tastypie.exceptions import *
@@ -22,6 +25,48 @@ class ISELAuthentication(Authorization):
 
     def is_authenticated(self, request, **kwargs):
         return False
+
+
+# ************************************************************************************************************
+#********************************************* Obtener ultimo folio de venta por sucursal *******************
+#************************************************************************************************************
+
+
+class LastFolioInVentaBySucursalResource(ModelResource):
+    sucursal = fields.ForeignKey("apps.api.resource.SucursalSinInventarioResource", 'sucursal', null=True, full=True)
+
+    class Meta:
+        queryset = venta.objects.all().order_by("-fecha")
+        allowed_methods = ["get"]
+        resource_name = 'ultimofolio'
+        filtering = {
+
+            "sucursal": ALL_WITH_RELATIONS,
+
+        }
+
+    def dehydrate(self, bundle):
+
+        del bundle.data["sucursal"]
+
+        return bundle
+
+    def obj_get_list(self, bundle, **kwargs):
+
+        request = bundle.request
+        querystring_get = dict(bundle.request.GET.iterlists())
+        venta_qs = venta.objects.all()
+
+        if request.method == 'POST':
+            return []
+        try:
+            sucursal = querystring_get["sucursal"] or False
+            if sucursal:
+                last_venta = venta_qs.filter( sucursal = sucursal[0]).order_by("-fecha")[0]
+            return [last_venta]
+
+        except:
+            return []
 
 
 # ************************************************************************************************************
@@ -478,9 +523,10 @@ class VentaResource(ModelResource):
 
 
         #se actualiza el disponible fisico de una sucursal
-        update_existencia_total_in_bitacora(sucursal.id)
+        #update_bitacora_existencias_de_sistema(sucursal.id)
         calcular_ventas_totales(sucursal)
-        update_disponible_fisico(sucursal=sucursal)
+        #update_disponible_fisico(sucursal=sucursal)
+        update_bitacora_by_sucursal_id(sucursal.id)
 
 
         return bundle
@@ -1110,13 +1156,11 @@ class CambioResource(ModelResource):
 
 
         #se actualiza el disponible fisico de una sucursal
-        update_existencia_total_in_bitacora(bundle.obj.sucursal.id)
-
-        update_bitacora_existencias_de_sistema(bundle.obj.sucursal.id)
-
+        #update_existencia_total_in_bitacora(bundle.obj.sucursal.id)
+        #update_bitacora_existencias_de_sistema(bundle.obj.sucursal.id)
         update_bitacora_by_sucursal_id(bundle.obj.sucursal.id)
+        #update_disponible_fisico(sucursal=bundle.obj.sucursal)
 
-        update_disponible_fisico(sucursal=bundle.obj.sucursal)
         return bundle
 
 
@@ -1777,14 +1821,11 @@ class CargarFacturaEnInventarioResource(ModelResource):
                     #actualizamos la existencia del inventario
 
                     factura_instance.update(procesado=1)
-                    update_bitacora_by_sucursal_id(sucursal_id)
 
-                    #se actualiza el disponible fisico de una sucursal
-                    update_existencia_total_in_bitacora(sucursal_id)
+                update_bitacora_by_sucursal_id(sucursal_id)
+                #se actualiza el disponible fisico de una sucursal
+                #update_bitacora_existencias_de_sistema(sucursal_id)
 
-
-
-                update_disponible_fisico(sucursal=sucursal_id)
                 return bundle
 
             except Exception as error:
@@ -1841,7 +1882,8 @@ def update_bitacora_by_sucursal_id(sucursal_id, contar_producto_inicial=False):
 
     #actualizamos existencia
     update_bitacora_existencias_de_sistema(sucursal_id)
-
+    update_disponible_fisico(sucursal=sucursal_id)
+    #fin de calculo de la bitacora total
 
 #se actualiza la existencia del sistema con cualquier cambio 
 def update_bitacora_existencias_de_sistema(sucursal_id):
@@ -1861,25 +1903,6 @@ def update_bitacora_existencias_de_sistema(sucursal_id):
     bitacora.update(total_existencia=existencia_inicial)
 
 
-def update_existencia_total_in_bitacora(sucursal):
-
-    existe_corte_de_dia, datetime_ultima_transaccion = get_fecha_ultima_transaccion_by_sucursal_id(sucursal)
-
-    sucursal_id = sucursal
-    #current time at now
-
-    if existe_corte_de_dia:
-        bitacora = Bitacora.objects.filter(fecha__gte=datetime_ultima_transaccion, sucursal=sucursal_id)
-    else:
-        bitacora = Bitacora.objects.filter(fecha__lte=datetime_ultima_transaccion, sucursal=sucursal_id)
-
-
-    existencia_total = 0
-    existencia_productos = [producto.existencia for producto in inventario.objects.filter(sucursal__id=sucursal_id)]
-    existencia_total = sum(existencia_productos)
-
-    bitacora.update(total_existencia=existencia_total)
-    return bitacora
 
 
 def calcular_ventas_totales(sucursal):
@@ -1963,13 +1986,6 @@ def calcular_ventas_totales(sucursal):
             ventas_hoy_publico += venta_a_facturar.venta.total
 
 
-
-    #gastos_bitacora = _gastos + bitacora[0].gastos
-
-    #bitacora.update(gastos=gastos_bitacora)
-    #total_a = bitacora[0].total_a_depositar - _gastos
-    #GastosSucursal
-
     if existe_corte_de_dia:
         gastos=GastosSucursal.objects.filter(fecha__gte=datetime_ultima_transaccion)
     else:
@@ -1999,8 +2015,6 @@ def update_disponible_fisico(sucursal=False):
     bitacora.update(disponible_fisico=disponible_fisico_total)
 
 
-
-#summary:
 #param @int:sucursal - Id de la sucursal
 #se pretende obtener una fecha para saber hasta que fecha el usuario al llamar el ORM pueda tomar los datos, los datos
 #en la bd estan en UTC, si regresa fecha de ultimo corte, a partir de esta fecha en adelante se tomaran los datos
@@ -2017,10 +2031,4 @@ def get_fecha_ultima_transaccion_by_sucursal_id(sucursal):
         return True, fecha_ultimo_corte.order_by("-id")[0].fecha
 
     return False, timezone.now()
-
-
-
-
-
-
 

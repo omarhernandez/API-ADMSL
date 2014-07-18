@@ -39,5 +39,5 @@ v1_api.register(CargarFacturaEnInventarioResource())
 v1_api.register(CargarFacturaHasProductosResource())
 v1_api.register(AsistenciaResource())
 v1_api.register(BitacoraResource())
-
+v1_api.register(LastFolioInVentaBySucursalResource())
 

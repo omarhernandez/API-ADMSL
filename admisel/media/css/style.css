@@ -86,3 +86,19 @@ div.container_notify .child{
 .actor {
     color: #4183C4;
     }
+
+.slogan{
+	display: block;
+	padding-top: 16px;
+}
+
+.header {
+	float: left;
+	width: 353px;
+}
+
+
+
+.header img {
+	float: left;
+}
