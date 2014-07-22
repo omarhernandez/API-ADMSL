@@ -91,6 +91,15 @@ class BitacoraResource(ModelResource):
         }
 
     def dehydrate(self, bundle):
+
+        _total_a_depositar = bundle.obj.ventas_mayoreo + bundle.obj.ventas_publico - bundle.obj.gastos
+        bundle.obj.total_a_depositar = _total_a_depositar
+
+        bundle.obj.disponible_fisico =bundle.obj.entrada_total - bundle.obj.salida_total
+
+        bundle.obj.save()
+
+
         return bundle
 
 
@@ -1615,7 +1624,7 @@ class PaquetesResource(ModelResource):
     producto = fields.ForeignKey(ProductoResource, 'producto', full=True)
 
     class Meta:
-        allowed_methods = ["get", "post"]
+        allowed_methods = ["get", "post" , "delete"]
         queryset = Paquetes.objects.all()
         always_return_data = True
         resource_name = 'paquete'
