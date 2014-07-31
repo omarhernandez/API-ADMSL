@@ -14,9 +14,47 @@ from tastypie.resources import ModelResource, ALL_WITH_RELATIONS
 from tastypie.exceptions import Unauthorized
 from django.contrib.auth.models import User
 from django.db.models import Q
+from tastypie import http
+import string
 
 MAYOREO_INT = 2
 HORA_CENTRAL_MX = -5
+
+
+class BaseCorsResource(object):
+    """
+    Adds CORS headers to resources that subclass this.
+    """
+    def create_response(self, *args, **kwargs):
+        response = super(BaseCorsResource, self).create_response(*args, **kwargs)
+        response['Access-Control-Allow-Origin'] = '*'
+        response['Access-Control-Allow-Headers'] = 'Content-Type'
+        response['Access-Control-Allow-Methods'] = 'GET, POST, PUT, OPTIONS'
+        return response
+
+    def method_check(self, request, allowed=None):
+        if allowed is None:
+            allowed = []
+
+        request_method = request.method.lower()
+        print "cros"
+        allows = ','.join(map(string.upper, allowed))
+
+        if request_method == 'options':
+            response = HttpResponse(allows)
+            response['Access-Control-Allow-Origin'] = '*'
+            response['Access-Control-Allow-Headers'] = 'Content-Type'
+            response['Access-Control-Allow-Methods'] = 'GET, POST, PUT, OPTIONS'
+            response['Allow'] = allows
+
+            raise ImmediateHttpResponse(response=response)
+
+        if not request_method in allowed:
+            response = http.HttpMethodNotAllowed(allows)
+            response['Allow'] = allows
+            raise ImmediateHttpResponse(response=response)
+
+        return request_method
 
 
 class ISELAuthentication(Authorization):
@@ -168,7 +206,7 @@ class AsistenciaResource(ModelResource):
 #************************************************************************************************************
 
 
-class UsuarioHasSucursalResource(ModelResource):
+class UsuarioHasSucursalResource(BaseCorsResource,ModelResource):
     usuario = fields.ForeignKey("apps.api.resource.UsuarioResource", 'usuario', null=True, full=True)
     Sucursal_id = fields.ForeignKey("apps.api.resource.SucursalSinInventarioResource", 'Sucursal_id', null=True,
                                     full=True)
@@ -412,7 +450,6 @@ class VentaResource(ModelResource):
     def dehydrate(self, bundle):
         #bundle.data["folio"] = bundle.obj.id
         #del bundle.data["producto"]
-
         return bundle
 
 
@@ -602,6 +639,7 @@ class ClienteResource(ModelResource):
     def dehydrate(self, bundle):
 
         cliente_datos = {}
+        print "ahh"
         try:
             cliente_datos = ClienteFacturacion.objects.filter(cliente_datos=bundle.obj)[0]
             bundle.data["datos_facturacion"] = cliente_datos.__dict__
@@ -2040,4 +2078,62 @@ def get_fecha_ultima_transaccion_by_sucursal_id(sucursal):
         return True, fecha_ultimo_corte.order_by("-id")[0].fecha
 
     return False, timezone.now()
+
+
+
+#************************************************************************************************************
+#********************************************* Status de las notificaciones de ventas para un supervisor ***
+#************************************************************************************************************
+
+
+class StatusVentasAsistidasResource(BaseCorsResource,ModelResource):
+    supervisor = fields.ForeignKey("apps.api.resource.UsuarioResource", 'supervisor', null=True, full=False)
+    #sucursal = fields.ForeignKey("apps.api.resource.SucursalSinInventarioResource", 'sucursal', null=True, full=True)
+
+    class Meta:
+        queryset = StatusVentasAsistidas.objects.all()
+        resource_name = 'status_notify'
+        authorization = Authorization()
+
+        filtering = {
+
+           # "sucursal": ["exact"],
+            "supervisor": ["exact"],
+
+        }
+    def dehydrate(self, bundle):
+
+        return bundle
+
+
+    def obj_get_list(self, bundle, **kwargs):
+
+        request = bundle.request
+        querystring_get = dict(bundle.request.GET.iterlists())
+        venta_qs = StatusVentasAsistidas.objects.all()
+
+        current_time = timezone.now()- timedelta(hours=6)
+
+        day = current_time.day
+        year = current_time.year
+        month = current_time.month
+
+
+        supervisor = querystring_get["supervisor"] or False
+        if supervisor:
+            venta_qs = venta_qs.filter(fecha__year=year, fecha__day=day, fecha__month=month, supervisor=supervisor[0])
+
+            if len(venta_qs):
+                return venta_qs
+
+            else:
+                supervisor_instance = Usuario.objects.get(pk=supervisor[0])
+                instance_qs = StatusVentasAsistidas.objects.create(supervisor=supervisor_instance)
+                return [instance_qs]
+
+        else:
+            return []
+
+
+
 

@@ -428,3 +428,27 @@ class Asistencia(models.Model):
     class Meta:
         db_table = 'asistencia'
 
+
+class StatusVentasAsistidas(models.Model):
+
+    num_ventas_asistidas = models.IntegerField(null=True, blank=True,default=0)
+    num_ventas_no_asistidas = models.IntegerField(null=True, blank=True,default=0)
+    num_ventas_totales = models.IntegerField(null=True, blank=True,default=0)
+    num_sucursales_asistiendo = models.IntegerField(null=True, blank=True,default=0)
+    supervisor  = models.ForeignKey('Usuario' , db_column="supervisor_id")
+    fecha = models.DateTimeField( auto_now_add = True)
+
+    class Meta:
+        db_table = 'status_ventas_asistidas'
+
+
+class StatusVentasAsistidasHasVentas(models.Model):
+
+    sucursal = models.ForeignKey(Sucursal, db_column='sucursal_id') # Field name made lowercase.
+    status_ventas_asistidas_id = models.ForeignKey(StatusVentasAsistidas, db_column='status_ventas_asistidas_id') # Field name made lowercase.
+    venta_id = models.IntegerField()
+    tiempo_asistiendo = models.TextField(blank=True)
+    observacion = models.TextField(blank=True)
+
+    class Meta:
+        db_table = 'status_ventas_asistidas_has_ventas'
