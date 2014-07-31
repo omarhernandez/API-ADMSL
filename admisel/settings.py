@@ -101,13 +101,18 @@ TEMPLATE_LOADERS = (
 #     'django.template.loaders.eggs.Loader',
 )
 
+XS_SHARING_ALLOWED_ORIGINS = "*"
+#XS_SHARING_ALLOWED_HEADERS = "Content-Type"
+
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    # Uncomment the next line for simple clickjacking protection:
+    #'middleware.django-crossdomainxhr-middleware',
+    'middleware.xssharing.XsSharingMiddleware',
+
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 

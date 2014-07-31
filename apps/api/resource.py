@@ -21,40 +21,7 @@ MAYOREO_INT = 2
 HORA_CENTRAL_MX = -5
 
 
-class BaseCorsResource(object):
-    """
-    Adds CORS headers to resources that subclass this.
-    """
-    def create_response(self, *args, **kwargs):
-        response = super(BaseCorsResource, self).create_response(*args, **kwargs)
-        response['Access-Control-Allow-Origin'] = '*'
-        response['Access-Control-Allow-Headers'] = 'Content-Type'
-        response['Access-Control-Allow-Methods'] = 'GET, POST, PUT, OPTIONS'
-        return response
 
-    def method_check(self, request, allowed=None):
-        if allowed is None:
-            allowed = []
-
-        request_method = request.method.lower()
-        print "cros"
-        allows = ','.join(map(string.upper, allowed))
-
-        if request_method == 'options':
-            response = HttpResponse(allows)
-            response['Access-Control-Allow-Origin'] = '*'
-            response['Access-Control-Allow-Headers'] = 'Content-Type'
-            response['Access-Control-Allow-Methods'] = 'GET, POST, PUT, OPTIONS'
-            response['Allow'] = allows
-
-            raise ImmediateHttpResponse(response=response)
-
-        if not request_method in allowed:
-            response = http.HttpMethodNotAllowed(allows)
-            response['Allow'] = allows
-            raise ImmediateHttpResponse(response=response)
-
-        return request_method
 
 
 class ISELAuthentication(Authorization):
@@ -206,7 +173,7 @@ class AsistenciaResource(ModelResource):
 #************************************************************************************************************
 
 
-class UsuarioHasSucursalResource(BaseCorsResource,ModelResource):
+class UsuarioHasSucursalResource(ModelResource):
     usuario = fields.ForeignKey("apps.api.resource.UsuarioResource", 'usuario', null=True, full=True)
     Sucursal_id = fields.ForeignKey("apps.api.resource.SucursalSinInventarioResource", 'Sucursal_id', null=True,
                                     full=True)
@@ -2086,7 +2053,7 @@ def get_fecha_ultima_transaccion_by_sucursal_id(sucursal):
 #************************************************************************************************************
 
 
-class StatusVentasAsistidasResource(BaseCorsResource,ModelResource):
+class StatusVentasAsistidasResource(ModelResource):
     supervisor = fields.ForeignKey("apps.api.resource.UsuarioResource", 'supervisor', null=True, full=False)
     #sucursal = fields.ForeignKey("apps.api.resource.SucursalSinInventarioResource", 'sucursal', null=True, full=True)
 
@@ -2135,5 +2102,19 @@ class StatusVentasAsistidasResource(BaseCorsResource,ModelResource):
             return []
 
 
+class StatusVentasAsistidasHasVentasResource(ModelResource):
+    status_ventas_asistidas = fields.ForeignKey("apps.api.resource.StatusVentasAsistidasResource",
+                                                'status_ventas_asistidas', null=True, full=True)
+    sucursal = fields.ForeignKey("apps.api.resource.SucursalSinInventarioResource", 'sucursal', null=True, full=True)
 
+    class Meta:
+        queryset = StatusVentasAsistidasHasVentas.objects.all()
+        resource_name = "status_notify_rate"
+        authorization = Authorization()
 
+        filtering = {
+
+            "sucursal": ["exact"],
+            "status_ventas_asistidas": ["exact"],
+
+        }

@@ -41,5 +41,6 @@ v1_api.register(AsistenciaResource())
 v1_api.register(BitacoraResource())
 v1_api.register(LastFolioInVentaBySucursalResource())
 v1_api.register(StatusVentasAsistidasResource())
+v1_api.register(StatusVentasAsistidasHasVentasResource())
 
 

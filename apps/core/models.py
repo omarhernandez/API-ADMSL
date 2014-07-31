@@ -444,9 +444,9 @@ class StatusVentasAsistidas(models.Model):
 
 class StatusVentasAsistidasHasVentas(models.Model):
 
-    sucursal = models.ForeignKey(Sucursal, db_column='sucursal_id') # Field name made lowercase.
-    status_ventas_asistidas_id = models.ForeignKey(StatusVentasAsistidas, db_column='status_ventas_asistidas_id') # Field name made lowercase.
-    venta_id = models.IntegerField()
+    sucursal = models.ForeignKey(Sucursal, db_column='sucursal_id')# Field name made lowercase.
+    status_ventas_asistidas = models.ForeignKey(StatusVentasAsistidas, db_column='status_ventas_asistidas_id') # Field name made lowercase.
+    folio_venta = models.IntegerField( db_column="venta_id")
     tiempo_asistiendo = models.TextField(blank=True)
     observacion = models.TextField(blank=True)
 
